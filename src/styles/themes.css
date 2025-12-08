@@ -7,6 +7,7 @@
     --text-secondary: #6b7280;
     --text-tertiary: #9ca3af;
     --border-color: #e5e7eb;
+    --shadow-color: rgba(0, 0, 0, 0.1);
 }
 
 /* Dark Theme */
@@ -18,4 +19,25 @@
     --text-secondary: #d1d5db;
     --text-tertiary: #9ca3af;
     --border-color: #374151;
+    --shadow-color: rgba(0, 0, 0, 0.5);
 }
+
+/* Light Mode Specific */
+body {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.dark body {
+    background-color: var(--bg-secondary);
+}
+
+/* Custom scrollbar for dark mode */
+.dark::-webkit-scrollbar-thumb {
+    background: var(--color-gray-600);
+}
+
+.dark::-webkit-scrollbar-thumb:hover {
+    background: var(--color-primary);
+}
+
