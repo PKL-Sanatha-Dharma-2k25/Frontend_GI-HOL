@@ -1,0 +1,95 @@
+{
+  "sidebar": {
+    "dashboard": "Dasbor",
+    "users": "Pengguna",
+    "reports": "Laporan",
+    "analytics": "Analitik",
+    "settings": "Pengaturan"
+  },
+  "header": {
+    "dashboard": "Dasbor"
+  },
+  "breadcrumb": {
+    "dashboard": "Dasbor"
+  },
+  "stats": {
+    "totalUsers": "Total Pengguna",
+    "totalRevenue": "Total Pendapatan",
+    "activeSessions": "Sesi Aktif",
+    "pendingTasks": "Tugas Menunggu"
+  },
+  "chart": {
+    "monthlyPerformance": "Performa Bulanan"
+  },
+  "activities": {
+    "title": "Aktivitas Terbaru",
+    "loggedIn": "Masuk sistem",
+    "updatedProfile": "Memperbarui profil",
+    "downloadedReport": "Mengunduh laporan",
+    "passwordChanged": "Mengubah kata sandi"
+  },
+  "table": {
+    "id": "ID",
+    "user": "Pengguna",
+    "action": "Aksi",
+    "date": "Tanggal",
+    "status": "Status",
+    "recentTransactions": "Transaksi Terbaru",
+    "users": "Pengguna",
+    "filter": "Filter",
+    "export": "Ekspor"
+  },
+  "pagination": {
+    "showing": "Menampilkan",
+    "to": "hingga",
+    "of": "dari"
+  },
+  "tabs": {
+    "overview": "Ikhtisar",
+    "analytics": "Analitik",
+    "reports": "Laporan",
+    "overviewContent": "Konten ikhtisar dasbor",
+    "analyticsContent": "Data analitik",
+    "reportsContent": "Konten laporan"
+  },
+  "widgets": {
+    "quickStats": "Statistik Cepat",
+    "quickStatsContent": "Lihat statistik cepat Anda di sini",
+    "performance": "Performa",
+    "performanceContent": "Pantau metrik performa Anda",
+    "systemHealth": "Kesehatan Sistem",
+    "systemHealthContent": "Periksa status kesehatan sistem Anda"
+  },
+  "status": {
+    "serverStatus": "Status Server",
+    "backupStatus": "Status Cadangan",
+    "active": "Aktif",
+    "inProgress": "Sedang Berlangsung",
+    "allOperational": "Semua sistem berjalan normal",
+    "lastBackup": "Cadangan terakhir",
+    "systemHealth": "Kesehatan Sistem",
+    "complete": "Selesai"
+  },
+  "welcome": {
+    "message": "Selamat datang kembali",
+    "greeting": "Selamat datang kembali",
+    "subtitle": "Berikut ini adalah ringkasan sistem Anda hari ini"
+  },
+  "button": {
+    "settings": "Pengaturan Dasbor",
+    "cancel": "Batal",
+    "save": "Simpan Pengaturan"
+  },
+  "drawer": {
+    "title": "Pengaturan Dasbor"
+  },
+  "settings": {
+    "theme": "Tema",
+    "lightMode": "Mode Terang",
+    "darkMode": "Mode Gelap",
+    "language": "Bahasa",
+    "notifications": "Pemberitahuan",
+    "enableNotifications": "Aktifkan pemberitahuan",
+    "current": "Saat Ini"
+  }
+}

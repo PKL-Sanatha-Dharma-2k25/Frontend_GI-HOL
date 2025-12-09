@@ -1,13 +1,17 @@
+// src/pages/auth/Login.jsx
 import { useState } from 'react';
-import Button from '../../components/ui/Button';
-import Input from '../../components/ui/Input';
-import Card from '../../components/ui/Card';
-import Alert from '../../components/ui/Alert';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import Card from '@/components/ui/Card';
+import Alert from '@/components/ui/Alert';
 import { Mail, Lock } from 'lucide-react';
-import logo from '../../assets/logo/logo.png';
-import templateIcon from '../../assets/icons/icon.png'; 
+import logo from '@/assets/logo/logo.png';
+import templateIcon from '@/assets/icons/icon.png';
+import bacorunSVG from '@/assets/images/auth/modern.svg';
+import Lottie from 'lottie-react';
+import monitoringAnimation from '@/assets/animations/monitoring.json';
 
-export default function Login() {
+export default function Login({ onLogin }) {
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -18,6 +22,8 @@ export default function Login() {
   const [alertType, setAlertType] = useState('error');
   const [alertMessage, setAlertMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [loginSuccess, setLoginSuccess] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -37,20 +43,18 @@ export default function Login() {
     const newErrors = {};
     
     if (!formData.username.trim()) {
-      newErrors.username = 'Username atau email harus diisi';
+      newErrors.username = 'Username or email is required';
     }
     if (!formData.password.trim()) {
-      newErrors.password = 'Password harus diisi';
+      newErrors.password = 'Password is required';
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Password minimal 6 karakter';
+      newErrors.password = 'Password must be at least 6 characters';
     }
     
     return newErrors;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
+  const handleSubmit = async () => {
     const newErrors = validateForm();
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -58,24 +62,64 @@ export default function Login() {
     }
 
     setIsLoading(true);
+    setLoginSuccess(false);
     
-    // Simulasi API call
     setTimeout(() => {
-      setIsLoading(false);
-      setShowAlert(true);
-      setAlertType('success');
-      setAlertMessage('Login berhasil! Redirect ke dashboard...');
-      
-      // Reset form
-      setFormData({ username: '', password: '' });
+      try {
+        const userData = {
+          token: 'mock-jwt-token-' + Date.now(),
+          id: 1,
+          username: formData.username,
+          email: formData.username,
+          role: 'admin',
+          name: 'Admin User'
+        };
+
+        if (rememberMe) {
+          localStorage.setItem('rememberedUsername', btoa(formData.username));
+        }
+
+        setIsLoading(false);
+        setLoginSuccess(true);
+        setShowAlert(true);
+        setAlertType('success');
+        setAlertMessage('Login successful! Redirecting to dashboard...');
+        
+        onLogin(userData);
+
+        setTimeout(() => {
+          setFormData({ username: '', password: '' });
+          setLoginSuccess(false);
+        }, 1500);
+
+      } catch (error) {
+        setIsLoading(false);
+        setShowAlert(true);
+        setAlertType('error');
+        setAlertMessage('Login failed. Please try again.');
+      }
     }, 1500);
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSubmit();
+    }
   };
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-blue-700 via-blue-800 to-blue-900 overflow-hidden">
       {/* Left Side - Login Form */}
-      <div className="w-1/2 flex items-center justify-center p-8 overflow-y-auto">
-        <Card shadow="2xl" padding="lg" rounded="xl" className="w-full max-w-2xl">
+      <div className="w-1/2 flex items-center justify-center p-6 overflow-y-auto relative">
+        {/* Bacorun SVG Background Left */}
+        <div className="absolute inset-0 opacity-15">
+          <img 
+            src={bacorunSVG}
+            alt="Bacorun Background"
+            className="w-full h-full object-cover"
+          />
+        </div>
+        <Card shadow="2xl" padding="lg" rounded="2xl" className="w-full max-w-md">
           {/* Alert */}
           {showAlert && (
             <div className="mb-6 slide-in-down">
@@ -88,36 +132,38 @@ export default function Login() {
             </div>
           )}
 
-          {/* Logo */}
+          {/* Logo Section */}
           <div className="text-center mb-8">
             <div className="flex items-center justify-center mb-6">
               <img 
                 src={logo} 
                 alt="Logo" 
-                className="h-20 w-auto object-contain"
+                className="h-20 w-auto object-contain drop-shadow-lg animate-bounce"
+                style={{ animationDuration: '2s' }}
               />
             </div>
           </div>
 
           {/* Divider */}
-          <div className="border-b border-gray-200 mb-8"></div>
+          <div className="border-b border-gray-200 mb-6"></div>
 
           {/* Welcome Text */}
           <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Selamat Datang</h2>
-            <p className="text-gray-600 text-sm">Masuk ke akun Anda untuk melanjutkan</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-1">Welcome Back</h2>
+            <p className="text-gray-600 text-xs">Enter your credentials to access the system</p>
           </div>
 
           {/* Form Inputs */}
-          <div className="space-y-5">
+          <div className="space-y-4">
             {/* Username Input */}
             <Input
-              label="Username atau Email"
+              label="Email or Username"
               type="text"
               name="username"
               value={formData.username}
               onChange={handleChange}
-              placeholder="Masukkan username atau email"
+              onKeyPress={handleKeyPress}
+              placeholder="Enter your username or email"
               error={errors.username}
               icon={Mail}
               required={true}
@@ -130,7 +176,8 @@ export default function Login() {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              placeholder="Masukkan password"
+              onKeyPress={handleKeyPress}
+              placeholder="Enter your password"
               error={errors.password}
               icon={Lock}
               showPasswordToggle={true}
@@ -138,16 +185,18 @@ export default function Login() {
             />
 
             {/* Remember Me & Forgot Password */}
-            <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center gap-2 cursor-pointer">
+            <div className="flex items-center justify-between text-xs">
+              <label className="flex items-center gap-2 cursor-pointer hover:text-blue-600 transition">
                 <input
                   type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
                   className="w-4 h-4 border-gray-300 rounded accent-blue-600 cursor-pointer"
                 />
-                <span className="text-gray-700">Ingat saya</span>
+                <span className="text-gray-700">Remember me</span>
               </label>
               <a href="#" className="text-blue-600 hover:text-blue-700 font-medium transition">
-                Lupa password?
+                Forgot password?
               </a>
             </div>
 
@@ -156,89 +205,105 @@ export default function Login() {
               type="button"
               variant="primary"
               size="lg"
-              className="w-full mt-6"
+              className="w-full mt-4"
               loading={isLoading}
+              disabled={loginSuccess}
               onClick={handleSubmit}
+              loadingText="Signing in..."
             >
-              {isLoading ? 'Sedang login...' : 'Sign In'}
+              {loginSuccess ? 'Welcome!' : 'Sign In'}
             </Button>
           </div>
 
           {/* Footer */}
-          <div className="mt-8 pt-6 border-t border-gray-200">
-            <p className="text-center text-gray-600 text-xs mb-4">
+          <div className="mt-6 pt-6 border-t border-gray-200 text-center">
+            <p className="text-gray-600 text-xs mb-1">
               © 2025 MIS Team
             </p>
-            <p className="text-center text-gray-500 text-xs">
-              Hak Cipta Dilindungi | All Rights Reserved
+            <p className="text-gray-500 text-xs">
+              All Rights Reserved
             </p>
           </div>
         </Card>
       </div>
 
       {/* Right Side - Illustration & Info */}
-      <div className="w-1/2 hidden lg:flex flex-col items-center justify-center text-white p-8 relative overflow-hidden">
+      <div className="w-1/2 hidden lg:flex flex-col items-center justify-center p-6 relative overflow-hidden">
+        {/* Bacorun SVG Background Right */}
+        <div className="absolute inset-0 opacity-20">
+          <img 
+            src={bacorunSVG}
+            alt="Bacorun Background"
+            className="w-full h-full object-cover"
+          />
+        </div>
+
         {/* Gradient Background Decoration */}
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 right-20 w-72 h-72 bg-white rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 left-20 w-96 h-96 bg-blue-300 rounded-full blur-3xl"></div>
+          <div className="absolute top-20 right-20 w-72 h-72 bg-white rounded-full blur-3xl animate-pulse" style={{ animationDuration: '4s' }}></div>
+          <div className="absolute bottom-20 left-20 w-96 h-96 bg-blue-300 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '6s', animationDelay: '2s' }}></div>
         </div>
 
         {/* Content */}
-        <div className="relative z-10 text-center max-w-md">
-          {/* Title dengan Icon */}
-          <div className="mb-12">
-            {/* Icon di atas judul */}
-            <div className="flex justify-center mb-6">
-              <img 
-                src={templateIcon}
-                alt="Template Icon"
-                className="h-24 w-24 object-contain drop-shadow-lg"
-              />
-            </div>
-            <h2 className="text-5xl font-bold mb-3">Template React 19</h2>
-            <p className="text-blue-100 text-xl">Management Information System</p>
+        <div className="relative z-10 flex flex-col items-center justify-center h-full animate-in fade-in duration-700">
+          
+          {/* Icon with Animation */}
+          <div className="mb-8 animate-bounce" style={{ animationDuration: '2s' }}>
+            <img 
+              src={templateIcon}
+              alt="Template Icon"
+              className="h-20 w-20 object-contain drop-shadow-lg"
+            />
+          </div>
+
+          {/* Title */}
+          <div className="text-center mb-12">
+            <h2 className="text-5xl font-bold text-white mb-2">React Template 19</h2>
+            <p className="text-blue-100 text-lg">Management Information System</p>
           </div>
 
           {/* Illustration Card */}
           <Card 
             shadow="xl" 
             padding="lg" 
-            rounded="xl" 
-            className="bg-white bg-opacity-10 backdrop-blur-md border border-white border-opacity-20 mb-8"
+            rounded="2xl" 
+            className="bg-white bg-opacity-10 backdrop-blur-md border border-white border-opacity-20 w-full max-w-sm mb-8 hover:bg-opacity-20 transition-all duration-300"
           >
-            <div className="bg-gradient-to-b from-blue-50 to-blue-100 rounded-lg p-8 flex items-center justify-center min-h-72">
-              {/* Placeholder untuk Illustration */}
-              <div className="text-center">
-                <div className="text-6xl mb-4">👔</div>
-                <p className="text-gray-500 font-medium">Illustration</p>
-                <p className="text-gray-400 text-sm mt-1">Management Dashboard</p>
+            <div className="bg-gradient-to-b from-blue-50 to-blue-100 rounded-xl p-6 flex items-center justify-center h-56">
+              {/* Lottie Animation */}
+              <div className="w-full h-full flex items-center justify-center">
+                <Lottie 
+                  animationData={monitoringAnimation}
+                  loop={true}
+                  autoplay={true}
+                  style={{ width: '100%', height: '100%' }}
+                />
               </div>
             </div>
           </Card>
 
           {/* Features */}
-          <div className="grid grid-cols-3 gap-4 text-sm">
-            <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-4 border border-white border-opacity-20">
+          <div className="grid grid-cols-3 gap-3 w-full max-w-sm mb-8">
+            <div className="bg-white bg-opacity-10 backdrop-blur rounded-lg p-3 border border-white border-opacity-20 text-center hover:bg-opacity-20 transition-all duration-300">
               <div className="text-2xl mb-2">📊</div>
-              <p className="text-blue-100">Dashboard</p>
+              <p className="text-blue-100 text-xs font-medium">Dashboard</p>
             </div>
-            <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-4 border border-white border-opacity-20">
+            <div className="bg-white bg-opacity-10 backdrop-blur rounded-lg p-3 border border-white border-opacity-20 text-center hover:bg-opacity-20 transition-all duration-300">
               <div className="text-2xl mb-2">👥</div>
-              <p className="text-blue-100">Users</p>
+              <p className="text-blue-100 text-xs font-medium">Users</p>
             </div>
-            <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-4 border border-white border-opacity-20">
+            <div className="bg-white bg-opacity-10 backdrop-blur rounded-lg p-3 border border-white border-opacity-20 text-center hover:bg-opacity-20 transition-all duration-300">
               <div className="text-2xl mb-2">⚙️</div>
-              <p className="text-blue-100">Settings</p>
+              <p className="text-blue-100 text-xs font-medium">Settings</p>
             </div>
           </div>
 
           {/* Info Badge */}
-          <div className="mt-8 flex items-center justify-center gap-3 text-blue-100">
-            <div className="w-10 h-10 border-2 border-blue-200 rounded-full flex items-center justify-center text-lg font-bold">
+          <div className="flex items-center justify-center gap-3 text-blue-100 w-full max-w-sm animate-in fade-in duration-700" style={{ animationDelay: '0.3s' }}>
+            <div className="w-8 h-8 border-2 border-blue-200 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
               ℹ️
             </div>
-            <span className="text-sm max-w-xs">Login dengan akun yang sudah terdaftar untuk mengakses sistem</span>
+            <span className="text-xs text-center">Login with a registered account to access the system</span>
           </div>
         </div>
       </div>

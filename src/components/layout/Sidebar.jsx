@@ -1,5 +1,5 @@
-// src/components/common/Sidebar.jsx
-import { LogOut, Menu, ChevronDown } from 'lucide-react';
+// src/components/layout/Sidebar.jsx
+import { LogOut, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 
 export default function Sidebar({ 

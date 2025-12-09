@@ -1,0 +1,95 @@
+{
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "reports": "Reports",
+    "analytics": "Analytics",
+    "settings": "Settings"
+  },
+  "header": {
+    "dashboard": "Dashboard"
+  },
+  "breadcrumb": {
+    "dashboard": "Dashboard"
+  },
+  "stats": {
+    "totalUsers": "Total Users",
+    "totalRevenue": "Total Revenue",
+    "activeSessions": "Active Sessions",
+    "pendingTasks": "Pending Tasks"
+  },
+  "chart": {
+    "monthlyPerformance": "Monthly Performance"
+  },
+  "activities": {
+    "title": "Recent Activities",
+    "loggedIn": "Logged in",
+    "updatedProfile": "Updated profile",
+    "downloadedReport": "Downloaded report",
+    "passwordChanged": "Password changed"
+  },
+  "table": {
+    "id": "ID",
+    "user": "User",
+    "action": "Action",
+    "date": "Date",
+    "status": "Status",
+    "recentTransactions": "Recent Transactions",
+    "users": "Users",
+    "filter": "Filter",
+    "export": "Export"
+  },
+  "pagination": {
+    "showing": "Showing",
+    "to": "to",
+    "of": "of"
+  },
+  "tabs": {
+    "overview": "Overview",
+    "analytics": "Analytics",
+    "reports": "Reports",
+    "overviewContent": "Dashboard overview content",
+    "analyticsContent": "Analytics data",
+    "reportsContent": "Reports content"
+  },
+  "widgets": {
+    "quickStats": "Quick Stats",
+    "quickStatsContent": "View your quick statistics here",
+    "performance": "Performance",
+    "performanceContent": "Monitor your performance metrics",
+    "systemHealth": "System Health",
+    "systemHealthContent": "Check your system health status"
+  },
+  "status": {
+    "serverStatus": "Server Status",
+    "backupStatus": "Backup Status",
+    "active": "Active",
+    "inProgress": "In Progress",
+    "allOperational": "All systems operational",
+    "lastBackup": "Last backup",
+    "systemHealth": "System Health",
+    "complete": "Complete"
+  },
+  "welcome": {
+    "message": "Welcome back",
+    "greeting": "Welcome back",
+    "subtitle": "Here's what's happening in your system today"
+  },
+  "button": {
+    "settings": "Dashboard Settings",
+    "cancel": "Cancel",
+    "save": "Save Settings"
+  },
+  "drawer": {
+    "title": "Dashboard Settings"
+  },
+  "settings": {
+    "theme": "Theme",
+    "lightMode": "Light Mode",
+    "darkMode": "Dark Mode",
+    "language": "Language",
+    "notifications": "Notifications",
+    "enableNotifications": "Enable notifications",
+    "current": "Current"
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "sidebar": {
+    "dashboard": "لوحة التحكم",
+    "users": "المستخدمون",
+    "reports": "التقارير",
+    "analytics": "التحليلات",
+    "settings": "الإعدادات"
+  },
+  "header": {
+    "dashboard": "لوحة التحكم"
+  },
+  "breadcrumb": {
+    "dashboard": "لوحة التحكم"
+  },
+  "stats": {
+    "totalUsers": "إجمالي المستخدمين",
+    "totalRevenue": "إجمالي الإيرادات",
+    "activeSessions": "الجلسات النشطة",
+    "pendingTasks": "المهام المعلقة"
+  },
+  "chart": {
+    "monthlyPerformance": "الأداء الشهري"
+  },
+  "activities": {
+    "title": "الأنشطة الأخيرة",
+    "loggedIn": "تسجيل الدخول",
+    "updatedProfile": "تحديث الملف الشخصي",
+    "downloadedReport": "تنزيل التقرير",
+    "passwordChanged": "تغيير كلمة المرور"
+  },
+  "table": {
+    "id": "المعرّف",
+    "user": "المستخدم",
+    "action": "الإجراء",
+    "date": "التاريخ",
+    "status": "الحالة",
+    "recentTransactions": "المعاملات الأخيرة",
+    "users": "المستخدمون",
+    "filter": "عامل التصفية",
+    "export": "تصدير"
+  },
+  "pagination": {
+    "showing": "عرض",
+    "to": "إلى",
+    "of": "من"
+  },
+  "tabs": {
+    "overview": "نظرة عامة",
+    "analytics": "التحليلات",
+    "reports": "التقارير",
+    "overviewContent": "محتوى نظرة عامة لوحة التحكم",
+    "analyticsContent": "بيانات التحليل",
+    "reportsContent": "محتوى التقارير"
+  },
+  "widgets": {
+    "quickStats": "الإحصائيات السريعة",
+    "quickStatsContent": "عرض إحصائياتك السريعة هنا",
+    "performance": "الأداء",
+    "performanceContent": "راقب مقاييس أدائك",
+    "systemHealth": "صحة النظام",
+    "systemHealthContent": "تحقق من حالة صحة نظامك"
+  },
+  "status": {
+    "serverStatus": "حالة الخادم",
+    "backupStatus": "حالة النسخة الاحتياطية",
+    "active": "نشط",
+    "inProgress": "قيد التقدم",
+    "allOperational": "جميع الأنظمة تعمل بشكل طبيعي",
+    "lastBackup": "آخر نسخة احتياطية",
+    "systemHealth": "صحة النظام",
+    "complete": "اكتمل"
+  },
+  "welcome": {
+    "message": "أهلا وسهلا",
+    "greeting": "أهلا وسهلا",
+    "subtitle": "فيما يلي ملخص نظامك اليوم"
+  },
+  "button": {
+    "settings": "إعدادات لوحة التحكم",
+    "cancel": "إلغاء",
+    "save": "حفظ الإعدادات"
+  },
+  "drawer": {
+    "title": "إعدادات لوحة التحكم"
+  },
+  "settings": {
+    "theme": "المظهر",
+    "lightMode": "الوضع الفاتح",
+    "darkMode": "الوضع الداكن",
+    "language": "اللغة",
+    "notifications": "الإشعارات",
+    "enableNotifications": "تفعيل الإشعارات",
+    "current": "الحالي"
+  }
+}

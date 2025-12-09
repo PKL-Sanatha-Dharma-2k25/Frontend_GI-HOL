@@ -1,5 +1,5 @@
 {
-  "name": "pt-garmen-monitoring",
+  "name": "pt-globalindo-intimates",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -13,6 +13,7 @@
     "axios": "^1.13.2",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "lottie-react": "^2.4.1",
     "lucide-react": "^0.556.0",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
