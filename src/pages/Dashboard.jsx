@@ -3,7 +3,6 @@ import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
-import Spinner from '@/components/ui/Spinner';
 import Tabs from '@/components/ui/Tabs';
 import Drawer from '@/components/ui/Drawer';
 import Dropdown from '@/components/ui/Dropdown';
@@ -23,39 +22,98 @@ import UserTable from '@/components/tables/UserTable';
 import BreadCrumb from '@/components/common/BreadCrumb';
 import Pagination from '@/components/common/Pagination';
 
+import { Users, TrendingUp, Activity, Zap } from 'lucide-react';
+
 export default function Dashboard({ user, onLogout }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeMenu, setActiveMenu] = useState('dashboard');
   const [currentPage, setCurrentPage] = useState(1);
   const [showDrawer, setShowDrawer] = useState(false);
-  const [showAlert, setShowAlert] = useState(true);
 
-  // Menu items
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: 'BarChart3' },
-    { id: 'users', label: 'Users', icon: 'Users' },
-    { id: 'reports', label: 'Reports', icon: 'FileText' },
-    { id: 'analytics', label: 'Analytics', icon: 'TrendingUp' },
-    { id: 'settings', label: 'Settings', icon: 'Settings' },
+    { 
+      id: 'dashboard', 
+      label: 'Dashboard',
+      submenu: [
+        { id: 'overview', label: 'Overview' },
+        { id: 'statistics', label: 'Statistics' }
+      ]
+    },
+    { 
+      id: 'users', 
+      label: 'Users',
+      submenu: [
+        { id: 'all-users', label: 'All Users' },
+        { id: 'add-user', label: 'Add User' },
+        { id: 'roles', label: 'User Roles' }
+      ]
+    },
+    { 
+      id: 'reports', 
+      label: 'Reports',
+      submenu: [
+        { id: 'sales-report', label: 'Sales Report' },
+        { id: 'activity-report', label: 'Activity Report' },
+        { id: 'export', label: 'Export Data' }
+      ]
+    },
+    { 
+      id: 'analytics', 
+      label: 'Analytics',
+      submenu: [
+        { id: 'performance', label: 'Performance' },
+        { id: 'trends', label: 'Trends' },
+        { id: 'conversion', label: 'Conversion' }
+      ]
+    },
+    { 
+      id: 'settings', 
+      label: 'Settings',
+      submenu: [
+        { id: 'general', label: 'General' },
+        { id: 'security', label: 'Security' },
+        { id: 'notifications', label: 'Notifications' }
+      ]
+    },
   ];
 
-  // Breadcrumb
   const breadcrumbItems = [
     { label: 'Dashboard', href: '#', active: true },
   ];
 
-  // Stats
   const stats = [
-    { label: 'Total Users', value: '1,234', icon: '👥', color: 'blue', trend: 12 },
-    { label: 'Total Revenue', value: '$45,231', icon: '💰', color: 'green', trend: 8 },
-    { label: 'Active Sessions', value: '342', icon: '🔌', color: 'purple', trend: -3 },
-    { label: 'Pending Tasks', value: '28', icon: '✓', color: 'orange', trend: 5 },
+    { 
+      label: 'Total Users', 
+      value: '1,234', 
+      icon: <Users size={28} className="text-blue-600" />,
+      color: 'blue', 
+      trend: 12 
+    },
+    { 
+      label: 'Total Revenue', 
+      value: '$45,231', 
+      icon: <TrendingUp size={28} className="text-green-600" />,
+      color: 'green', 
+      trend: 8 
+    },
+    { 
+      label: 'Active Sessions', 
+      value: '342', 
+      icon: <Activity size={28} className="text-purple-600" />,
+      color: 'purple', 
+      trend: -3 
+    },
+    { 
+      label: 'Pending Tasks', 
+      value: '28', 
+      icon: <Zap size={28} className="text-orange-600" />,
+      color: 'orange', 
+      trend: 5 
+    },
   ];
 
-  // Chart data
   const chartData = [65, 78, 45, 82, 56, 90, 72, 88, 65, 78, 85, 92];
 
-  // Recent activities
   const activitiesData = [
     { id: 1, user: 'John Doe', action: 'Logged in', time: '2 minutes ago', status: 'success' },
     { id: 2, user: 'Jane Smith', action: 'Updated profile', time: '15 minutes ago', status: 'success' },
@@ -63,7 +121,6 @@ export default function Dashboard({ user, onLogout }) {
     { id: 4, user: 'Sarah Williams', action: 'Password changed', time: '3 hours ago', status: 'warning' },
   ];
 
-  // Table data
   const tableColumns = [
     { key: 'id', label: 'ID', width: '15%' },
     { key: 'user', label: 'User', width: '25%' },
@@ -86,7 +143,6 @@ export default function Dashboard({ user, onLogout }) {
     { id: 3, name: 'Mike Johnson', email: 'mike@example.com', role: 'User', status: 'Inactive' },
   ];
 
-  // Tabs
   const tabs = [
     { label: 'Overview', content: <div className="text-gray-600">Dashboard overview content</div> },
     { label: 'Analytics', content: <div className="text-gray-600">Analytics data</div> },
@@ -105,18 +161,19 @@ export default function Dashboard({ user, onLogout }) {
   const paginatedData = tableData.slice((currentPage - 1) * 5, currentPage * 5);
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen w-full bg-gray-100">
       {/* Sidebar */}
       <Sidebar
-        open={sidebarOpen}
+        open={true}
         menuItems={menuItems}
         activeMenu={activeMenu}
         onMenuClick={handleMenuClick}
         onLogout={handleLogoutClick}
+        logoUrl="/src/assets/logo/logo.png"
       />
 
       {/* Main Content */}
-      <div className={`${sidebarOpen ? 'ml-64' : 'ml-20'} flex-1 flex flex-col transition-all duration-300`}>
+      <div className="flex-1 flex flex-col w-full overflow-hidden">
         
         {/* Header */}
         <Header
@@ -129,115 +186,106 @@ export default function Dashboard({ user, onLogout }) {
         />
 
         {/* Content */}
-        <div className="flex-1 overflow-auto p-6">
-          {/* Alert */}
-          {showAlert && (
-            <div className="mb-6">
-              <Alert
-                type="success"
-                message={`Welcome back, ${user?.name || 'Admin'}!`}
-                dismissible={true}
-                onClose={() => setShowAlert(false)}
-              />
-            </div>
-          )}
-
+        <div className="flex-1 overflow-auto p-4 md:p-6 space-y-6">
+          
           {/* Breadcrumb */}
-          <div className="mb-6">
-            <BreadCrumb items={breadcrumbItems} />
-          </div>
+          <BreadCrumb items={breadcrumbItems} />
 
           {/* Welcome Section */}
-          <Card shadow="md" padding="lg" rounded="lg" className="mb-6 bg-gradient-to-r from-blue-500 to-blue-600 text-white">
-            <div className="flex items-center justify-between">
+          <Card shadow="md" padding="lg" rounded="lg" className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div>
-                <h2 className="text-3xl font-bold mb-2">Welcome back, {user?.name || 'Admin'}! 👋</h2>
+                <h2 className="text-2xl md:text-3xl font-bold mb-2">Welcome back, {user?.name || 'Admin'}! 👋</h2>
                 <p className="text-blue-100">Here's what's happening in your system today</p>
               </div>
-              {/* FIXED: Avatar diganti dengan simple div */}
-              <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-3xl font-bold text-white border-2 border-white border-opacity-30">
+              <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-3xl font-bold text-white border-2 border-white border-opacity-30 flex-shrink-0">
                 {user?.name?.charAt(0) || 'A'}
               </div>
             </div>
           </Card>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {stats.map((stat, idx) => (
-              <StatCard key={idx} {...stat} />
+              <StatCard 
+                key={idx} 
+                label={stat.label}
+                value={stat.value}
+                icon={stat.icon}
+                color={stat.color}
+                trend={stat.trend}
+              />
             ))}
           </div>
 
           {/* Charts & Activities */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
             <div className="lg:col-span-2">
-              <Chart title="Monthly Performance" data={chartData} type="bar" />
+              <Chart title="Monthly Performance" data={chartData} type="bar" color="blue" />
             </div>
             <RecentActivity title="Recent Activities" activities={activitiesData} />
           </div>
 
           {/* Widgets */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <Card shadow="md" padding="lg" rounded="lg">
-              <Widget title="Quick Stats" content="View your quick statistics here" icon="📊" />
-            </Card>
-            <Card shadow="md" padding="lg" rounded="lg">
-              <Widget title="Performance" content="Monitor your performance metrics" icon="⚡" />
-            </Card>
-            <Card shadow="md" padding="lg" rounded="lg">
-              <Widget title="System Health" content="Check your system health status" icon="💚" />
-            </Card>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+            <Widget title="Quick Stats" content="View your quick statistics here" icon="📊" color="blue" variant="gradient" />
+            <Widget title="Performance" content="Monitor your performance metrics" icon="⚡" color="green" variant="gradient" />
+            <Widget title="System Health" content="Check your system health status" icon="💚" color="purple" variant="gradient" />
           </div>
 
           {/* Tabs */}
-          <div className="mb-6">
-            <Card shadow="md" padding="0" rounded="lg">
-              <Tabs tabs={tabs} />
-            </Card>
-          </div>
+          <Card shadow="md" padding="0" rounded="lg">
+            <Tabs tabs={tabs} />
+          </Card>
 
           {/* Data Table */}
-          <div className="mb-6">
-            <Card shadow="md" padding="0" rounded="lg">
-              <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-                <h3 className="text-lg font-bold text-gray-900">Recent Transactions</h3>
-                <div className="flex gap-2">
-                  <Dropdown 
-                    label="Filter"
-                    items={['All', 'Completed', 'Pending', 'Failed']}
-                    onSelect={(item) => console.log('Filter:', item)}
-                  />
-                  <Button variant="primary" size="sm">
-                    Export
-                  </Button>
-                </div>
+          <Card shadow="md" padding="0" rounded="lg">
+            <div className="p-4 md:p-6 border-b border-gray-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <h3 className="text-lg font-bold text-gray-900">Recent Transactions</h3>
+              <div className="flex gap-2 w-full md:w-auto">
+                <Dropdown 
+                  label="Filter"
+                  items={['All', 'Completed', 'Pending', 'Failed']}
+                  onSelect={(item) => console.log('Filter:', item)}
+                />
+                <Button variant="primary" size="sm">
+                  Export
+                </Button>
               </div>
+            </div>
+            <div className="overflow-x-auto">
               <DataTable columns={tableColumns} data={paginatedData} striped={true} hover={true} />
-              <div className="px-6 py-4 border-t border-gray-200 flex justify-between items-center bg-gray-50">
-                <span className="text-sm text-gray-600">
-                  Showing {(currentPage - 1) * 5 + 1} to {Math.min(currentPage * 5, tableData.length)} of {tableData.length}
-                </span>
-                <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
-              </div>
-            </Card>
-          </div>
+            </div>
+            <div className="px-4 md:px-6 py-4 border-t border-gray-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-gray-50">
+              <span className="text-xs md:text-sm text-gray-600">
+                Showing {(currentPage - 1) * 5 + 1} to {Math.min(currentPage * 5, tableData.length)} of {tableData.length}
+              </span>
+              <Pagination 
+                currentPage={currentPage} 
+                totalPages={totalPages} 
+                onPageChange={setCurrentPage}
+                totalItems={tableData.length}
+                itemsPerPage={5}
+              />
+            </div>
+          </Card>
 
           {/* User Table */}
-          <div className="mb-6">
-            <Card shadow="md" padding="lg" rounded="lg">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Users</h3>
+          <Card shadow="md" padding="lg" rounded="lg">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">Users</h3>
+            <div className="overflow-x-auto">
               <UserTable users={users} />
-            </Card>
-          </div>
+            </div>
+          </Card>
 
           {/* Status Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <Card shadow="md" padding="lg" rounded="lg">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-gray-900">Server Status</h3>
+                <h3 className="text-base md:text-lg font-bold text-gray-900">Server Status</h3>
                 <Badge variant="success" text="Active" />
               </div>
-              <p className="text-gray-600 mb-4">All systems operational</p>
+              <p className="text-gray-600 mb-4 text-sm md:text-base">All systems operational</p>
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div className="bg-green-500 h-2 rounded-full" style={{ width: '95%' }}></div>
               </div>
@@ -246,10 +294,10 @@ export default function Dashboard({ user, onLogout }) {
 
             <Card shadow="md" padding="lg" rounded="lg">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-gray-900">Backup Status</h3>
+                <h3 className="text-base md:text-lg font-bold text-gray-900">Backup Status</h3>
                 <Badge variant="info" text="In Progress" />
               </div>
-              <p className="text-gray-600 mb-4">Last backup: 2 hours ago</p>
+              <p className="text-gray-600 mb-4 text-sm md:text-base">Last backup: 2 hours ago</p>
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div className="bg-blue-500 h-2 rounded-full" style={{ width: '65%' }}></div>
               </div>
@@ -258,11 +306,9 @@ export default function Dashboard({ user, onLogout }) {
           </div>
 
           {/* Drawer Button */}
-          <div className="mb-6">
-            <Button variant="secondary" size="lg" onClick={() => setShowDrawer(true)}>
-              Open Side Panel
-            </Button>
-          </div>
+          <Button variant="secondary" size="lg" onClick={() => setShowDrawer(true)} className="w-full md:w-auto">
+            Open Side Panel
+          </Button>
 
           {/* Drawer */}
           <Drawer
@@ -284,7 +330,7 @@ export default function Dashboard({ user, onLogout }) {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Theme</label>
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                   <option>Light</option>
                   <option>Dark</option>
                   <option>Auto</option>
@@ -292,7 +338,7 @@ export default function Dashboard({ user, onLogout }) {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Notifications</label>
-                <input type="checkbox" defaultChecked className="w-4 h-4" /> Enable notifications
+                <input type="checkbox" defaultChecked className="w-4 h-4 cursor-pointer" /> Enable notifications
               </div>
             </div>
           </Drawer>

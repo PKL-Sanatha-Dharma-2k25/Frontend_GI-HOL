@@ -92,6 +92,7 @@ export default function Login({ onLogin }) {
           setLoginSuccess(false);
         }, 1500);
 
+      // eslint-disable-next-line no-unused-vars
       } catch (error) {
         setIsLoading(false);
         setShowAlert(true);

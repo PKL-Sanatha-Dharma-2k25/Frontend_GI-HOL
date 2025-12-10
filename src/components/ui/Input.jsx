@@ -18,7 +18,6 @@ export default function Input({
   ...props
 }) {
   const [showPassword, setShowPassword] = useState(false);
-
   const inputType = showPasswordToggle && type === 'password' 
     ? (showPassword ? 'text' : 'password') 
     : type;
@@ -46,6 +45,7 @@ export default function Input({
           disabled={disabled}
           className={`
             w-full px-4 py-3 border-2 rounded-lg 
+            bg-white text-gray-900
             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
             transition duration-200
             disabled:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-500
