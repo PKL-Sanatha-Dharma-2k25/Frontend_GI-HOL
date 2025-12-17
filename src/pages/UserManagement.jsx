@@ -62,7 +62,6 @@ export default function UserManagement() {
   });
 
   const breadcrumbItems = [
-    { label: 'Dashboard', href: '#' },
     { label: 'User Management', href: '#', active: true }
   ];
 

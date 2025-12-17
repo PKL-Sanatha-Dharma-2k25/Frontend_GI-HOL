@@ -3,7 +3,7 @@ import { ChevronRight, Home } from 'lucide-react';
 export default function BreadCrumb({ 
   items = [],
   showHome = true,
-  homeHref = '#'
+  homeHref = '/dashboard'
 }) {
   return (
     <nav className="flex items-center gap-1 px-2 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 shadow-sm animate-slideDown" role="navigation" aria-label="Breadcrumb">
