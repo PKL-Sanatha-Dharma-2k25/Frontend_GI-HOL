@@ -1,352 +1,253 @@
-import { useState } from 'react';
-import Button from '@/components/ui/Button';
-import Card from '@/components/ui/Card';
-import Badge from '@/components/ui/Badge';
-import Alert from '@/components/ui/Alert';
-import Tabs from '@/components/ui/Tabs';
-import Drawer from '@/components/ui/Drawer';
-import Dropdown from '@/components/ui/Dropdown';
+// src/pages/Dashboard.jsx
+import { TrendingUp, Activity, Zap, Users, BarChart3, LineChart as LineChartIcon, AlertCircle } from 'lucide-react'
+import { useAuth } from '@/hooks/useAuth'
+import { useSidebar } from '@/context/SidebarContext'
+import Card from '@/components/ui/Card'
+import StatCard from '@/components/dashboard/StatCard'
+import Chart from '@/components/dashboard/Chart'
+import BreadCrumb from '@/components/common/BreadCrumb'
 
-import Sidebar from '@/components/layout/Sidebar';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
+export default function Dashboard() {
+  const { user, loading } = useAuth()
+  const { sidebarHovered } = useSidebar()
 
-import StatCard from '@/components/dashboard/StatCard';
-import Chart from '@/components/dashboard/Chart';
-import RecentActivity from '@/components/dashboard/RecentActivity';
-import Widget from '@/components/dashboard/Widget';
+  console.log('📊 [Dashboard] Component mounted')
+  console.log('📊 [Dashboard] loading:', loading)
+  console.log('📊 [Dashboard] user:', user)
+  console.log('📊 [Dashboard] user?.role:', user?.role)
+  console.log('📊 [Dashboard] sidebarHovered:', sidebarHovered)
 
-import DataTable from '@/components/tables/DataTable';
-import UserTable from '@/components/tables/UserTable';
+  if (loading) {
+    console.log('⏳ [Dashboard] Still loading, returning null')
+    return null
+  }
 
-import BreadCrumb from '@/components/common/BreadCrumb';
-import Pagination from '@/components/common/Pagination';
-
-import { Users, TrendingUp, Activity, Zap } from 'lucide-react';
-
-export default function Dashboard({ user, onLogout }) {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeMenu, setActiveMenu] = useState('dashboard');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [showDrawer, setShowDrawer] = useState(false);
-
-  const menuItems = [
-    { 
-      id: 'dashboard', 
-      label: 'Dashboard',
-      submenu: [
-        { id: 'overview', label: 'Overview' },
-        { id: 'statistics', label: 'Statistics' }
-      ]
-    },
-    { 
-      id: 'users', 
-      label: 'Users',
-      submenu: [
-        { id: 'all-users', label: 'All Users' },
-        { id: 'add-user', label: 'Add User' },
-        { id: 'roles', label: 'User Roles' }
-      ]
-    },
-    { 
-      id: 'reports', 
-      label: 'Reports',
-      submenu: [
-        { id: 'sales-report', label: 'Sales Report' },
-        { id: 'activity-report', label: 'Activity Report' },
-        { id: 'export', label: 'Export Data' }
-      ]
-    },
-    { 
-      id: 'analytics', 
-      label: 'Analytics',
-      submenu: [
-        { id: 'performance', label: 'Performance' },
-        { id: 'trends', label: 'Trends' },
-        { id: 'conversion', label: 'Conversion' }
-      ]
-    },
-    { 
-      id: 'settings', 
-      label: 'Settings',
-      submenu: [
-        { id: 'general', label: 'General' },
-        { id: 'security', label: 'Security' },
-        { id: 'notifications', label: 'Notifications' }
-      ]
-    },
-  ];
+  console.log('📊 [Dashboard] User role:', user?.role)
+  console.log('✅ [Dashboard] Rendering dashboard for:', user?.role)
 
   const breadcrumbItems = [
-    { label: 'Dashboard', href: '#', active: true },
-  ];
+    { label: 'Dashboard', href: '/', active: true },
+  ]
 
-  const stats = [
-    { 
-      label: 'Total Users', 
-      value: '1,234', 
-      icon: <Users size={28} className="text-blue-600" />,
-      color: 'blue', 
-      trend: 12 
-    },
-    { 
-      label: 'Total Revenue', 
-      value: '$45,231', 
-      icon: <TrendingUp size={28} className="text-green-600" />,
-      color: 'green', 
-      trend: 8 
-    },
-    { 
-      label: 'Active Sessions', 
-      value: '342', 
-      icon: <Activity size={28} className="text-purple-600" />,
-      color: 'purple', 
-      trend: -3 
-    },
-    { 
-      label: 'Pending Tasks', 
-      value: '28', 
-      icon: <Zap size={28} className="text-orange-600" />,
-      color: 'orange', 
-      trend: 5 
-    },
-  ];
+  // =========================
+  // ROLE LABEL (STRING BASED)
+  // =========================
+  const getRoleLabel = () => {
+    const roleMap = {
+      superadmin: 'Superadmin',
+      admin: 'Admin',
+      supervisor: 'Supervisor',
+    }
+    const label = roleMap[user?.role] || 'User'
+    console.log('📝 [getRoleLabel] Role:', user?.role, '→ Label:', label)
+    return label
+  }
 
-  const chartData = [65, 78, 45, 82, 56, 90, 72, 88, 65, 78, 85, 92];
+  // =========================
+  // STATS
+  // =========================
+  const getStatsData = () => {
+    const baseStats = [
+      { 
+        label: 'Total Output', 
+        value: '1,250', 
+        icon: <TrendingUp size={28} className="text-blue-600" />,
+        color: 'blue', 
+        trend: 12 
+      },
+      { 
+        label: 'Target Output', 
+        value: '1,200', 
+        icon: <Activity size={28} className="text-green-600" />,
+        color: 'green', 
+        trend: 8 
+      },
+      { 
+        label: 'Efficiency Rate', 
+        value: '85.5%', 
+        icon: <Zap size={28} className="text-orange-600" />,
+        color: 'orange', 
+        trend: 5 
+      },
+    ]
 
-  const activitiesData = [
-    { id: 1, user: 'John Doe', action: 'Logged in', time: '2 minutes ago', status: 'success' },
-    { id: 2, user: 'Jane Smith', action: 'Updated profile', time: '15 minutes ago', status: 'success' },
-    { id: 3, user: 'Mike Johnson', action: 'Downloaded report', time: '1 hour ago', status: 'success' },
-    { id: 4, user: 'Sarah Williams', action: 'Password changed', time: '3 hours ago', status: 'warning' },
-  ];
+    // 🔐 SUPERADMIN ONLY
+    if (user?.role === 'superadmin') {
+      console.log('📊 [getStatsData] Adding "Total Users" stat for superadmin')
+      baseStats.push({
+        label: 'Total Users',
+        value: '24',
+        icon: <Users size={28} className="text-purple-600" />,
+        color: 'purple',
+        trend: 3
+      })
+    }
 
-  const tableColumns = [
-    { key: 'id', label: 'ID', width: '15%' },
-    { key: 'user', label: 'User', width: '25%' },
-    { key: 'action', label: 'Action', width: '25%' },
-    { key: 'date', label: 'Date', width: '20%' },
-    { key: 'status', label: 'Status', width: '15%' },
-  ];
+    // 👔 ADMIN & SUPERVISOR - Tambah Line Management stat
+    if (user?.role === 'admin' || user?.role === 'supervisor') {
+      baseStats.push({
+        label: 'Active Lines',
+        value: '12',
+        icon: <BarChart3 size={28} className="text-indigo-600" />,
+        color: 'indigo',
+        trend: 2
+      })
+    }
 
-  const tableData = [
-    { id: 'TRX-1001', user: 'User 1', action: 'Transaction', date: 'Dec 1, 2025', status: 'Completed' },
-    { id: 'TRX-1002', user: 'User 2', action: 'Transaction', date: 'Dec 2, 2025', status: 'Completed' },
-    { id: 'TRX-1003', user: 'User 3', action: 'Transaction', date: 'Dec 3, 2025', status: 'Pending' },
-    { id: 'TRX-1004', user: 'User 4', action: 'Transaction', date: 'Dec 4, 2025', status: 'Completed' },
-    { id: 'TRX-1005', user: 'User 5', action: 'Transaction', date: 'Dec 5, 2025', status: 'Completed' },
-  ];
+    console.log('📊 [getStatsData] Returning', baseStats.length, 'stat cards')
+    return baseStats
+  }
 
-  const users = [
-    { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Admin', status: 'Active' },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'User', status: 'Active' },
-    { id: 3, name: 'Mike Johnson', email: 'mike@example.com', role: 'User', status: 'Inactive' },
-  ];
-
-  const tabs = [
-    { label: 'Overview', content: <div className="text-gray-600">Dashboard overview content</div> },
-    { label: 'Analytics', content: <div className="text-gray-600">Analytics data</div> },
-    { label: 'Reports', content: <div className="text-gray-600">Reports content</div> },
-  ];
-
-  const handleMenuClick = (item) => {
-    setActiveMenu(item.id);
-  };
-
-  const handleLogoutClick = () => {
-    onLogout();
-  };
-
-  const totalPages = Math.ceil(tableData.length / 5);
-  const paginatedData = tableData.slice((currentPage - 1) * 5, currentPage * 5);
+  const stats = getStatsData()
 
   return (
-    <div className="flex h-screen w-full bg-gray-100">
-      {/* Sidebar */}
-      <Sidebar
-        open={true}
-        menuItems={menuItems}
-        activeMenu={activeMenu}
-        onMenuClick={handleMenuClick}
-        onLogout={handleLogoutClick}
-        logoUrl="/src/assets/logo/logo.png"
-      />
+    <div className="space-y-6">
+      <BreadCrumb items={breadcrumbItems} />
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col w-full overflow-hidden">
-        
-        {/* Header */}
-        <Header
-          title="Dashboard"
-          onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-          sidebarOpen={sidebarOpen}
-          user={user}
-          onLogout={handleLogoutClick}
-          notificationCount={3}
-        />
-
-        {/* Content */}
-        <div className="flex-1 overflow-auto p-4 md:p-6 space-y-6">
-          
-          {/* Breadcrumb */}
-          <BreadCrumb items={breadcrumbItems} />
-
-          {/* Welcome Section */}
-          <Card shadow="md" padding="lg" rounded="lg" className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              <div>
-                <h2 className="text-2xl md:text-3xl font-bold mb-2">Welcome back, {user?.name || 'Admin'}! 👋</h2>
-                <p className="text-blue-100">Here's what's happening in your system today</p>
-              </div>
-              <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-3xl font-bold text-white border-2 border-white border-opacity-30 flex-shrink-0">
-                {user?.name?.charAt(0) || 'A'}
-              </div>
-            </div>
-          </Card>
-
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-            {stats.map((stat, idx) => (
-              <StatCard 
-                key={idx} 
-                label={stat.label}
-                value={stat.value}
-                icon={stat.icon}
-                color={stat.color}
-                trend={stat.trend}
-              />
-            ))}
+      {/* Welcome Card */}
+      <Card shadow="md" padding="lg" rounded="lg" className="bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div>
+            <h2 className="text-2xl md:text-3xl font-bold mb-2">
+              Welcome back, {user?.username}! 👋
+            </h2>
+            <p className="text-blue-100">
+              You are logged in as:{' '}
+              <span className="font-semibold">{getRoleLabel()}</span>
+            </p>
           </div>
-
-          {/* Charts & Activities */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-            <div className="lg:col-span-2">
-              <Chart title="Monthly Performance" data={chartData} type="bar" color="blue" />
-            </div>
-            <RecentActivity title="Recent Activities" activities={activitiesData} />
+          <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-3xl font-bold text-white border-2 border-white border-opacity-30">
+            {user?.username?.charAt(0).toUpperCase()}
           </div>
-
-          {/* Widgets */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-            <Widget title="Quick Stats" content="View your quick statistics here" icon="📊" color="blue" variant="gradient" />
-            <Widget title="Performance" content="Monitor your performance metrics" icon="⚡" color="green" variant="gradient" />
-            <Widget title="System Health" content="Check your system health status" icon="💚" color="purple" variant="gradient" />
-          </div>
-
-          {/* Tabs */}
-          <Card shadow="md" padding="0" rounded="lg">
-            <Tabs tabs={tabs} />
-          </Card>
-
-          {/* Data Table */}
-          <Card shadow="md" padding="0" rounded="lg">
-            <div className="p-4 md:p-6 border-b border-gray-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-              <h3 className="text-lg font-bold text-gray-900">Recent Transactions</h3>
-              <div className="flex gap-2 w-full md:w-auto">
-                <Dropdown 
-                  label="Filter"
-                  items={['All', 'Completed', 'Pending', 'Failed']}
-                  onSelect={(item) => console.log('Filter:', item)}
-                />
-                <Button variant="primary" size="sm">
-                  Export
-                </Button>
-              </div>
-            </div>
-            <div className="overflow-x-auto">
-              <DataTable columns={tableColumns} data={paginatedData} striped={true} hover={true} />
-            </div>
-            <div className="px-4 md:px-6 py-4 border-t border-gray-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-gray-50">
-              <span className="text-xs md:text-sm text-gray-600">
-                Showing {(currentPage - 1) * 5 + 1} to {Math.min(currentPage * 5, tableData.length)} of {tableData.length}
-              </span>
-              <Pagination 
-                currentPage={currentPage} 
-                totalPages={totalPages} 
-                onPageChange={setCurrentPage}
-                totalItems={tableData.length}
-                itemsPerPage={5}
-              />
-            </div>
-          </Card>
-
-          {/* User Table */}
-          <Card shadow="md" padding="lg" rounded="lg">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Users</h3>
-            <div className="overflow-x-auto">
-              <UserTable users={users} />
-            </div>
-          </Card>
-
-          {/* Status Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-            <Card shadow="md" padding="lg" rounded="lg">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-base md:text-lg font-bold text-gray-900">Server Status</h3>
-                <Badge variant="success" text="Active" />
-              </div>
-              <p className="text-gray-600 mb-4 text-sm md:text-base">All systems operational</p>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-green-500 h-2 rounded-full" style={{ width: '95%' }}></div>
-              </div>
-              <p className="text-xs text-gray-500 mt-2">95% System Health</p>
-            </Card>
-
-            <Card shadow="md" padding="lg" rounded="lg">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-base md:text-lg font-bold text-gray-900">Backup Status</h3>
-                <Badge variant="info" text="In Progress" />
-              </div>
-              <p className="text-gray-600 mb-4 text-sm md:text-base">Last backup: 2 hours ago</p>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-blue-500 h-2 rounded-full" style={{ width: '65%' }}></div>
-              </div>
-              <p className="text-xs text-gray-500 mt-2">65% Complete</p>
-            </Card>
-          </div>
-
-          {/* Drawer Button */}
-          <Button variant="secondary" size="lg" onClick={() => setShowDrawer(true)} className="w-full md:w-auto">
-            Open Side Panel
-          </Button>
-
-          {/* Drawer */}
-          <Drawer
-            isOpen={showDrawer}
-            title="Dashboard Settings"
-            position="right"
-            onClose={() => setShowDrawer(false)}
-            footer={
-              <div className="flex gap-2">
-                <Button variant="secondary" onClick={() => setShowDrawer(false)}>
-                  Cancel
-                </Button>
-                <Button variant="primary" onClick={() => setShowDrawer(false)}>
-                  Save
-                </Button>
-              </div>
-            }
-          >
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Theme</label>
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <option>Light</option>
-                  <option>Dark</option>
-                  <option>Auto</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Notifications</label>
-                <input type="checkbox" defaultChecked className="w-4 h-4 cursor-pointer" /> Enable notifications
-              </div>
-            </div>
-          </Drawer>
         </div>
+      </Card>
 
-        {/* Footer */}
-        <Footer />
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        {stats.map((stat, idx) => (
+          <StatCard 
+            key={idx} 
+            label={stat.label}
+            value={stat.value}
+            icon={stat.icon}
+            color={stat.color}
+            trend={stat.trend}
+          />
+        ))}
       </div>
+
+      {/* Charts Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card shadow="md" padding="lg" rounded="lg">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-bold text-gray-900">Output Trend</h3>
+            <LineChartIcon size={20} className="text-blue-600" />
+          </div>
+          <Chart 
+            title="" 
+            data={[100, 120, 115, 130, 125, 140]} 
+            type="line" 
+            color="blue" 
+          />
+        </Card>
+
+        <Card shadow="md" padding="lg" rounded="lg">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-bold text-gray-900">Line Performance</h3>
+            <BarChart3 size={20} className="text-green-600" />
+          </div>
+          <Chart 
+            title="" 
+            data={[88, 82, 79]} 
+            type="bar" 
+            color="green" 
+          />
+        </Card>
+      </div>
+
+      {/* Role-Specific Info Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* SUPERADMIN Card */}
+        {user?.role === 'superadmin' && (
+          <Card shadow="md" padding="lg" rounded="lg" className="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200">
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-purple-200 rounded-lg">
+                <Users size={24} className="text-purple-600" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-purple-900 mb-2">Superadmin Access</h3>
+                <p className="text-purple-700 text-sm leading-relaxed">
+                  Anda memiliki akses penuh ke sistem termasuk User Management, konfigurasi sistem, dan laporan lengkap.
+                </p>
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {/* ADMIN Card */}
+        {user?.role === 'admin' && (
+          <Card shadow="md" padding="lg" rounded="lg" className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200">
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-blue-200 rounded-lg">
+                <BarChart3 size={24} className="text-blue-600" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-blue-900 mb-2">Admin Access</h3>
+                <p className="text-blue-700 text-sm leading-relaxed">
+                  Anda dapat mengelola line, style master, dan memantau line balancing di semua lini produksi.
+                </p>
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {/* SUPERVISOR Card */}
+        {user?.role === 'supervisor' && (
+          <Card shadow="md" padding="lg" rounded="lg" className="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200">
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-green-200 rounded-lg">
+                <Activity size={24} className="text-green-600" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-green-900 mb-2">Supervisor Access</h3>
+                <p className="text-green-700 text-sm leading-relaxed">
+                  Anda dapat memantau dan mengelola output dari line yang Anda supervisi serta membuat header output per jam.
+                </p>
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {/* Quick Stats Card */}
+        <Card shadow="md" padding="lg" rounded="lg" className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-2 border-yellow-200">
+          <div className="flex items-start gap-4">
+            <div className="p-3 bg-yellow-200 rounded-lg">
+              <TrendingUp size={24} className="text-yellow-600" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-bold text-yellow-900 mb-2">Quick Stats</h3>
+              <div className="space-y-2 text-sm text-yellow-700">
+                <p>• Total Output: <span className="font-bold">1,250 pcs</span></p>
+                <p>• Target Output: <span className="font-bold">1,200 pcs</span></p>
+                <p>• Achievement: <span className="font-bold">104.2%</span></p>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Alerts/Notices */}
+      <Card shadow="md" padding="lg" rounded="lg" className="border-l-4 border-yellow-400 bg-yellow-50">
+        <div className="flex items-start gap-4">
+          <AlertCircle size={24} className="text-yellow-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <h3 className="font-bold text-yellow-900 mb-1">⚠️ Notice</h3>
+            <p className="text-yellow-700 text-sm">
+              Sistem sedang dalam tahap pengembangan. Beberapa fitur mungkin masih dalam proses atau belum tersedia sepenuhnya.
+            </p>
+          </div>
+        </div>
+      </Card>
     </div>
-  );
+  )
 }

@@ -1,0 +1,74 @@
+import axios from 'axios'
+import { getToken, clearAuth } from '@/utils/token'
+
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+})
+
+// ===== REQUEST INTERCEPTOR =====
+api.interceptors.request.use(
+  (config) => {
+    const token = getToken()
+
+    if (token) {
+      console.log('📤 [API Request]', config.method.toUpperCase(), config.url)
+      console.log('   Attaching token...')
+      config.headers.Authorization = `Bearer ${token}`
+    } else {
+      console.log('📤 [API Request]', config.method.toUpperCase(), config.url)
+      console.log('   No token to attach')
+    }
+
+    return config
+  },
+  (error) => {
+    console.error('❌ [API Request Error]', error.message)
+    return Promise.reject(error)
+  }
+)
+
+// ===== RESPONSE INTERCEPTOR =====
+api.interceptors.response.use(
+  (response) => {
+    console.log('📥 [API Response]', response.status, response.config.url)
+    console.log('   Response data:', response.data)
+    return response
+  },
+  (error) => {
+    const status = error.response?.status
+    const message = error.response?.data?.message
+    const currentPath = window.location.pathname
+
+    console.group('❌ [API Error]')
+    console.error('Status:', status)
+    console.error('Message:', message)
+    console.error('URL:', error.config?.url)
+    console.error('Full error response:', error.response?.data)
+
+    // ⭐ HANDLE 401 UNAUTHORIZED
+    if (status === 401 && currentPath !== '/login') {
+      console.error('🚨 Unauthorized - redirecting to login')
+      clearAuth()
+      window.location.href = '/login'
+    }
+
+    // ⭐ HANDLE 500 SERVER ERROR
+    if (status === 500) {
+      console.error('🚨 Server error (500)')
+    }
+
+    // ⭐ HANDLE NETWORK ERROR
+    if (!error.response) {
+      console.error('🚨 Network error - no response')
+    }
+
+    console.groupEnd()
+
+    return Promise.reject(error)
+  }
+)
+
+export default api
