@@ -10,6 +10,6 @@ export default function DashboardRouter() {
   if (user.role === 'supervisor' || user.role === 3) {
     return <HourlyOutput />
   }
-
+  
   return <Dashboard />
 }

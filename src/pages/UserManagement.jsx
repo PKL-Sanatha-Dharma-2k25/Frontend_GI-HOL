@@ -1,376 +1,381 @@
 // src/pages/UserManagement.jsx
-import { useState } from 'react';
-import { Search, ChevronUp, ChevronDown, Edit2, Trash2, Plus, Eye, EyeOff } from 'lucide-react';
-import { useSidebar } from '@/context/SidebarContext';
-import Card from '@/components/ui/Card';
-import Button from '@/components/ui/Button';
-import BreadCrumb from '@/components/common/BreadCrumb';
-import Alert from '@/components/ui/Alert';
-import Input from '@/components/ui/Input';
+import { useState, useEffect } from 'react'
+import { Plus, Eye, EyeOff } from 'lucide-react'
+import { useSidebar } from '@/context/SidebarContext'
+import Button from '@/components/ui/Button'
+import Card from '@/components/ui/Card'
+import BreadCrumb from '@/components/common/BreadCrumb'
+import Alert from '@/components/ui/Alert'
+import UserTable from '@/components/tables/UserTable'
+import api from '@/services/api'
 
 export default function UserManagement() {
-  const { sidebarHovered } = useSidebar();
-  const [users, setUsers] = useState([
-    {
-      id: 1,
-      username: 'coba',
-      email: 'coba@example.com',
-      role: '1',
-      line_id: 1,
-      line_name: 'SHIFT 1 LINE TELAGA',
-      status: 'Active',
-      created_at: '2025-12-10'
-    },
-    {
-      id: 2,
-      username: 'admin_user',
-      email: 'admin@example.com',
-      role: '2',
-      line_id: null,
-      line_name: '-',
-      status: 'Active',
-      created_at: '2025-12-09'
-    },
-    {
-      id: 3,
-      username: 'supervisor_user',
-      email: 'supervisor@example.com',
-      role: '3',
-      line_id: 2,
-      line_name: 'SHIFT 1 LINE RAJA AMPAT',
-      status: 'Active',
-      created_at: '2025-12-08'
-    }
-  ]);
-
-  const [loading, setLoading] = useState(false);
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertType, setAlertType] = useState('success');
-  const [alertMessage, setAlertMessage] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortConfig, setSortConfig] = useState({ key: 'username', direction: 'asc' });
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [showPassword, setShowPassword] = useState(false);
+  const { sidebarHovered } = useSidebar()
+  const [users, setUsers] = useState([])
+  const [lines, setLines] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [showAlert, setShowAlert] = useState(false)
+  const [alertType, setAlertType] = useState('success')
+  const [alertMessage, setAlertMessage] = useState('')
+  const [showForm, setShowForm] = useState(false)
+  const [editingId, setEditingId] = useState(null)
+  const [showPassword, setShowPassword] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
   const [formData, setFormData] = useState({
     username: '',
     email: '',
     password: '',
-    role: '2',
-    line_id: '',
+    id_role: '4', // Default role ID
+    id_line: '',
     status: 'Active'
-  });
+  })
 
   const breadcrumbItems = [
-    { label: 'User Management', href: '#', active: true }
-  ];
+    { label: 'User Management', href: '/user-management', active: true }
+  ]
 
-  const roleMap = {
-    '1': 'Superadmin',
-    '2': 'Admin',
-    '3': 'Supervisor'
-  };
+  // ⭐ ROLE MAPPING: id_role sebagai value
+  const roleOptions = [
+    { value: '1', label: 'Superadmin' },
+    { value: '2', label: 'Admin' },
+    { value: '3', label: 'Supervisor' },
+    { value: '4', label: 'User' }
+  ]
 
-  const lineOptions = [
-    { id: 1, name: 'SHIFT 1 LINE TELAGA' },
-    { id: 2, name: 'SHIFT 1 LINE RAJA AMPAT' },
-    { id: 3, name: 'SHIFT 1 LINE ULU WATU' },
-    { id: 4, name: 'SHIFT 1 LINE BROMO' }
-  ];
+  // =============================
+  // LOAD DATA ON MOUNT
+  // =============================
+  useEffect(() => {
+    loadUsers()
+    loadLines()
+  }, [])
 
-  // Filter & Sort
-  const filteredUsers = users
-    .filter(u => 
-      u.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      u.email.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-    .sort((a, b) => {
-      const aValue = a[sortConfig.key];
-      const bValue = b[sortConfig.key];
+  const loadUsers = async () => {
+    try {
+      console.group('📥 [loadUsers] Fetching users')
+      setLoading(true)
+
+      const response = await api.get('/auth/getalluser')
+      console.log('Response:', response.data)
+
+      // Handle different response formats
+      let usersData = []
+      if (response.data?.data && Array.isArray(response.data.data)) {
+        usersData = response.data.data
+      } else if (Array.isArray(response.data)) {
+        usersData = response.data
+      }
+
+      // ⭐ NORMALIZE DATA - Gunakan id_role dari database
+      const normalizedUsers = usersData.map(user => ({
+        id_user: user.id_user || user.id,
+        username: user.username || 'Unknown',
+        email: user.email || '',
+        id_role: user.id_role || '4', // Gunakan id_role dari database
+        role: getRoleLabel(user.id_role), // Convert id_role ke label
+        id_line: user.id_line || null,
+        line_name: user.line_name || user.line?.line_name || '-',
+        status: user.status || 'Active',
+        created_at: user.created_at || new Date().toISOString().split('T')[0]
+      }))
+
+      console.log('Normalized users:', normalizedUsers)
+      setUsers(normalizedUsers)
+      setAlertMessage('')
+
+      console.groupEnd()
+    } catch (error) {
+      console.group('❌ [loadUsers] Error')
+      console.error('Error:', error.message)
+      console.error('Error response:', error.response?.data)
+      console.groupEnd()
+
+      setShowAlert(true)
+      setAlertType('error')
       
-      if (aValue < bValue) {
-        return sortConfig.direction === 'asc' ? -1 : 1;
-      }
-      if (aValue > bValue) {
-        return sortConfig.direction === 'asc' ? 1 : -1;
-      }
-      return 0;
-    });
+      // ⭐ BETTER ERROR MESSAGE
+      const errorMsg = error.response?.data?.message || error.message
+      setAlertMessage('Failed to load users: ' + errorMsg)
+      setUsers([])
+    } finally {
+      setLoading(false)
+    }
+  }
 
-  const handleSort = (key) => {
-    setSortConfig(prev => ({
-      key,
-      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
-    }));
-  };
+  const loadLines = async () => {
+    try {
+      console.group('📥 [loadLines] Fetching lines')
 
+      const response = await api.get('/auth/getline')
+      console.log('Response:', response.data)
+
+      let linesData = []
+      if (response.data?.data && Array.isArray(response.data.data)) {
+        linesData = response.data.data
+      } else if (Array.isArray(response.data)) {
+        linesData = response.data
+      }
+
+      console.log('Lines loaded:', linesData)
+      setLines(linesData)
+
+      console.groupEnd()
+    } catch (error) {
+      console.error('Failed to load lines:', error.message)
+      setLines([])
+    }
+  }
+
+  // ⭐ Helper function: Convert id_role ke label
+  const getRoleLabel = (idRole) => {
+    const role = roleOptions.find(r => r.value === String(idRole))
+    return role ? role.label : 'Unknown'
+  }
+
+  // =============================
+  // HANDLERS
+  // =============================
   const handleAddNew = () => {
-    setEditingId(null);
+    setEditingId(null)
     setFormData({
       username: '',
       email: '',
       password: '',
-      role: '2',
-      line_id: '',
+      id_role: '4', // Default ke User
+      id_line: '',
       status: 'Active'
-    });
-    setShowForm(true);
-  };
+    })
+    setShowForm(true)
+  }
 
-  const handleEdit = (user) => {
-    setEditingId(user.id);
-    setFormData({
-      username: user.username,
-      email: user.email,
-      password: '',
-      role: user.role,
-      line_id: user.line_id || '',
-      status: user.status
-    });
-    setShowForm(true);
-  };
+  const handleEdit = (userId) => {
+    const user = users.find(u => u.id_user === userId || u.id === userId)
+    if (user) {
+      setEditingId(user.id_user || user.id)
+      setFormData({
+        username: user.username,
+        email: user.email || '',
+        password: '',
+        id_role: String(user.id_role) || '4', // Pastikan string
+        id_line: user.id_line || '',
+        status: user.status || 'Active'
+      })
+      setShowForm(true)
+    }
+  }
 
-  const handleFormSubmit = (e) => {
-    e.preventDefault();
-    
-    if (!formData.username || !formData.email || !formData.role) {
-      setShowAlert(true);
-      setAlertType('error');
-      setAlertMessage('Please fill all required fields');
-      return;
+  const handleFormSubmit = async (e) => {
+    e.preventDefault()
+
+    // Validation
+    if (!formData.username || !formData.email || !formData.id_role) {
+      setShowAlert(true)
+      setAlertType('error')
+      setAlertMessage('Please fill all required fields')
+      return
     }
 
     if (!editingId && !formData.password) {
-      setShowAlert(true);
-      setAlertType('error');
-      setAlertMessage('Password is required for new user');
-      return;
+      setShowAlert(true)
+      setAlertType('error')
+      setAlertMessage('Password is required for new user')
+      return
     }
 
-    if (editingId) {
-      // Update
-      setUsers(users.map(u => 
-        u.id === editingId 
-          ? {
-              ...u,
-              username: formData.username,
-              email: formData.email,
-              role: formData.role,
-              line_id: formData.line_id ? parseInt(formData.line_id) : null,
-              line_name: formData.line_id ? lineOptions.find(l => l.id === parseInt(formData.line_id))?.name : '-',
-              status: formData.status
-            }
-          : u
-      ));
-      setAlertMessage('User updated successfully');
-    } else {
-      // Create
-      const newUser = {
-        id: Math.max(...users.map(u => u.id), 0) + 1,
-        username: formData.username,
-        email: formData.email,
-        role: formData.role,
-        line_id: formData.line_id ? parseInt(formData.line_id) : null,
-        line_name: formData.line_id ? lineOptions.find(l => l.id === parseInt(formData.line_id))?.name : '-',
-        status: formData.status,
-        created_at: new Date().toISOString().split('T')[0]
-      };
-      setUsers([...users, newUser]);
-      setAlertMessage('User created successfully');
+    try {
+      setSubmitting(true)
+
+      if (editingId) {
+        // ⭐ UPDATE USER
+        console.group('📤 [updateUser]')
+        const payload = {
+          username: formData.username,
+          email: formData.email,
+          id_role: parseInt(formData.id_role), // ⭐ Kirim sebagai number
+          id_line: formData.id_line ? parseInt(formData.id_line) : null,
+          status: formData.status
+        }
+
+        // Jika password diisi, tambahkan ke payload
+        if (formData.password) {
+          payload.password = formData.password
+        }
+
+        console.log('Payload:', payload)
+
+        await api.post(`/auth/update-user/${editingId}`, payload)
+
+        console.log('User updated successfully')
+        console.groupEnd()
+
+        setShowAlert(true)
+        setAlertType('success')
+        setAlertMessage('User updated successfully')
+
+        // Reload users
+        await loadUsers()
+      } else {
+        // ⭐ CREATE USER - Kirim id_role sebagai number
+        console.group('📤 [createUser]')
+        const payload = {
+          username: formData.username,
+          email: formData.email,
+          password: formData.password,
+          id_role: parseInt(formData.id_role), // ⭐ Kirim sebagai number
+          id_line: formData.id_line ? parseInt(formData.id_line) : null,
+          status: formData.status
+        }
+
+        console.log('Payload:', payload)
+
+        await api.post('/auth/create-user', payload)
+
+        console.log('User created successfully')
+        console.groupEnd()
+
+        setShowAlert(true)
+        setAlertType('success')
+        setAlertMessage('User created successfully')
+
+        // Reload users
+        await loadUsers()
+      }
+
+      setShowForm(false)
+    } catch (error) {
+      console.group('❌ [handleFormSubmit] Error')
+      console.error('Error:', error.response?.data || error.message)
+      console.groupEnd()
+
+      setShowAlert(true)
+      setAlertType('error')
+      setAlertMessage(error.response?.data?.message || 'Failed to save user')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const handleDelete = async (userId) => {
+    if (!confirm('Are you sure want to delete this user?')) {
+      return
     }
 
-    setShowAlert(true);
-    setAlertType('success');
-    setShowForm(false);
-  };
+    try {
+      console.group('📤 [deleteUser]')
+      console.log('Deleting user:', userId)
 
-  const handleDelete = (id) => {
-    if (confirm('Are you sure want to delete this user?')) {
-      setUsers(users.filter(u => u.id !== id));
-      setShowAlert(true);
-      setAlertType('success');
-      setAlertMessage('User deleted successfully');
+      await api.post(`/auth/delete-user/${userId}`)
+
+      console.log('User deleted successfully')
+      console.groupEnd()
+
+      setShowAlert(true)
+      setAlertType('success')
+      setAlertMessage('User deleted successfully')
+
+      // Reload users
+      await loadUsers()
+    } catch (error) {
+      console.group('❌ [handleDelete] Error')
+      console.error('Error:', error.response?.data || error.message)
+      console.groupEnd()
+
+      setShowAlert(true)
+      setAlertType('error')
+      setAlertMessage(error.response?.data?.message || 'Failed to delete user')
     }
-  };
-
-  const SortHeader = ({ label, sortKey }) => (
-    <button
-      onClick={() => handleSort(sortKey)}
-      className="flex items-center gap-2 font-semibold text-gray-700 hover:text-blue-600 transition-colors"
-    >
-      {label}
-      {sortConfig.key === sortKey && (
-        sortConfig.direction === 'asc' ? <ChevronUp size={16} /> : <ChevronDown size={16} />
-      )}
-    </button>
-  );
+  }
 
   return (
-    <div className="space-y-6 p-6 md:p-8">
-      {/* Breadcrumb */}
-      <BreadCrumb items={breadcrumbItems} />
+    <div className="space-y-6 px-responsive py-responsive bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+      {/* ✅ Breadcrumb */}
+      <div className="slide-in-down">
+        <BreadCrumb items={breadcrumbItems} />
+      </div>
 
-      {/* Alert */}
+      {/* ✅ Alert */}
       {showAlert && (
-        <Alert
-          type={alertType}
-          message={alertMessage}
-          dismissible={true}
-          onClose={() => setShowAlert(false)}
-        />
+        <div className="slide-in-up">
+          <Alert
+            type={alertType}
+            message={alertMessage}
+            dismissible={true}
+            onClose={() => setShowAlert(false)}
+          />
+        </div>
       )}
 
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
-          <p className="text-gray-600 mt-1">Kelola pengguna sistem</p>
-        </div>
+      {/* ✅ Add User Button */}
+      <div className="flex justify-end scale-in">
         <Button
-          variant="primary"
-          size="lg"
           onClick={handleAddNew}
-          className="flex items-center gap-2"
+          variant="primary"
+          size="md"
+          icon={Plus}
+          disabled={loading}
         >
-          <Plus size={20} />
           Add User
         </Button>
       </div>
 
-      {/* Search */}
-      <Card shadow="md" padding="lg" rounded="lg">
-        <div className="relative">
-          <Search 
-            size={20} 
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-          />
-          <input
-            type="text"
-            placeholder="Search by username or email..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+      {/* ✅ UserTable Card */}
+      <Card shadow="lg" padding="lg" rounded="lg" className="scale-in transition-shadow duration-300">
+        <UserTable 
+          users={users}
+          loading={loading}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          searchable={true}
+          sortable={true}
+        />
       </Card>
 
-      {/* Table */}
-      <Card shadow="md" padding="0" rounded="lg" className="overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="px-6 py-4 text-left">
-                  <SortHeader label="Username" sortKey="username" />
-                </th>
-                <th className="px-6 py-4 text-left">Email</th>
-                <th className="px-6 py-4 text-left">
-                  <SortHeader label="Role" sortKey="role" />
-                </th>
-                <th className="px-6 py-4 text-left">Line</th>
-                <th className="px-6 py-4 text-left">
-                  <SortHeader label="Status" sortKey="status" />
-                </th>
-                <th className="px-6 py-4 text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
-                    <div className="flex items-center justify-center">
-                      <div className="w-8 h-8 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
-                      <span className="ml-2">Loading...</span>
-                    </div>
-                  </td>
-                </tr>
-              ) : filteredUsers.length === 0 ? (
-                <tr>
-                  <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
-                    No users found
-                  </td>
-                </tr>
-              ) : (
-                filteredUsers.map((user) => (
-                  <tr key={user.id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-gray-900">{user.username}</td>
-                    <td className="px-6 py-4 text-gray-600 text-sm">{user.email}</td>
-                    <td className="px-6 py-4">
-                      <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold">
-                        {roleMap[user.role]}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-gray-600 text-sm">{user.line_name}</td>
-                    <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        user.status === 'Active'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {user.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        <button
-                          onClick={() => handleEdit(user)}
-                          className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                          title="Edit"
-                        >
-                          <Edit2 size={18} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(user.id)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Delete"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Table Footer */}
-        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 text-sm text-gray-600">
-          Total: {filteredUsers.length} users
-        </div>
-      </Card>
-
-      {/* Form Modal */}
+      {/* ✅ Form Modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
-          <Card shadow="2xl" padding="lg" rounded="lg" className="w-full max-w-md my-8">
-            <h2 className="text-2xl font-bold mb-6">
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 fade-in overflow-y-auto">
+          <Card shadow="2xl" padding="lg" rounded="lg" className="w-full max-w-md my-8 scale-in">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6 font-display leading-tight tracking-tight">
               {editingId ? 'Edit User' : 'Add New User'}
             </h2>
 
-            <form onSubmit={handleFormSubmit} className="space-y-4">
-              <Input
-                label="Username"
-                value={formData.username}
-                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                placeholder="e.g., supervisor_user"
-                required
-              />
+            <form onSubmit={handleFormSubmit} className="space-y-4 slide-in-up">
+              {/* Username Input */}
+              <div className="form-group">
+                <label className="block text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">
+                  Username *
+                </label>
+                <input
+                  type="text"
+                  value={formData.username}
+                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                  placeholder="e.g., supervisor_user"
+                  className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg font-normal text-base leading-normal focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                  disabled={submitting}
+                  required
+                />
+              </div>
 
-              <Input
-                label="Email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                placeholder="e.g., user@example.com"
-                required
-              />
+              {/* Email Input */}
+              <div className="form-group">
+                <label className="block text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">
+                  Email *
+                </label>
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  placeholder="e.g., user@example.com"
+                  className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg font-normal text-base leading-normal focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                  disabled={submitting}
+                  required
+                />
+              </div>
 
+              {/* Password Input */}
               {!editingId && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Password
+                <div className="form-group">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">
+                    Password *
                   </label>
                   <div className="relative">
                     <input
@@ -378,13 +383,15 @@ export default function UserManagement() {
                       value={formData.password}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                       placeholder="Enter password"
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg font-normal text-base leading-normal focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                      disabled={submitting}
                       required
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors duration-200"
+                      disabled={submitting}
                     >
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
@@ -392,65 +399,87 @@ export default function UserManagement() {
                 </div>
               )}
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
+              {/* Role Select */}
+              <div className="form-group">
+                <label className="block text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">
+                  Role *
+                </label>
                 <select
-                  value={formData.role}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={formData.id_role}
+                  onChange={(e) => setFormData({ ...formData, id_role: e.target.value })}
+                  className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg font-normal text-base leading-normal focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                  disabled={submitting}
                   required
                 >
-                  <option value="1">Superadmin</option>
-                  <option value="2">Admin</option>
-                  <option value="3">Supervisor</option>
+                  {roleOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
                 </select>
               </div>
 
-              {formData.role === '3' && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Assign Line</label>
+              {/* Line Select (Supervisor only) */}
+              {formData.id_role === '3' && (
+                <div className="form-group slide-in-down">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">
+                    Assign Line
+                  </label>
                   <select
-                    value={formData.line_id}
-                    onChange={(e) => setFormData({ ...formData, line_id: e.target.value })}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={formData.id_line}
+                    onChange={(e) => setFormData({ ...formData, id_line: e.target.value })}
+                    className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg font-normal text-base leading-normal focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                    disabled={submitting}
                   >
                     <option value="">Select Line</option>
-                    {lineOptions.map(line => (
-                      <option key={line.id} value={line.id}>
-                        {line.name}
+                    {lines.map(line => (
+                      <option key={line.id_line || line.id} value={line.id_line || line.id}>
+                        {line.line_name || line.name}
                       </option>
                     ))}
                   </select>
                 </div>
               )}
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+              {/* Status Select */}
+              <div className="form-group">
+                <label className="block text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">
+                  Status
+                </label>
                 <select
                   value={formData.status}
                   onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg font-normal text-base leading-normal focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                  disabled={submitting}
                 >
                   <option value="Active">Active</option>
                   <option value="Inactive">Inactive</option>
                 </select>
               </div>
 
-              <div className="flex gap-3 pt-4">
+              {/* Divider */}
+              <div className="divider"></div>
+
+              {/* Form Actions */}
+              <div className="flex gap-3 slide-in-up">
                 <Button
                   type="button"
                   variant="secondary"
+                  size="md"
                   onClick={() => setShowForm(false)}
                   className="flex-1"
+                  disabled={submitting}
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   variant="primary"
+                  size="md"
                   className="flex-1"
+                  disabled={submitting}
                 >
-                  {editingId ? 'Update' : 'Create'}
+                  {submitting ? 'Saving...' : (editingId ? 'Update' : 'Create')}
                 </Button>
               </div>
             </form>
@@ -458,5 +487,5 @@ export default function UserManagement() {
         </div>
       )}
     </div>
-  );
+  )
 }
