@@ -153,22 +153,22 @@ export default function Login() {
   };
 
   return (
-    <div className="flex h-screen bg-gradient-to-r from-blue-900 to-indigo-900 overflow-hidden">
+    <div className="flex flex-col lg:flex-row h-screen bg-gradient-to-r from-blue-900 to-indigo-900 overflow-hidden">
       {/* Left Side - Login Form */}
-      <div className="w-2/5 flex items-center justify-center p-8">
-        <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-6">
+      <div className="w-full lg:w-2/5 flex items-center justify-center p-4 sm:p-8 min-h-screen lg:min-h-auto">
+        <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-6 sm:p-8">
           {/* Logo Section */}
           <div className="text-center mb-6">
             <img 
               src={logo} 
               alt="Company Logo" 
-              className="h-12 w-auto mx-auto mb-4"
+              className="h-10 sm:h-12 w-auto mx-auto mb-4"
             />
           </div>
 
           {/* Address Section */}
           <div className="text-center mb-8">
-            <p className="text-gray-500 text-sm">
+            <p className="text-gray-500 text-xs sm:text-sm">
               Jl. Jombor - Pokak 01/01, Ceper, Klaten<br />
               Jawa Tengah - Indonesia
             </p>
@@ -177,7 +177,7 @@ export default function Login() {
           {/* Alert Component */}
           {showAlert && (
             <div className="mb-6">
-              <div className={`p-3 rounded-lg ${alertType === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+              <div className={`p-3 rounded-lg text-sm sm:text-base ${alertType === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                 {alertMessage}
               </div>
             </div>
@@ -186,10 +186,10 @@ export default function Login() {
           {/* Form Section */}
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Username</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-gray-400" />
+                  <User className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                 </div>
                 <input
                   type="text"
@@ -198,20 +198,20 @@ export default function Login() {
                   onChange={handleChange}
                   onKeyPress={handleKeyPress}
                   placeholder="Enter your username"
-                  className={`block w-full pl-10 pr-3 py-3 border ${errors.username ? 'border-red-300' : 'border-gray-300'} rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                  className={`block w-full pl-10 pr-3 py-2 sm:py-3 border text-sm sm:text-base ${errors.username ? 'border-red-300' : 'border-gray-300'} rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                   disabled={isLoading}
                 />
                 {errors.username && (
-                  <p className="mt-1 text-sm text-red-600">{errors.username}</p>
+                  <p className="mt-1 text-xs sm:text-sm text-red-600">{errors.username}</p>
                 )}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Password</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
+                  <Lock className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                 </div>
                 <input
                   type={showPassword ? "text" : "password"}
@@ -220,7 +220,7 @@ export default function Login() {
                   onChange={handleChange}
                   onKeyPress={handleKeyPress}
                   placeholder="Enter your password"
-                  className={`block w-full pl-10 pr-10 py-3 border ${errors.password ? 'border-red-300' : 'border-gray-300'} rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                  className={`block w-full pl-10 pr-10 py-2 sm:py-3 border text-sm sm:text-base ${errors.password ? 'border-red-300' : 'border-gray-300'} rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                   disabled={isLoading}
                 />
                 <button
@@ -229,13 +229,13 @@ export default function Login() {
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
                 >
                   {showPassword ? (
-                    <EyeOff className="h-5 w-5" />
+                    <EyeOff className="h-4 w-4 sm:h-5 sm:w-5" />
                   ) : (
-                    <Eye className="h-5 w-5" />
+                    <Eye className="h-4 w-4 sm:h-5 sm:w-5" />
                   )}
                 </button>
                 {errors.password && (
-                  <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+                  <p className="mt-1 text-xs sm:text-sm text-red-600">{errors.password}</p>
                 )}
               </div>
             </div>
@@ -244,7 +244,7 @@ export default function Login() {
               type="button"
               onClick={handleSubmit}
               disabled={isLoading || loginSuccess}
-              className={`w-full py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white ${
+              className={`w-full py-2 sm:py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm sm:text-base font-medium text-white ${
                 isLoading || loginSuccess 
                   ? 'bg-blue-400 cursor-not-allowed' 
                   : 'bg-blue-600 hover:bg-blue-700'
@@ -255,15 +255,15 @@ export default function Login() {
           </div>
 
           {/* Footer */}
-          <div className="mt-10 pt-6 border-t border-gray-200 text-center">
+          <div className="mt-8 sm:mt-10 pt-6 border-t border-gray-200 text-center">
             <p className="text-gray-500 text-xs">© 2025 MIS Team</p>
             <p className="text-gray-400 text-xs">All Rights Reserved</p>
           </div>
         </div>
       </div>
 
-      {/* Right Side - Illustration */}
-      <div className="w-3/5 flex items-center justify-center bg-gradient-to-r from-blue-900 to-indigo-900 p-8">
+      {/* Right Side - Illustration (Hidden on Mobile) */}
+      <div className="hidden lg:flex w-3/5 items-center justify-center bg-gradient-to-r from-blue-900 to-indigo-900 p-8">
         <div className="text-center max-w-lg">
           <h2 className="text-4xl font-bold text-white mb-2">GI-HOL</h2>
           <p className="text-blue-200 text-lg mb-8">Management Information System</p>

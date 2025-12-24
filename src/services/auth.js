@@ -35,7 +35,7 @@ export const loginUser = async (username, password) => {
   }
 }
 
-// ⭐ UPDATED: Use /api/auth/me endpoint
+// ⭐ UPDATED: Use /api/auth/me endpoint with id_line validation
 export const getUserProfile = async () => {
   try {
     console.group('🔴 [getUserProfile] FETCH PROFILE')
@@ -77,7 +77,6 @@ export const getUserProfile = async () => {
     console.log('  - username:', profile.username)
     console.log('  - role:', profile.role)
     console.log('  - id_role:', profile.id_role)
-    console.log('  - role type:', typeof profile.role)
     console.log('  - id_line:', profile.id_line)
     
     // ⭐ NORMALIZE OUTPUT - Handle both role dan id_role
@@ -85,9 +84,21 @@ export const getUserProfile = async () => {
       id_user: profile.id_user || profile.id,
       username: profile.username,
       role: profile.role || profile.id_role,  // ⭐ Handle id_role from database
-      id_line: profile.id_line || null
+      id_line: profile.id_line  // ✅ HARUS ADA!
     }
     
+    // ✅ VALIDASI CRITICAL - id_line WAJIB ADA
+    if (!normalizedProfile.id_line) {
+      console.error('❌ CRITICAL: id_line is missing from API response!')
+      console.error('   User:', normalizedProfile.username)
+      console.error('   id_user:', normalizedProfile.id_user)
+      console.error('   Message: Contact admin to set id_line for this user')
+      console.groupEnd()
+      throw new Error('id_line is required but missing from user profile. Contact your administrator.')
+    }
+    
+    console.log('✅ id_line validation passed:', normalizedProfile.id_line)
+    console.log('✅ Profile is valid and ready to use')
     console.groupEnd()
     return normalizedProfile
     
@@ -97,11 +108,8 @@ export const getUserProfile = async () => {
     console.error('Error message:', error.response?.data?.message)
     console.error('Full error:', error.message)
     console.error('Full error response:', error.response?.data)
-    
-    console.log('\n⚠️ FALLBACK: Using default profile (karena endpoint error)')
     console.groupEnd()
-    
-    return null
+    throw error
   }
 }
 
@@ -122,16 +130,25 @@ export const getUserProfileAlternative = async () => {
         console.log('Trying endpoint:', endpoint)
         const res = await api.get(endpoint)
         console.log('✅ Found! Response:', res.data)
-        console.groupEnd()
         
         // Return normalized format
         const data = res.data.data ? res.data.data[0] || res.data.data : res.data
-        return {
+        
+        // ✅ VALIDASI id_line juga di alternative
+        if (!data.id_line) {
+          console.warn('⚠️ Alternative endpoint returned data without id_line')
+          continue
+        }
+        
+        const normalizedProfile = {
           id_user: data.id_user || data.id,
           username: data.username,
           role: data.role,
-          id_line: data.id_line || null
+          id_line: data.id_line  // ✅ VALIDATED
         }
+        
+        console.groupEnd()
+        return normalizedProfile
       } catch (e) {
         console.log('❌ Failed:', endpoint)
         continue

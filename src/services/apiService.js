@@ -1,10 +1,9 @@
-import api from './api' // Import axios instance
+import api from './api'
 
 // ========================================
 // AUTHENTICATION FUNCTIONS
 // ========================================
 
-// Get CSRF Token
 export const getCSRFToken = async () => {
   try {
     const response = await api.get('/sanctum/csrf-cookie')
@@ -15,7 +14,6 @@ export const getCSRFToken = async () => {
   }
 }
 
-// Login
 export const login = async (username, password) => {
   try {
     await getCSRFToken()
@@ -30,7 +28,6 @@ export const login = async (username, password) => {
   }
 }
 
-// Logout
 export const logout = async () => {
   try {
     const response = await api.post('/auth/logout')
@@ -41,7 +38,6 @@ export const logout = async () => {
   }
 }
 
-// Get Current User Profile
 export const getCurrentUserProfile = async () => {
   try {
     const response = await api.post('/auth/me')
@@ -52,7 +48,6 @@ export const getCurrentUserProfile = async () => {
   }
 }
 
-// Refresh Token
 export const refreshToken = async () => {
   try {
     const response = await api.post('/auth/refresh')
@@ -67,7 +62,6 @@ export const refreshToken = async () => {
 // DATA MASTER FUNCTIONS
 // ========================================
 
-// Get ORC Sewing
 export const getOrcSewing = async () => {
   try {
     const response = await api.get('/auth/getorcsewing')
@@ -78,7 +72,6 @@ export const getOrcSewing = async () => {
   }
 }
 
-// Get Style ORC
 export const getStyleOrc = async () => {
   try {
     const response = await api.get('/auth/getstyleorc')
@@ -89,7 +82,6 @@ export const getStyleOrc = async () => {
   }
 }
 
-// Get Line
 export const getLine = async () => {
   try {
     const response = await api.get('/auth/getline')
@@ -100,7 +92,6 @@ export const getLine = async () => {
   }
 }
 
-// Get All User
 export const getAllUser = async () => {
   try {
     const response = await api.get('/auth/getallusers')
@@ -112,10 +103,9 @@ export const getAllUser = async () => {
 }
 
 // ========================================
-// HOURLY OUTPUT FUNCTIONS (FIXED)
+// HOURLY OUTPUT FUNCTIONS
 // ========================================
 
-// Get Hourly Output (dengan filter style atau id_line)
 export const getHourlyOutput = async (style = null, idLine = null) => {
   try {
     const params = {}
@@ -143,7 +133,6 @@ export const getHourlyOutput = async (style = null, idLine = null) => {
   }
 }
 
-// ✅ Get Hourly Output Header (endpoint: /api/auth/getouputheader)
 export const getHourlyOutputHeader = async () => {
   try {
     console.log('📊 [getHourlyOutputHeader] Fetching data from /auth/getouputheader...')
@@ -156,31 +145,102 @@ export const getHourlyOutputHeader = async () => {
   }
 }
 
-// ✅ Get Detail Output (endpoint: /api/auth/getdetailoptob?style=...&id_line=...)
 export const getDetailOutputByStyle = async (style, idLine) => {
   try {
     console.log('📊 [getDetailOutputByStyle] Fetching detail...', { style, idLine })
-    const params = { style, id_line: idLine }
-    console.log('📊 Calling endpoint: /auth/getdetailoptob with params:', params)
+    const params = { style, id_lane: idLine }
+    console.log('📊 [getDetailOutputByStyle] Calling endpoint: /auth/getdetailoptob')
+    console.log('📊 [getDetailOutputByStyle] Params:', params)
     const response = await api.get('/auth/getdetailoptob', { params })
     console.log('✅ [getDetailOutputByStyle] Success response:', response.data)
+    
+    if (response.data?.data?.length === 0) {
+      console.error('❌ [getDetailOutputByStyle] No detail data found!')
+      console.error('   Style:', style)
+      console.error('   ID Lane:', idLine)
+      
+      throw new Error(
+        `ORC ini tidak punya data detail untuk style "${style}". ` +
+        `Silakan hubungi admin untuk setup data.`
+      )
+    }
+    
     return response.data
   } catch (error) {
-    console.error('❌ Get detail output error:', error)
+    console.error('❌ Get detail output error:', error.message)
     console.error('❌ Requested URL:', error.config?.url)
     throw error
   }
 }
 
-// Store Hourly Output
 export const storeHourlyOutput = async (data) => {
   try {
-    console.log('💾 [storeHourlyOutput] Saving data:', data)
+    console.log('💾 [storeHourlyOutput] Saving header data:', data)
     const response = await api.post('/auth/store', data)
     console.log('✅ [storeHourlyOutput] Success response:', response.data)
     return response.data
   } catch (error) {
-    console.error('❌ Store data error:', error)
+    console.error('❌ Store hourly output error:', error)
+    throw error
+  }
+}
+
+export const storeDetailOutput = async (data) => {
+  try {
+    console.log('💾 [storeDetailOutput] Saving detail output data:', data)
+    const response = await api.post('/auth/insertdetailopt', data)
+    console.log('✅ [storeDetailOutput] Success response:', response.data)
+    return response.data
+  } catch (error) {
+    console.error('❌ Store detail output error:', error)
+    throw error
+  }
+}
+
+// ========================================
+// DETAIL & UPDATE VIEW FUNCTIONS ⭐ NEW
+// ========================================
+
+export const getDetailFromDetailOpt = async (idOutput) => {
+  try {
+    console.log('👁️ [getDetailFromDetailOpt] Fetching detail view data..., { idOutput }')
+    const params = { id_output: idOutput }
+    console.log('👁️ [getDetailFromDetailOpt] Calling endpoint: /auth/getdetailfromdetailopt')
+    console.log('👁️ [getDetailFromDetailOpt] Params:', params)
+    const response = await api.get('/auth/getdetailfromdetailopt', { params })
+    console.log('✅ [getDetailFromDetailOpt] Success response:', response.data)
+    return response.data
+  } catch (error) {
+    console.error('❌ Get detail from detail opt error:', error.message)
+    console.error('❌ Requested URL:', error.config?.url)
+    throw error
+  }
+}
+
+export const getUpdateFromDetailOpt = async (idOutput) => {
+  try {
+    console.log('✏️ [getUpdateFromDetailOpt] Fetching update data..., { idOutput }')
+    const params = { id_output: idOutput }
+    console.log('✏️ [getUpdateFromDetailOpt] Calling endpoint: /auth/getupdatefromdetailopt')
+    console.log('✏️ [getUpdateFromDetailOpt] Params:', params)
+    const response = await api.get('/auth/getupdatefromdetailopt', { params })
+    console.log('✅ [getUpdateFromDetailOpt] Success response:', response.data)
+    return response.data
+  } catch (error) {
+    console.error('❌ Get update from detail opt error:', error.message)
+    console.error('❌ Requested URL:', error.config?.url)
+    throw error
+  }
+}
+
+export const updateDetailOutput = async (data) => {
+  try {
+    console.log('🔄 [updateDetailOutput] Updating detail output data:', data)
+    const response = await api.post('/auth/updatedetailopt', data)
+    console.log('✅ [updateDetailOutput] Success response:', response.data)
+    return response.data
+  } catch (error) {
+    console.error('❌ Update detail output error:', error)
     throw error
   }
 }
@@ -189,7 +249,6 @@ export const storeHourlyOutput = async (data) => {
 // IGNITION FUNCTIONS
 // ========================================
 
-// Execute Solution
 export const executeSolution = async (payload) => {
   try {
     const response = await api.post('/ignition/execute-solution', payload)
@@ -200,7 +259,6 @@ export const executeSolution = async (payload) => {
   }
 }
 
-// Update Config
 export const updateConfig = async (payload) => {
   try {
     const response = await api.post('/ignition/update-config', payload)
@@ -215,7 +273,6 @@ export const updateConfig = async (payload) => {
 // HEALTH CHECK FUNCTIONS
 // ========================================
 
-// Health Check
 export const healthCheck = async () => {
   try {
     const response = await api.get('/ignition/health-check')
@@ -226,7 +283,6 @@ export const healthCheck = async () => {
   }
 }
 
-// API Status
 export const checkAPIStatus = async () => {
   try {
     const response = await api.get('/up')

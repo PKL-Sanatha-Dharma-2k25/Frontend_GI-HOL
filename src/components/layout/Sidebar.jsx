@@ -6,6 +6,8 @@ import {
   ShoppingBag,
   Clock,
   Users,
+  Menu,
+  X
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
@@ -20,6 +22,7 @@ export default function Sidebar({
   const location = useLocation()
   const { user, logout } = useAuth()
   const { sidebarHovered, setSidebarHovered } = useSidebar()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const rawRole = user?.role
 
@@ -117,6 +120,7 @@ export default function Sidebar({
 
   const handleSubMenuClick = (sub) => {
     if (sub.path) navigate(sub.path)
+    setMobileMenuOpen(false)
   }
 
   const handleLogout = () => {
@@ -126,52 +130,170 @@ export default function Sidebar({
 
   return (
     <>
-      {/* Hover Trigger Area - untuk trigger sidebar saat cursor di edge kiri */}
-      <div
-        className="hidden md:block fixed left-0 top-0 h-full w-1 z-20 hover:w-20 transition-all duration-300 cursor-pointer"
-        onMouseEnter={() => setSidebarHovered(true)}
-        onMouseLeave={() => setSidebarHovered(false)}
-      />
+      {/* DESKTOP SIDEBAR */}
+      <div className="hidden md:block">
+        {/* Hover Trigger Area - untuk trigger sidebar saat cursor di edge kiri */}
+        <div
+          className="fixed left-0 top-0 h-full w-1 z-20 hover:w-20 transition-all duration-300 cursor-pointer"
+          onMouseEnter={() => setSidebarHovered(true)}
+          onMouseLeave={() => setSidebarHovered(false)}
+        />
 
-      {/* Sidebar */}
-      <div
-        className={`
-          hidden md:flex
-          fixed top-0 left-0 h-full z-40 
-          bg-white transition-all duration-300
-          flex-col shadow-xl border-r border-gray-100
-          ${sidebarHovered ? 'w-72 translate-x-0' : 'w-20 translate-x-0'}
-        `}
-        onMouseEnter={() => setSidebarHovered(true)}
-        onMouseLeave={() => setSidebarHovered(false)}
-      >
-        {/* Logo */}
-        <div className="px-4 py-6 flex items-center justify-center border-b h-[88px]">
-          <div className="w-full h-full flex items-center justify-center">
-            {sidebarHovered ? (
-              // Logo Penuh saat expanded
-              <img 
-                src={logoUrl} 
-                alt="Logo" 
-                className="h-16 w-auto object-contain"
-              />
-            ) : (
-              // Icon saja saat collapsed
-              <img 
-                src={iconUrl} 
-                alt="Icon" 
-                className="h-10 w-10 object-contain"
-                onError={(e) => {
-                  // Fallback ke LayoutDashboard jika icon tidak ada
-                  e.target.style.display = 'none'
-                }}
-              />
-            )}
+        {/* Sidebar */}
+        <div
+          className={`
+            fixed top-0 left-0 h-full z-40 
+            bg-white transition-all duration-300
+            flex-col shadow-xl border-r border-gray-100
+            ${sidebarHovered ? 'w-72 translate-x-0' : 'w-20 translate-x-0'}
+            flex
+          `}
+          onMouseEnter={() => setSidebarHovered(true)}
+          onMouseLeave={() => setSidebarHovered(false)}
+        >
+          {/* Logo */}
+          <div className="px-4 py-6 flex items-center justify-center border-b h-[88px]">
+            <div className="w-full h-full flex items-center justify-center">
+              {sidebarHovered ? (
+                // Logo Penuh saat expanded
+                <img 
+                  src={logoUrl} 
+                  alt="Logo" 
+                  className="h-16 w-auto object-contain"
+                />
+              ) : (
+                // Icon saja saat collapsed
+                <img 
+                  src={iconUrl} 
+                  alt="Icon" 
+                  className="h-10 w-10 object-contain"
+                  onError={(e) => {
+                    // Fallback ke LayoutDashboard jika icon tidak ada
+                    e.target.style.display = 'none'
+                  }}
+                />
+              )}
+            </div>
           </div>
+
+          {/* Menu */}
+          <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
+            {menuItems.map(item => {
+              const isActive = activeMenu === item.id
+              const expanded = expandedItems[item.id]
+
+              return (
+                <div key={item.id}>
+                  <button
+                    onClick={() => handleMenuClick(item)}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition ${
+                      isActive 
+                        ? 'bg-blue-50 text-blue-600' 
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    }`}
+                    title={!sidebarHovered ? item.label : ''}
+                  >
+                    <span className="flex-shrink-0">{getIcon(item.icon)}</span>
+                    {sidebarHovered && (
+                      <>
+                        <span className="text-sm font-medium flex-1 text-left">{item.label}</span>
+                        {item.submenu?.length > 0 && (
+                          <ChevronDown 
+                            size={16} 
+                            className={`flex-shrink-0 transition-transform ${expanded ? 'rotate-180' : ''}`} 
+                          />
+                        )}
+                      </>
+                    )}
+                  </button>
+
+                  {item.submenu?.length > 0 && expanded && sidebarHovered && (
+                    <div className="ml-4 mt-2 space-y-1">
+                      {item.submenu.map(sub => (
+                        <button
+                          key={sub.id}
+                          onClick={() => handleSubMenuClick(sub)}
+                          className="w-full text-left px-3 py-2 text-xs rounded-md text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition"
+                        >
+                          {sub.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </nav>
+
+          {/* User Info */}
+          {user && sidebarHovered && (
+            <div className="px-4 py-3 border-t bg-blue-50">
+              <p className="text-xs text-gray-500">Logged in as</p>
+              <p className="text-sm font-semibold truncate">{user.username}</p>
+              <p className="text-xs text-gray-500">
+                {role === 'superadmin'
+                  ? 'Superadmin'
+                  : role === 'admin'
+                  ? 'Admin'
+                  : 'Supervisor'}
+              </p>
+            </div>
+          )}
+
+          {/* Logout */}
+          {sidebarHovered && (
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-3 px-4 py-4 text-gray-600 hover:text-red-600 border-t hover:bg-gray-50 transition"
+            >
+              <LogOut size={18} />
+              Logout
+            </button>
+          )}
         </div>
 
+        {/* Content spacing adjustment */}
+        <div 
+          className={`transition-all duration-300 ${sidebarHovered ? 'w-72' : 'w-20'}`}
+        />
+      </div>
+
+      {/* MOBILE HEADER */}
+      <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-100 shadow-sm z-40 flex items-center justify-between px-4">
+        <img 
+          src={iconUrl} 
+          alt="Logo" 
+          className="h-8 w-8 object-contain"
+          onError={(e) => e.target.style.display = 'none'}
+        />
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="p-2 hover:bg-gray-100 rounded-lg transition"
+        >
+          {mobileMenuOpen ? (
+            <X size={24} className="text-gray-600" />
+          ) : (
+            <Menu size={24} className="text-gray-600" />
+          )}
+        </button>
+      </div>
+
+      {/* MOBILE OVERLAY */}
+      {mobileMenuOpen && (
+        <div 
+          className="md:hidden fixed inset-0 bg-black/50 z-30 top-16"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* MOBILE SIDEBAR DRAWER */}
+      <div 
+        className={`md:hidden fixed top-16 left-0 h-[calc(100vh-64px)] w-64 bg-white shadow-lg z-30 transition-transform duration-300 overflow-y-auto ${
+          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
         {/* Menu */}
-        <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
+        <nav className="px-3 py-6 space-y-1">
           {menuItems.map(item => {
             const isActive = activeMenu === item.id
             const expanded = expandedItems[item.id]
@@ -185,23 +307,18 @@ export default function Sidebar({
                       ? 'bg-blue-50 text-blue-600' 
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                   }`}
-                  title={!sidebarHovered ? item.label : ''}
                 >
                   <span className="flex-shrink-0">{getIcon(item.icon)}</span>
-                  {sidebarHovered && (
-                    <>
-                      <span className="text-sm font-medium flex-1 text-left">{item.label}</span>
-                      {item.submenu?.length > 0 && (
-                        <ChevronDown 
-                          size={16} 
-                          className={`flex-shrink-0 transition-transform ${expanded ? 'rotate-180' : ''}`} 
-                        />
-                      )}
-                    </>
+                  <span className="text-sm font-medium flex-1 text-left">{item.label}</span>
+                  {item.submenu?.length > 0 && (
+                    <ChevronDown 
+                      size={16} 
+                      className={`flex-shrink-0 transition-transform ${expanded ? 'rotate-180' : ''}`} 
+                    />
                   )}
                 </button>
 
-                {item.submenu?.length > 0 && expanded && sidebarHovered && (
+                {item.submenu?.length > 0 && expanded && (
                   <div className="ml-4 mt-2 space-y-1">
                     {item.submenu.map(sub => (
                       <button
@@ -220,8 +337,8 @@ export default function Sidebar({
         </nav>
 
         {/* User Info */}
-        {user && sidebarHovered && (
-          <div className="px-4 py-3 border-t bg-blue-50">
+        {user && (
+          <div className="px-4 py-3 border-t bg-blue-50 mx-3 rounded-lg mt-4">
             <p className="text-xs text-gray-500">Logged in as</p>
             <p className="text-sm font-semibold truncate">{user.username}</p>
             <p className="text-xs text-gray-500">
@@ -235,21 +352,20 @@ export default function Sidebar({
         )}
 
         {/* Logout */}
-        {sidebarHovered && (
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-3 px-4 py-4 text-gray-600 hover:text-red-600 border-t hover:bg-gray-50 transition"
-          >
-            <LogOut size={18} />
-            Logout
-          </button>
-        )}
+        <button
+          onClick={() => {
+            handleLogout()
+            setMobileMenuOpen(false)
+          }}
+          className="flex items-center gap-3 px-4 py-4 text-gray-600 hover:text-red-600 border-t hover:bg-gray-50 transition w-full mt-4"
+        >
+          <LogOut size={18} />
+          Logout
+        </button>
       </div>
 
-      {/* Content spacing adjustment */}
-      <div 
-        className={`hidden md:block transition-all duration-300 ${sidebarHovered ? 'w-72' : 'w-20'}`}
-      />
+      {/* Content spacing for mobile header */}
+      <div className="md:hidden h-16" />
     </>
   )
 }
