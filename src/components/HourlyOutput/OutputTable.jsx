@@ -1,7 +1,6 @@
-
-
 import { Eye, Edit } from 'lucide-react'
 import DataTable from '@/components/tables/DataTable'
+import { getDetailOutputByStyle } from '@/services/apiService'  // ← ADD THIS
 
 export default function OutputTable({
   data,
@@ -11,26 +10,77 @@ export default function OutputTable({
 }) {
   console.log('📊 [OutputTable] Received data:', data)
 
-  // Debug: Log setiap item untuk cek id_output
-  data.forEach((item, idx) => {
-    console.log(`📊 [OutputTable] Item ${idx}:`, {
-      id_output: item.id_output,
-      id: item.id,
-      idOutput: item.idOutput,
-      date: item.date,
-      hour: item.hour,
-      style: item.style,
-      orc: item.orc,
-      status: item.status
-    })
-  })
-
-  // Warning jika tidak ada id
-  const missingIds = data.filter(item => !item.id_output && !item.id && !item.idOutput)
-  if (missingIds.length > 0) {
-    console.warn(`⚠️ [OutputTable] ${missingIds.length} items tidak punya id_output!`)
+  // ⭐ HELPER FUNCTION: Fetch id_output dari detail
+  // Gunakan style & fallback id_line (default 59)
+  const getIdOutputFromDetail = async (style, idLine = 59) => {
+    try {
+      console.log(`🔍 [getIdOutputFromDetail] Fetching for style: ${style}, idLine: ${idLine}`)
+      const detailResponse = await getDetailOutputByStyle(style, idLine)
+      const details = detailResponse.data || detailResponse
+      
+      console.log(`📥 [getIdOutputFromDetail] Detail response:`, details)
+      
+      if (Array.isArray(details) && details.length > 0) {
+        const idOutput = details[0].id_output
+        console.log(`✅ [getIdOutputFromDetail] Found id_output: ${idOutput}`)
+        return idOutput
+      } else {
+        console.error('❌ [getIdOutputFromDetail] No detail data found')
+        return null
+      }
+    } catch (error) {
+      console.error('❌ [getIdOutputFromDetail] Error:', error)
+      return null
+    }
   }
 
+  // ⭐ HANDLER: Detail Click
+  const handleDetailClick = async (row) => {
+    console.log('👁️ [handleDetailClick] Clicked row:', row)
+    
+    let idOutput = row.id_output
+    console.log('   Current id_output from row:', idOutput)
+    
+    if (!idOutput) {
+      console.log('   id_output not in row, fetching from detail...')
+      // Gunakan style & default id_line (59) jika tidak ada
+      idOutput = await getIdOutputFromDetail(row.style, row.id_line || 59)
+      
+      if (!idOutput) {
+        console.error('❌ Cannot find id_output')
+        alert('❌ Error: Cannot load detail. Missing ID.')
+        return
+      }
+    }
+    
+    console.log(`✅ [handleDetailClick] Calling onDetailClick with id: ${idOutput}`)
+    onDetailClick(idOutput)
+  }
+
+  // ⭐ HANDLER: Update Click
+  const handleUpdateClick = async (row) => {
+    console.log('✏️ [handleUpdateClick] Clicked row:', row)
+    
+    let idOutput = row.id_output
+    console.log('   Current id_output from row:', idOutput)
+    
+    if (!idOutput) {
+      console.log('   id_output not in row, fetching from detail...')
+      // Gunakan style & default id_line (59) jika tidak ada
+      idOutput = await getIdOutputFromDetail(row.style, row.id_line || 59)
+      
+      if (!idOutput) {
+        console.error('❌ Cannot find id_output')
+        alert('❌ Error: Cannot update. Missing ID.')
+        return
+      }
+    }
+    
+    console.log(`✅ [handleUpdateClick] Calling onUpdateClick with id: ${idOutput}`)
+    onUpdateClick(idOutput)
+  }
+
+  // ⭐ TABLE COLUMNS CONFIG
   const tableColumns = [
     { key: 'date', label: 'Date', width: '12%' },
     { key: 'hour', label: 'Hour', width: '8%' },
@@ -63,27 +113,30 @@ export default function OutputTable({
       label: 'Action',
       width: '24%',
       render: (value, row) => {
-        console.log('🔘 [Action Button] row data:', row)
-        console.log('🔘 [Action Button] id_output value:', row.id_output)
+        // ⭐ DEBUG LOG
+        console.log(`🔘 [Action Button] Row:`, {
+          date: row.date,
+          hour: row.hour,
+          style: row.style,
+          id_output: row.id_output,
+          id_line: row.id_line
+        })
         
         return (
           <div className="flex justify-center gap-2">
+            {/* Detail Button */}
             <button
-              onClick={() => {
-                console.log('👁️ [DETAIL BUTTON CLICKED] id_output:', row.id_output)
-                onDetailClick(row.id_output)
-              }}
+              onClick={() => handleDetailClick(row)}
               className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors text-xs font-medium"
               title="View detail"
             >
               <Eye size={16} />
               Detail
             </button>
+            
+            {/* Update Button */}
             <button
-              onClick={() => {
-                console.log('✏️ [UPDATE BUTTON CLICKED] id_output:', row.id_output)
-                onUpdateClick(row.id_output)
-              }}
+              onClick={() => handleUpdateClick(row)}
               className="inline-flex items-center gap-1 px-3 py-1.5 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-lg transition-colors text-xs font-medium"
               title="Update"
             >
