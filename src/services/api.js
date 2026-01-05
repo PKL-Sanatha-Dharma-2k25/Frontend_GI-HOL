@@ -46,13 +46,20 @@ api.interceptors.response.use(
     console.error('Status:', status)
     console.error('Message:', message)
     console.error('URL:', error.config?.url)
+    console.error('Current path:', currentPath)
     console.error('Full error response:', error.response?.data)
 
-    // ⭐ HANDLE 401 UNAUTHORIZED
-    if (status === 401 && currentPath !== '/login') {
-      console.error('🚨 Unauthorized - redirecting to login')
-      clearAuth()
-      window.location.href = '/login'
+    // ⭐ HANDLE 401 UNAUTHORIZED - JANGAN REDIRECT JIKA DI LOGIN PAGE
+    if (status === 401) {
+      // Jangan redirect jika sudah di halaman login
+      if (!currentPath.includes('/login')) {
+        console.error('🚨 Token expired/invalid - redirecting to login')
+        clearAuth()
+        window.location.href = '/GI-HOL/login'  // ✅ DENGAN PREFIX /GI-HOL/
+      } else {
+        // Sedang di login page, biarkan error ditangani oleh Login.jsx component
+        console.warn('⚠️ 401 error at login page - let component handle it')
+      }
     }
 
     // ⭐ HANDLE 500 SERVER ERROR

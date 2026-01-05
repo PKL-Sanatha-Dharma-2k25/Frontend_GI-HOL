@@ -1,3 +1,4 @@
+// src/components/layout/Sidebar.jsx
 import { 
   LogOut, 
   ChevronDown,
@@ -7,51 +8,60 @@ import {
   Clock,
   Users,
   Menu,
-  X
+  X,
+  Pin
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useSidebar } from '@/context/SidebarContext'
 
+import logo from '@/assets/logo/logo.png'
+import icon from '@/assets/icons/icon.png'
+
 export default function Sidebar({ 
-  logoUrl = '/src/assets/logo/logo.png',
-  iconUrl = '/icon.PNG'
+  logoUrl = logo,
+  iconUrl = icon
 }) {
   const navigate = useNavigate()
   const location = useLocation()
   const { user, logout } = useAuth()
   const { sidebarHovered, setSidebarHovered } = useSidebar()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [sidebarPinned, setSidebarPinned] = useState(false)
 
+  // ⭐ NORMALIZE ROLE
   const rawRole = user?.role
-
   const role = (() => {
     if (!rawRole) return null
-    const r = rawRole.toString().toLowerCase().trim()
-    if (r === '3' || r === 'supervisor') return 'supervisor'
-    if (r === '2' || r === 'admin') return 'admin'
-    if (r === '1' || r === 'superadmin' || r === 'role_superadmin') return 'superadmin'
+    const r = String(rawRole).toLowerCase().trim()
+    if (r.includes('supervisor') || r === '3' || r === '4') return 'supervisor'
+    if (r.includes('admin') || r === '2') return 'admin'
+    if (r.includes('superadmin') || r === '1') return 'superadmin'
     return null
   })()
+
+  console.log('🎯 [Sidebar] Role detected:', role, '(raw:', rawRole, ')')
 
   const [expandedItems, setExpandedItems] = useState({})
   const [activeMenu, setActiveMenu] = useState('dashboard')
 
+  // ⭐ DETERMINE ACTIVE MENU BASED ON CURRENT PATH
   useEffect(() => {
     const pathMenuMap = {
       '/': 'dashboard',
       '/dashboard': 'dashboard',
+      '/hourly-output': 'hourly-output',
       '/line': 'line',
       '/operation-breakdown': 'operation-breakdown',
-      '/hourly-output': 'hourly-output',
       '/users': 'users'
     }
     setActiveMenu(pathMenuMap[location.pathname] || 'dashboard')
   }, [location.pathname])
 
+  // ⭐ BUILD MENU BASED ON ROLE
   const getMenuItems = () => {
-    const menus = [
+    const baseMenu = [
       {
         id: 'dashboard',
         label: 'Dashboard',
@@ -61,8 +71,43 @@ export default function Sidebar({
       }
     ]
 
+    // ⭐ SUPERVISOR MENU
+    if (role === 'supervisor') {
+      console.log('📌 Building SUPERVISOR menu')
+      return [
+        {
+          id: 'dashboard',
+          label: 'Dashboard',
+          icon: 'dashboard',
+          path: '/',
+          submenu: []
+        },
+        {
+          id: 'hourly-output',
+          label: 'Hourly Output',
+          icon: 'hourly-output',
+          path: '/hourly-output',
+          submenu: []
+        }
+      ]
+    }
+
+    // ⭐ ADMIN MENU
+    if (role === 'admin') {
+      console.log('📌 Building ADMIN menu')
+      return [
+        { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', path: '/', submenu: [] },
+        { id: 'line', label: 'Line', icon: 'line', path: '/line', submenu: [] },
+        { id: 'operation-breakdown', label: 'Operation Breakdown', icon: 'operation-breakdown', path: '/operation-breakdown', submenu: [] },
+        { id: 'hourly-output', label: 'Hourly Output', icon: 'hourly-output', path: '/hourly-output', submenu: [] }
+      ]
+    }
+
+    // ⭐ SUPERADMIN MENU (FULL)
     if (role === 'superadmin') {
-      menus.push(
+      console.log('📌 Building SUPERADMIN menu')
+      return [
+        { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', path: '/', submenu: [] },
         { id: 'line', label: 'Line', icon: 'line', path: '/line', submenu: [] },
         { id: 'operation-breakdown', label: 'Operation Breakdown', icon: 'operation-breakdown', path: '/operation-breakdown', submenu: [] },
         { id: 'hourly-output', label: 'Hourly Output', icon: 'hourly-output', path: '/hourly-output', submenu: [] },
@@ -72,28 +117,16 @@ export default function Sidebar({
           icon: 'users',
           path: '/users',
           submenu: [
-            { id: 'users', label: 'All Users', path: '/users' },
-            { id: 'add-user', label: 'Add User', path: '/users?action=add' }
+            { id: 'users-list', label: 'All Users', path: '/users' },
+            { id: 'users-add', label: 'Add User', path: '/users?action=add' }
           ]
         }
-      )
+      ]
     }
 
-    if (role === 'admin') {
-      menus.push(
-        { id: 'line', label: 'Line', icon: 'line', path: '/line', submenu: [] },
-        { id: 'operation-breakdown', label: 'Operation Breakdown', icon: 'operation-breakdown', path: '/operation-breakdown', submenu: [] },
-        { id: 'hourly-output', label: 'Hourly Output', icon: 'hourly-output', path: '/hourly-output', submenu: [] }
-      )
-    }
-
-    if (role === 'supervisor') {
-      menus.push(
-        { id: 'hourly-output', label: 'Hourly Output', icon: 'hourly-output', path: '/hourly-output', submenu: [] }
-      )
-    }
-
-    return menus
+    // ⭐ DEFAULT MENU
+    console.log('📌 Building DEFAULT menu')
+    return baseMenu
   }
 
   const menuItems = getMenuItems()
@@ -115,7 +148,10 @@ export default function Sidebar({
 
   const handleMenuClick = (item) => {
     if (item.submenu?.length) toggleExpanded(item.id)
-    if (item.path) navigate(item.path)
+    if (item.path) {
+      navigate(item.path)
+      setMobileMenuOpen(false)
+    }
   }
 
   const handleSubMenuClick = (sub) => {
@@ -124,59 +160,78 @@ export default function Sidebar({
   }
 
   const handleLogout = () => {
+    console.log('🚪 [Sidebar] Logout clicked')
     logout()
-    navigate('/login')
+    navigate('/login', { replace: true })
   }
+
+  // ⭐ DETERMINE IF SIDEBAR SHOULD BE EXPANDED
+  const isSidebarExpanded = sidebarPinned || sidebarHovered
 
   return (
     <>
-      {/* DESKTOP SIDEBAR */}
+      {/* 🖥️ DESKTOP SIDEBAR */}
       <div className="hidden md:block">
-        {/* Hover Trigger Area - untuk trigger sidebar saat cursor di edge kiri */}
+        {/* Hover Trigger Area */}
         <div
           className="fixed left-0 top-0 h-full w-1 z-20 hover:w-20 transition-all duration-300 cursor-pointer"
-          onMouseEnter={() => setSidebarHovered(true)}
-          onMouseLeave={() => setSidebarHovered(false)}
+          onMouseEnter={() => !sidebarPinned && setSidebarHovered(true)}
+          onMouseLeave={() => !sidebarPinned && setSidebarHovered(false)}
         />
 
-        {/* Sidebar */}
+        {/* Sidebar Panel */}
         <div
           className={`
             fixed top-0 left-0 h-full z-40 
             bg-white transition-all duration-300
             flex-col shadow-xl border-r border-gray-100
-            ${sidebarHovered ? 'w-72 translate-x-0' : 'w-20 translate-x-0'}
+            ${isSidebarExpanded ? 'w-72 translate-x-0' : 'w-20 translate-x-0'}
             flex
           `}
-          onMouseEnter={() => setSidebarHovered(true)}
-          onMouseLeave={() => setSidebarHovered(false)}
+          onMouseEnter={() => !sidebarPinned && setSidebarHovered(true)}
+          onMouseLeave={() => !sidebarPinned && setSidebarHovered(false)}
         >
-          {/* Logo */}
-          <div className="px-4 py-6 flex items-center justify-center border-b h-[88px]">
-            <div className="w-full h-full flex items-center justify-center">
-              {sidebarHovered ? (
-                // Logo Penuh saat expanded
+          {/* Logo & Pin Button */}
+          <div className="px-4 py-6 flex items-center justify-between border-b h-[88px]">
+            <div className="flex-1 h-full flex items-center justify-center">
+              {isSidebarExpanded ? (
                 <img 
                   src={logoUrl} 
                   alt="Logo" 
                   className="h-16 w-auto object-contain"
+                  onError={(e) => {
+                    console.error('Logo failed to load:', logoUrl)
+                    e.target.style.display = 'none'
+                  }}
                 />
               ) : (
-                // Icon saja saat collapsed
                 <img 
                   src={iconUrl} 
                   alt="Icon" 
                   className="h-10 w-10 object-contain"
                   onError={(e) => {
-                    // Fallback ke LayoutDashboard jika icon tidak ada
+                    console.error('Icon failed to load:', iconUrl)
                     e.target.style.display = 'none'
                   }}
                 />
               )}
             </div>
+
+            {isSidebarExpanded && (
+              <button
+                onClick={() => setSidebarPinned(!sidebarPinned)}
+                className="p-1 hover:bg-gray-100 rounded transition flex-shrink-0"
+                title={sidebarPinned ? 'Unpin Sidebar' : 'Pin Sidebar'}
+              >
+                <Pin 
+                  size={18} 
+                  className={`text-gray-600 transition-transform ${sidebarPinned ? 'rotate-45' : ''}`}
+                />
+              </button>
+            )}
           </div>
 
-          {/* Menu */}
+          {/* Menu Items */}
           <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
             {menuItems.map(item => {
               const isActive = activeMenu === item.id
@@ -188,13 +243,13 @@ export default function Sidebar({
                     onClick={() => handleMenuClick(item)}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition ${
                       isActive 
-                        ? 'bg-blue-50 text-blue-600' 
+                        ? 'bg-blue-50 text-blue-600 font-semibold' 
                         : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                     }`}
-                    title={!sidebarHovered ? item.label : ''}
+                    title={!isSidebarExpanded ? item.label : ''}
                   >
                     <span className="flex-shrink-0">{getIcon(item.icon)}</span>
-                    {sidebarHovered && (
+                    {isSidebarExpanded && (
                       <>
                         <span className="text-sm font-medium flex-1 text-left">{item.label}</span>
                         {item.submenu?.length > 0 && (
@@ -207,7 +262,8 @@ export default function Sidebar({
                     )}
                   </button>
 
-                  {item.submenu?.length > 0 && expanded && sidebarHovered && (
+                  {/* Submenu */}
+                  {item.submenu?.length > 0 && expanded && isSidebarExpanded && (
                     <div className="ml-4 mt-2 space-y-1">
                       {item.submenu.map(sub => (
                         <button
@@ -225,46 +281,33 @@ export default function Sidebar({
             })}
           </nav>
 
-          {/* User Info */}
-          {user && sidebarHovered && (
-            <div className="px-4 py-3 border-t bg-blue-50">
-              <p className="text-xs text-gray-500">Logged in as</p>
-              <p className="text-sm font-semibold truncate">{user.username}</p>
-              <p className="text-xs text-gray-500">
-                {role === 'superadmin'
-                  ? 'Superadmin'
-                  : role === 'admin'
-                  ? 'Admin'
-                  : 'Supervisor'}
-              </p>
-            </div>
-          )}
-
-          {/* Logout */}
-          {sidebarHovered && (
+          {/* Logout Button */}
+          <div className="px-3 py-4 border-t">
             <button
               onClick={handleLogout}
-              className="flex items-center gap-3 px-4 py-4 text-gray-600 hover:text-red-600 border-t hover:bg-gray-50 transition"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition"
+              title={!isSidebarExpanded ? 'Logout' : ''}
             >
-              <LogOut size={18} />
-              Logout
+              <LogOut size={20} className="flex-shrink-0" />
+              {isSidebarExpanded && <span className="text-sm font-medium">Logout</span>}
             </button>
-          )}
+          </div>
         </div>
 
-        {/* Content spacing adjustment */}
-        <div 
-          className={`transition-all duration-300 ${sidebarHovered ? 'w-72' : 'w-20'}`}
-        />
+        {/* Content Spacing */}
+        <div className={`transition-all duration-300 ${isSidebarExpanded ? 'w-72' : 'w-20'}`} />
       </div>
 
-      {/* MOBILE HEADER */}
+      {/* 📱 MOBILE HEADER */}
       <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-100 shadow-sm z-40 flex items-center justify-between px-4">
         <img 
           src={iconUrl} 
           alt="Logo" 
           className="h-8 w-8 object-contain"
-          onError={(e) => e.target.style.display = 'none'}
+          onError={(e) => {
+            console.error('Mobile logo failed:', iconUrl)
+            e.target.style.display = 'none'
+          }}
         />
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -278,7 +321,7 @@ export default function Sidebar({
         </button>
       </div>
 
-      {/* MOBILE OVERLAY */}
+      {/* 📱 MOBILE OVERLAY */}
       {mobileMenuOpen && (
         <div 
           className="md:hidden fixed inset-0 bg-black/50 z-30 top-16"
@@ -286,13 +329,12 @@ export default function Sidebar({
         />
       )}
 
-      {/* MOBILE SIDEBAR DRAWER */}
+      {/* 📱 MOBILE SIDEBAR */}
       <div 
         className={`md:hidden fixed top-16 left-0 h-[calc(100vh-64px)] w-64 bg-white shadow-lg z-30 transition-transform duration-300 overflow-y-auto ${
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        {/* Menu */}
         <nav className="px-3 py-6 space-y-1">
           {menuItems.map(item => {
             const isActive = activeMenu === item.id
@@ -304,7 +346,7 @@ export default function Sidebar({
                   onClick={() => handleMenuClick(item)}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition ${
                     isActive 
-                      ? 'bg-blue-50 text-blue-600' 
+                      ? 'bg-blue-50 text-blue-600 font-semibold' 
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                   }`}
                 >
@@ -336,35 +378,19 @@ export default function Sidebar({
           })}
         </nav>
 
-        {/* User Info */}
-        {user && (
-          <div className="px-4 py-3 border-t bg-blue-50 mx-3 rounded-lg mt-4">
-            <p className="text-xs text-gray-500">Logged in as</p>
-            <p className="text-sm font-semibold truncate">{user.username}</p>
-            <p className="text-xs text-gray-500">
-              {role === 'superadmin'
-                ? 'Superadmin'
-                : role === 'admin'
-                ? 'Admin'
-                : 'Supervisor'}
-            </p>
-          </div>
-        )}
-
-        {/* Logout */}
-        <button
-          onClick={() => {
-            handleLogout()
-            setMobileMenuOpen(false)
-          }}
-          className="flex items-center gap-3 px-4 py-4 text-gray-600 hover:text-red-600 border-t hover:bg-gray-50 transition w-full mt-4"
-        >
-          <LogOut size={18} />
-          Logout
-        </button>
+        {/* Mobile Logout */}
+        <div className="px-3 py-4 border-t">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition"
+          >
+            <LogOut size={20} />
+            <span className="text-sm font-medium">Logout</span>
+          </button>
+        </div>
       </div>
 
-      {/* Content spacing for mobile header */}
+      {/* Mobile Spacing */}
       <div className="md:hidden h-16" />
     </>
   )

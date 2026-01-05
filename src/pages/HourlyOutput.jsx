@@ -60,17 +60,15 @@ export default function HourlyOutputPage() {
       formHook.selectedOrc
     )
     if (success) {
-      formHook.resetForm()
-      setShowForm(false)
+      // ✅ JANGAN reset sama sekali, tetap seperti inputan sebelumnya
+      // Form dan semua field tetap
     }
   }
 
   // ⭐ Handle Close Form
   const handleCloseForm = () => {
     setShowForm(false)
-    formHook.handleClearOrc()
-    const { date, hour } = getJakartaTime()
-    formHook.setFormData({ date, hour, line: user?.username || '' })
+    // ✅ Tutup form, tapi data tetap tersimpan jika form dibuka lagi
   }
 
   // ⭐ Handle Save Detail Process
@@ -82,6 +80,8 @@ export default function HourlyOutputPage() {
     )
     if (success) {
       setCurrentPage(1)
+      // ✅ Tutup detail process, form tetap dengan semua inputan sebelumnya
+      detailProcessHook.handleCancel()
     }
   }
 

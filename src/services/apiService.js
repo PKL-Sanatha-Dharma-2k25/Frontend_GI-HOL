@@ -233,10 +233,11 @@ export const getUpdateFromDetailOpt = async (idOutput) => {
   }
 }
 
+// ⭐ UPDATED: Ganti POST ke PUT dan endpoint ke updatedetailbatch
 export const updateDetailOutput = async (data) => {
   try {
     console.log('🔄 [updateDetailOutput] Updating detail output data:', data)
-    const response = await api.post('/auth/updatedetailopt', data)
+    const response = await api.put('/auth/updatedetailbatch', data)  // ✅ PUT bukan POST!
     console.log('✅ [updateDetailOutput] Success response:', response.data)
     return response.data
   } catch (error) {

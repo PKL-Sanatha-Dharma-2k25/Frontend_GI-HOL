@@ -34,10 +34,24 @@ export function useHourlyOutput(user, showAlertMessage, detailHook) {
 
   const handleFormSubmit = useCallback(async (formData, selectedOrc) => {
     const errors = []
-    if (!formData.date || formData.date.trim() === '') errors.push('Date is required')
-    if (!formData.hour || formData.hour.trim() === '') errors.push('Hour is required')
-    if (!selectedOrc) errors.push('ORC is required')
 
+    // ✅ Validasi yang lebih robust
+    // Date validation
+    if (!formData.date || formData.date.trim() === '') {
+      errors.push('* Date is required')
+    }
+    
+    // Hour validation - PENTING: cek apakah hour kosong atau "0"
+    if (!formData.hour || formData.hour.trim() === '' || formData.hour === '0') {
+      errors.push('* Hour is required')
+    }
+    
+    // ORC validation
+    if (!selectedOrc) {
+      errors.push('* ORC is required')
+    }
+
+    // ❌ Jika ada error, tampilkan dan return false
     if (errors.length > 0) {
       showAlertMessage('error', 'Please fill in all required fields:', errors)
       return false
