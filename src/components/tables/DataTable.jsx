@@ -1,4 +1,3 @@
-// src/components/tables/DataTable.jsx
 import { useState, useMemo } from 'react'
 import { ChevronUp, ChevronDown, Search } from 'lucide-react'
 
@@ -108,7 +107,7 @@ export default function DataTable({
     }
 
     return (
-      <span className="block truncate" title={value || '-'}>
+      <span className="block max-w-xs sm:max-w-none truncate" title={value || '-'}>
         {value || '-'}
       </span>
     )
@@ -121,9 +120,9 @@ export default function DataTable({
     return (
       <div className="space-y-3">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="bg-white rounded-lg p-4 border border-gray-200 animate-pulse">
-            <div className="h-6 bg-gray-200 rounded w-1/4 mb-2"></div>
-            <div className="h-4 bg-gray-100 rounded w-full"></div>
+          <div key={i} className="bg-white p-4 border border-gray-200 animate-pulse">
+            <div className="h-6 bg-gray-200 w-1/4 mb-2"></div>
+            <div className="h-4 bg-gray-100 w-full"></div>
           </div>
         ))}
       </div>
@@ -131,26 +130,26 @@ export default function DataTable({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 p-3 sm:p-0">
       {/* SEARCH BAR */}
       {searchable && (
-        <div className="flex items-center gap-2 bg-white px-4 py-2.5 rounded-lg border border-gray-200 focus-within:border-blue-400 focus-within:ring-1 focus-within:ring-blue-400 transition-all duration-200">
-          <Search size={18} className="text-gray-400 flex-shrink-0" />
+        <div className="flex items-center gap-2 bg-white px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-200 focus-within:border-blue-400 focus-within:ring-1 focus-within:ring-blue-400 transition-all duration-200">
+          <Search size={16} className="text-gray-400 flex-shrink-0 sm:size-[18px]" />
           <input
             type="text"
             placeholder="Search..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="flex-1 bg-transparent outline-none text-sm text-gray-900 placeholder-gray-500"
+            className="flex-1 bg-transparent outline-none text-xs sm:text-sm text-gray-900 placeholder-gray-500"
           />
         </div>
       )}
 
       {/* TABLE */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden">
+      <div className="bg-white border border-gray-200 shadow-sm sm:shadow-lg">
         {sortedData.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          <div className="overflow-x-auto -mx-3 sm:mx-0">
+            <table className="w-full min-w-max sm:min-w-0">
               {/* TABLE HEADER */}
               <thead>
                 <tr className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 border-b-2 border-blue-500">
@@ -158,19 +157,19 @@ export default function DataTable({
                     <th
                       key={col.key}
                       onClick={() => handleSort(col.key)}
-                      className={`px-6 py-5 text-xs font-bold text-white uppercase tracking-widest ${
+                      className={`px-3 sm:px-6 py-3 sm:py-5 text-xs font-bold text-white uppercase tracking-wider sm:tracking-widest ${
                         col.key !== 'action' && sortable ? 'cursor-pointer hover:bg-blue-700 transition-colors' : ''
                       } ${col.key === 'action' ? 'text-center' : 'text-left'}`}
                       style={col.width ? { width: col.width } : {}}
                     >
-                      <div className={`flex items-center gap-2 ${col.key === 'action' ? 'justify-center' : ''}`}>
+                      <div className={`flex items-center gap-1 sm:gap-2 ${col.key === 'action' ? 'justify-center' : ''}`}>
                         <span>{col.label}</span>
                         {col.key !== 'action' && sortable && sortConfig.key === col.key && (
-                          <span className="text-blue-200">
+                          <span className="text-blue-200 flex-shrink-0">
                             {sortConfig.direction === 'asc' ? (
-                              <ChevronUp size={16} />
+                              <ChevronUp size={14} className="sm:size-4" />
                             ) : (
-                              <ChevronDown size={16} />
+                              <ChevronDown size={14} className="sm:size-4" />
                             )}
                           </span>
                         )}
@@ -199,7 +198,7 @@ export default function DataTable({
                     {columns.map((col) => (
                       <td
                         key={`${idx}-${col.key}`}
-                        className="px-6 py-5 text-sm font-medium text-gray-800"
+                        className="px-3 sm:px-6 py-3 sm:py-5 text-xs sm:text-sm font-medium text-gray-800"
                         style={col.width ? { width: col.width } : {}}
                       >
                         {renderCell(row, col)}
@@ -211,11 +210,11 @@ export default function DataTable({
             </table>
           </div>
         ) : (
-          <div className="p-16 text-center">
-            <svg className="w-20 h-20 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="p-8 sm:p-16 text-center">
+            <svg className="w-16 h-16 sm:w-20 sm:h-20 text-gray-300 mx-auto mb-3 sm:mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
             </svg>
-            <p className="font-semibold text-gray-600 text-lg mt-4">{emptyMessage}</p>
+            <p className="font-semibold text-gray-600 text-sm sm:text-lg mt-3 sm:mt-4">{emptyMessage}</p>
           </div>
         )}
       </div>

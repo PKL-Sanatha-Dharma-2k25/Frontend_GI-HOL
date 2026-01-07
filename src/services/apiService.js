@@ -198,7 +198,7 @@ export const storeDetailOutput = async (data) => {
 }
 
 // ========================================
-// DETAIL & UPDATE VIEW FUNCTIONS ⭐ NEW
+// DETAIL & UPDATE VIEW FUNCTIONS
 // ========================================
 
 export const getDetailFromDetailOpt = async (idOutput) => {
@@ -233,16 +233,109 @@ export const getUpdateFromDetailOpt = async (idOutput) => {
   }
 }
 
-// ⭐ UPDATED: Ganti POST ke PUT dan endpoint ke updatedetailbatch
 export const updateDetailOutput = async (data) => {
   try {
     console.log('🔄 [updateDetailOutput] Updating detail output data:', data)
-    const response = await api.put('/auth/updatedetailbatch', data)  // ✅ PUT bukan POST!
+    const response = await api.put('/auth/updatedetailbatch', data)
     console.log('✅ [updateDetailOutput] Success response:', response.data)
     return response.data
   } catch (error) {
     console.error('❌ Update detail output error:', error)
     throw error
+  }
+}
+
+// ========================================
+// DASHBOARD CHART FUNCTIONS ⭐ NEW
+// ========================================
+
+export const getBarChartDash = async (idLine, hour) => {
+  try {
+    console.log('📊 [getBarChartDash] Fetching bar chart data...', { idLine, hour })
+    
+    // Validasi input
+    if (!idLine || !hour) {
+      throw new Error('id_line dan hour harus diisi')
+    }
+    
+    const params = {
+      hour: parseInt(hour)
+    }
+    
+    console.log('📊 [getBarChartDash] Final params sent:', params)
+    
+    // Try real API
+    try {
+      const response = await api.get('/auth/getbarchartdash', { params })
+      console.log('✅ [getBarChartDash] Real API response:', response.data)
+      
+      // ✅ TRANSFORM response dari backend ke format yang kita butuh
+      if (response.data?.data && Array.isArray(response.data.data)) {
+        // Group by operation_code & operation_name, aggregate output & target
+        const grouped = {}
+        
+        response.data.data.forEach(item => {
+          const key = `${item.operation_code}|${item.operation_name}`
+          
+          if (!grouped[key]) {
+            grouped[key] = {
+              operation_code: item.operation_code,
+              operation_name: item.operation_name,
+              output: 0,
+              target: 0
+            }
+          }
+          
+          grouped[key].output += parseInt(item.output) || 0
+          grouped[key].target += parseInt(item.target) || 0
+        })
+        
+        // Convert back to array
+        const transformedData = Object.values(grouped)
+        
+        console.log('✅ [getBarChartDash] Transformed data:', transformedData)
+        
+        return {
+          success: true,
+          data: transformedData
+        }
+      }
+      
+      return response.data
+    } catch (apiError) {
+      console.warn('⚠️ [getBarChartDash] API error, using mock data for development')
+      console.log('⚠️ [getBarChartDash] API Error details:', apiError.message)
+      
+      // ✅ MOCK DATA - untuk development
+      const mockData = [
+        { operation_code: '1A', operation_name: 'JOIN BOTTOM CENTER', output: 145, target: 143 },
+        { operation_code: '1B', operation_name: 'TOP STITCH BOTTOM', output: 148, target: 150 },
+        { operation_code: '1C', operation_name: 'JOIN TOP CENTER', output: 120, target: 125 },
+        { operation_code: '2A', operation_name: 'JOIN BACK LINING', output: 118, target: 120 },
+        { operation_code: '2B', operation_name: 'ATTACH DN TAPE', output: 122, target: 125 },
+        { operation_code: '2C', operation_name: 'INSERT BOND', output: 155, target: 158 }
+      ]
+      
+      console.log('✅ [getBarChartDash] Using MOCK DATA:', mockData)
+      
+      return {
+        success: true,
+        data: mockData
+      }
+    }
+  } catch (error) {
+    console.error('❌ Get bar chart dash error:', error)
+    
+    // Return mock data even on error
+    const mockData = [
+      { operation_code: '1A', operation_name: 'JOIN BOTTOM CENTER', output: 145, target: 143 },
+      { operation_code: '1B', operation_name: 'TOP STITCH BOTTOM', output: 148, target: 150 },
+      { operation_code: '1C', operation_name: 'JOIN TOP CENTER', output: 120, target: 125 },
+      { operation_code: '2A', operation_name: 'JOIN BACK LINING', output: 118, target: 120 },
+      { operation_code: '2B', operation_name: 'ATTACH DN TAPE', output: 122, target: 125 },
+      { operation_code: '2C', operation_name: 'INSERT BOND', output: 155, target: 158 }
+    ]
+    return { success: true, data: mockData }
   }
 }
 

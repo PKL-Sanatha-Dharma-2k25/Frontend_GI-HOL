@@ -98,18 +98,11 @@ export default function Login() {
       setShowAlert(true);
       setLoginSuccess(true);
 
-      console.log('🔄 Redirecting based on role:', userData.role);
+      // ⭐ FIXED: SEMUA ROLE REDIRECT KE DASHBOARD (/)
+      console.log('🔄 Redirecting to dashboard');
       setTimeout(() => {
-        if (userData.role === 'supervisor') {
-          console.log('→ Redirect to /hourly-output');
-          navigate('/hourly-output', { replace: true });
-        } else if (userData.role === 'admin' || userData.role === 'superadmin') {
-          console.log('→ Redirect to /dashboard');
-          navigate('/dashboard', { replace: true });
-        } else {
-          console.log('→ Redirect to /dashboard (default)');
-          navigate('/dashboard', { replace: true });
-        }
+        console.log('→ Redirect to /');
+        navigate('/', { replace: true });
       }, 500);
 
     } catch (error) {

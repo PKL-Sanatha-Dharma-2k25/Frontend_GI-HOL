@@ -1,4 +1,3 @@
-// src/components/layout/Sidebar.jsx
 import { 
   LogOut, 
   ChevronDown,
@@ -30,14 +29,21 @@ export default function Sidebar({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [sidebarPinned, setSidebarPinned] = useState(false)
 
-  // ⭐ NORMALIZE ROLE
+  // ⭐ NORMALIZE ROLE - FIXED PRIORITY ORDER (SUPERADMIN CHECK FIRST)
   const rawRole = user?.role
   const role = (() => {
     if (!rawRole) return null
     const r = String(rawRole).toLowerCase().trim()
-    if (r.includes('supervisor') || r === '3' || r === '4') return 'supervisor'
-    if (r.includes('admin') || r === '2') return 'admin'
+    
+    // ⭐ PRIORITY 1: Check SUPERADMIN DULU (most specific)
     if (r.includes('superadmin') || r === '1') return 'superadmin'
+    
+    // ⭐ PRIORITY 2: Then check ADMIN
+    if (r.includes('admin') || r === '2') return 'admin'
+    
+    // ⭐ PRIORITY 3: Then check SUPERVISOR
+    if (r.includes('supervisor') || r === '3' || r === '4') return 'supervisor'
+    
     return null
   })()
 
@@ -66,7 +72,7 @@ export default function Sidebar({
         id: 'dashboard',
         label: 'Dashboard',
         icon: 'dashboard',
-        path: '/',
+        path: '/dashboard',
         submenu: []
       }
     ]
@@ -79,7 +85,7 @@ export default function Sidebar({
           id: 'dashboard',
           label: 'Dashboard',
           icon: 'dashboard',
-          path: '/',
+          path: '/dashboard',
           submenu: []
         },
         {
@@ -92,14 +98,24 @@ export default function Sidebar({
       ]
     }
 
-    // ⭐ ADMIN MENU
+    // ⭐ ADMIN MENU (WITH USER MANAGEMENT)
     if (role === 'admin') {
       console.log('📌 Building ADMIN menu')
       return [
-        { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', path: '/', submenu: [] },
+        { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', path: '/dashboard', submenu: [] },
         { id: 'line', label: 'Line', icon: 'line', path: '/line', submenu: [] },
         { id: 'operation-breakdown', label: 'Operation Breakdown', icon: 'operation-breakdown', path: '/operation-breakdown', submenu: [] },
-        { id: 'hourly-output', label: 'Hourly Output', icon: 'hourly-output', path: '/hourly-output', submenu: [] }
+        { id: 'hourly-output', label: 'Hourly Output', icon: 'hourly-output', path: '/hourly-output', submenu: [] },
+        {
+          id: 'users',
+          label: 'User Management',
+          icon: 'users',
+          path: '/users',
+          submenu: [
+            { id: 'users-list', label: 'All Users', path: '/users' },
+            { id: 'users-add', label: 'Add User', path: '/users?action=add' }
+          ]
+        }
       ]
     }
 
@@ -107,7 +123,7 @@ export default function Sidebar({
     if (role === 'superadmin') {
       console.log('📌 Building SUPERADMIN menu')
       return [
-        { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', path: '/', submenu: [] },
+        { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', path: '/dashboard', submenu: [] },
         { id: 'line', label: 'Line', icon: 'line', path: '/line', submenu: [] },
         { id: 'operation-breakdown', label: 'Operation Breakdown', icon: 'operation-breakdown', path: '/operation-breakdown', submenu: [] },
         { id: 'hourly-output', label: 'Hourly Output', icon: 'hourly-output', path: '/hourly-output', submenu: [] },

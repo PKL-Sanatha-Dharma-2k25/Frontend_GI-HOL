@@ -8,6 +8,7 @@ import { useHourlyOutput } from '@/hooks/useHourlyOutput'
 import { getJakartaTime } from '@/utils/dateTime'
 
 // Components
+import BreadCrumb from '@/components/common/BreadCrumb'
 import HourlyOutputForm from '@/components/HourlyOutput/HourlyOutputForm'
 import DetailProcessComponent from '@/components/HourlyOutput/DetailProcessComponent'
 import OutputTable from '@/components/HourlyOutput/OutputTable'
@@ -116,8 +117,16 @@ export default function HourlyOutputPage() {
   const startIndex = (currentPage - 1) * itemsPerPage
   const paginatedOutputs = filteredOutputs.slice(startIndex, startIndex + itemsPerPage)
 
+  // ⭐ Breadcrumb Items
+  const breadcrumbItems = [
+    { label: 'Hourly Output', href: '/GI-HOL/hourly-output', active: true },
+  ]
+
   return (
     <div className="space-y-6 px-6 py-8 bg-gray-50 min-h-screen">
+      {/* ⭐ BREADCRUMB */}
+      <BreadCrumb items={breadcrumbItems} />
+
       {/* ⭐ ALERT */}
       {alert.showAlert && (
         <AlertComponent

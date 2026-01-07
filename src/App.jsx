@@ -21,12 +21,22 @@ export default function App() {
         
         {/* Protected Routes */}
         <Route element={<ProtectedRoute />}>
-          <Route path="/" element={<DashboardRouter />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/line" element={<Line />} />
-          <Route path="/operation-breakdown" element={<OperationBreakdown />} />
-          <Route path="/hourly-output" element={<HourlyOutput />} />
-          <Route path="/users" element={<UserManagement />} />
+          {/* ⭐ Root route "/" - DashboardRouter decide berdasarkan role */}
+          {/* Supervisor → Dashboard, Admin/Superadmin → Dashboard */}
+          <Route index element={<DashboardRouter />} />
+          
+          {/* ⭐ Direct Dashboard access */}
+          <Route path="dashboard" element={<Dashboard />} />
+          
+          {/* Admin/Superadmin routes */}
+          <Route path="line" element={<Line />} />
+          <Route path="operation-breakdown" element={<OperationBreakdown />} />
+          
+          {/* All roles can access */}
+          <Route path="hourly-output" element={<HourlyOutput />} />
+          
+          {/* Admin & Superadmin */}
+          <Route path="users" element={<UserManagement />} />
         </Route>
         
         {/* Fallback - redirect ke home */}

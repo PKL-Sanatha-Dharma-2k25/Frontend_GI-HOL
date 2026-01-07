@@ -96,7 +96,7 @@ export const AuthProvider = ({ children }) => {
         console.log('  - role type:', typeof profile.role)
       }
 
-      // ⭐ STEP 4: NORMALIZE ROLE (FIXED - ROLE API PRIORITY)
+      // ⭐ STEP 4: NORMALIZE ROLE (FIXED - SUPERADMIN CHECK FIRST)
       console.log('\n📍 STEP 4: Normalize role')
       const normalizeRole = (rawRole, id_user, username) => {
         if (!rawRole) {
@@ -108,7 +108,7 @@ export const AuthProvider = ({ children }) => {
         const roleStr = String(rawRole).toLowerCase().trim()
         console.log('Input role:', rawRole, '| String:', roleStr, '| Type:', typeof rawRole)
 
-        // ⭐ PRIORITY 1: CEK ROLE STRING DULUAN (ini adalah source of truth dari API)
+        // ⭐ PRIORITY 1: CEK SUPERADMIN DULU (most specific - this is the fix!)
         console.log('→ Checking role string...')
         
         if (roleStr.includes('superadmin') || roleStr === '1') {
@@ -116,11 +116,13 @@ export const AuthProvider = ({ children }) => {
           return 'superadmin'
         }
 
+        // ⭐ PRIORITY 2: CEK ADMIN
         if (roleStr.includes('admin') || roleStr === '2') {
           console.log('✓ Found admin in role string')
           return 'admin'
         }
 
+        // ⭐ PRIORITY 3: CEK SUPERVISOR
         if (roleStr.includes('supervisor') || roleStr === '3' || roleStr === '4') {
           console.log('✓ Found supervisor in role string')
           return 'supervisor'

@@ -19,13 +19,19 @@ export default function HourlyOutputForm({
   onCancel = () => {},
   loading = false
 }) {
-  // ✅ Validasi form - tombol hanya aktif jika semua field terisi dengan benar
+  
   const isFormValid = 
     formData.date && 
     formData.date.trim() !== '' && 
     formData.hour && 
     formData.hour.trim() !== '' && 
     selectedOrc
+
+  const handleOrcSelect = (orc) => {
+    onOrcSelect(orc)
+    setOrcSearchTerm(orc.orc)
+    setShowOrcDropdown(false)
+  }
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden">
@@ -60,45 +66,56 @@ export default function HourlyOutputForm({
             </div>
 
             {/* ORC Search */}
-            <div className="lg:col-span-2 relative z-20 md:z-30">
+            <div className="lg:col-span-2 relative">
               <label className="flex items-center gap-2 text-xs font-bold text-gray-700 mb-3 uppercase tracking-wider">
                 <span>ORC</span>
                 <span className="text-red-500">*</span>
               </label>
-              <div onBlur={() => setTimeout(() => setShowOrcDropdown(false), 200)}>
-                <div className="relative flex items-center gap-2">
-                  <input
-                    type="text"
-                    placeholder="Search ORC..."
-                    value={orcSearchTerm}
-                    onChange={(e) => {
-                      setOrcSearchTerm(e.target.value)
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search ORC..."
+                  value={orcSearchTerm}
+                  onChange={(e) => {
+                    setOrcSearchTerm(e.target.value)
+                    setShowOrcDropdown(true)
+                  }}
+                  onFocus={() => {
+                    if (orcSearchTerm) {
                       setShowOrcDropdown(true)
-                    }}
-                    onFocus={() => setShowOrcDropdown(true)}
-                    className={`flex-1 px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 text-sm font-medium transition-all ${
-                      !selectedOrc ? 'border-red-500 bg-red-50 focus:ring-red-300 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
-                    }`}
-                  />
-                  {selectedOrc && (
-                    <button onClick={onClearOrc} className="text-gray-400 hover:text-gray-600 font-bold text-xl pr-2">
-                      ×
-                    </button>
-                  )}
-                  {!selectedOrc && (
-                    <div className="bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold pr-2">
-                      !
-                    </div>
-                  )}
-                </div>
+                    }
+                  }}
+                  className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 text-sm font-medium transition-all ${
+                    !selectedOrc ? 'border-red-500 bg-red-50 focus:ring-red-300 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                  }`}
+                />
+                {selectedOrc && (
+                  <button
+                    onClick={onClearOrc}
+                    type="button"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 font-bold text-xl hover:bg-gray-100 rounded-full w-6 h-6 flex items-center justify-center transition-colors"
+                  >
+                    ×
+                  </button>
+                )}
+                {!selectedOrc && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold pointer-events-none">
+                    !
+                  </div>
+                )}
 
+                {/* Dropdown ORC */}
                 {showOrcDropdown && filteredOrcList.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-blue-300 rounded-lg shadow-2xl z-50 max-h-56 overflow-y-auto">
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-blue-300 rounded-lg shadow-2xl z-40 max-h-56 overflow-y-auto">
                     {filteredOrcList.map((orc, idx) => (
                       <button
                         key={idx}
-                        onClick={() => onOrcSelect(orc)}
-                        className="w-full px-4 py-3 text-left hover:bg-blue-50 border-b border-gray-100 last:border-0 transition-colors"
+                        type="button"
+                        onMouseDown={(e) => {
+                          e.preventDefault()
+                          handleOrcSelect(orc)
+                        }}
+                        className="w-full px-4 py-3 text-left hover:bg-blue-100 border-b border-gray-100 last:border-0 transition-colors active:bg-blue-200"
                       >
                         <div className="font-semibold text-gray-900 text-sm">{orc.orc}</div>
                         <div className="text-xs text-gray-500 mt-1">{orc.style} • {orc.buyer}</div>

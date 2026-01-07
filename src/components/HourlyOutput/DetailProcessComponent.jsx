@@ -47,7 +47,7 @@ const DetailProcessComponent = memo(({
                   <input
                     type="number"
                     min="0"
-                    value={detailProcessInput[row.op_code] ?? 0}
+                    value={detailProcessInput[row.op_code] ?? ''}
                     onChange={(e) => onActualOutputChange(row.op_code, e.target.value)}
                     className="w-full px-2 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-right"
                     placeholder="0"

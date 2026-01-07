@@ -25,9 +25,10 @@ export function useDetailProcess(showAlertMessage) {
       data = Object.values(uniqueByOpCode)
       setDetailProcessData(data)
       
+      // Initialize dengan kosong, bukan 0
       const initialInput = {}
       data.forEach(item => {
-        initialInput[item.op_code] = 0
+        initialInput[item.op_code] = ''
       })
       setDetailProcessInput(initialInput)
     } catch (error) {
@@ -39,7 +40,8 @@ export function useDetailProcess(showAlertMessage) {
   }
 
   const handleActualOutputChange = useCallback((opCode, value) => {
-    const numValue = value === '' ? 0 : parseInt(value) || 0
+    // Keep as empty string if user belum input, jangan convert ke 0
+    const numValue = value === '' ? '' : parseInt(value) || 0
     setDetailProcessInput(prev => ({
       ...prev,
       [opCode]: numValue
