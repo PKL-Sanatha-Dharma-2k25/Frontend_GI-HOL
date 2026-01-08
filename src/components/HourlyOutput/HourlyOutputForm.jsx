@@ -1,6 +1,6 @@
 import { Plus, ChevronRight } from 'lucide-react'
 
-const HOURS = Array.from({ length: 8 }, (_, i) => String(i + 1))
+const HOURS = Array.from({ length: 10 }, (_, i) => String(i + 1))
 
 export default function HourlyOutputForm({
   showForm = true,
@@ -34,7 +34,7 @@ export default function HourlyOutputForm({
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden">
+    <div className="overflow-hidden">
       <button
         onClick={() => onToggleForm(!showForm)}
         className="w-full px-6 py-4 flex items-center justify-between bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 hover:from-blue-700 hover:via-blue-800 hover:to-blue-900 transition-all duration-200 border-b-2 border-blue-500"

@@ -176,6 +176,8 @@ export const getDetailOutputByStyle = async (style, idLine) => {
 export const storeHourlyOutput = async (data) => {
   try {
     console.log('💾 [storeHourlyOutput] Saving header data:', data)
+  
+  
     const response = await api.post('/auth/store', data)
     console.log('✅ [storeHourlyOutput] Success response:', response.data)
     return response.data

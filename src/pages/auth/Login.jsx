@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { User, Lock, Eye, EyeOff, Zap, Sparkles, Shield, TrendingUp } from 'lucide-react';
+import { User, Lock, Eye, EyeOff, Zap, Rocket, Shield, TrendingUp } from 'lucide-react';
 import logo from '@/assets/logo/logo.png';
 import Lottie from 'lottie-react';
 import monitoringAnimation from '@/assets/animations/monitoring.json';
@@ -354,7 +354,7 @@ export default function Login() {
           {/* Feature Pills */}
           <div className="mt-6 lg:mt-8 flex flex-wrap justify-center gap-2 lg:gap-3">
             {[
-              { icon: Sparkles, text: 'Lightning Fast' },
+              { icon: Rocket, text: 'Lightning Fast' },
               { icon: Shield, text: 'Enterprise Grade' },
               { icon: TrendingUp, text: 'Real-time Data' }
             ].map((feature, idx) => {

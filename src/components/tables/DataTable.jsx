@@ -146,7 +146,7 @@ export default function DataTable({
       )}
 
       {/* TABLE */}
-      <div className="bg-white border border-gray-200 shadow-sm sm:shadow-lg">
+      <div>
         {sortedData.length > 0 ? (
           <div className="overflow-x-auto -mx-3 sm:mx-0">
             <table className="w-full min-w-max sm:min-w-0">
