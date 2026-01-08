@@ -1,5 +1,5 @@
 // ============================================
-// /components/dashboard/DailySummaryPerformance.jsx
+// /components/dashboard/DailySummaryPerformance.jsx (WITH DEBUG)
 // ============================================
 import { Activity, RefreshCw } from 'lucide-react'
 import Card from '@/components/ui/Card'
@@ -11,43 +11,49 @@ function DailySummaryPerformance({
   chartLoading
 }) {
   const renderChart = () => {
-    const operationSummary = {}
+    const operatorSummary = {}
 
     if (viewAllHours) {
       Object.values(allHoursData).forEach(hourData => {
         if (Array.isArray(hourData)) {
           hourData.forEach(item => {
-            const operationCode = item.operation_code || 'Unknown'
-            if (!operationSummary[operationCode]) {
-              operationSummary[operationCode] = {
-                code: operationCode,
-                name: item.operation_name || operationCode,
+            const operatorName = item.name || 'Unknown'
+            if (!operatorSummary[operatorName]) {
+              operatorSummary[operatorName] = {
+                name: operatorName,
                 totalOutput: 0,
                 totalTarget: 0
               }
             }
-            operationSummary[operationCode].totalOutput += parseInt(item.output) || 0
-            operationSummary[operationCode].totalTarget += parseInt(item.target) || 0
+            operatorSummary[operatorName].totalOutput += parseInt(item.output) || 0
+            operatorSummary[operatorName].totalTarget += parseInt(item.target) || 0
           })
         }
       })
     } else {
       processChartData.forEach(item => {
-        const operationCode = item.operation_code || 'Unknown'
-        if (!operationSummary[operationCode]) {
-          operationSummary[operationCode] = {
-            code: operationCode,
-            name: item.operation_name || operationCode,
+        const operatorName = item.name || 'Unknown'
+        if (!operatorSummary[operatorName]) {
+          operatorSummary[operatorName] = {
+            name: operatorName,
             totalOutput: 0,
             totalTarget: 0
           }
         }
-        operationSummary[operationCode].totalOutput += parseInt(item.output) || 0
-        operationSummary[operationCode].totalTarget += parseInt(item.target) || 0
+        operatorSummary[operatorName].totalOutput += parseInt(item.output) || 0
+        operatorSummary[operatorName].totalTarget += parseInt(item.target) || 0
       })
     }
 
-    const summaryData = Object.values(operationSummary)
+    const summaryData = Object.values(operatorSummary)
+
+    // DEBUG LOG
+    console.log('📊 Daily Summary Data:')
+    console.log('viewAllHours:', viewAllHours)
+    console.log('processChartData:', processChartData)
+    console.log('allHoursData:', allHoursData)
+    console.log('operatorSummary:', operatorSummary)
+    console.log('summaryData count:', summaryData.length)
 
     if (summaryData.length === 0) {
       return <div className="text-center py-8 text-gray-500">No operator data available</div>
@@ -75,6 +81,11 @@ function DailySummaryPerformance({
           </div>
         </div>
 
+        {/* Debug Info */}
+        <div className="bg-yellow-50 border border-yellow-200 p-2 rounded text-xs text-yellow-700 mb-4">
+          Found {summaryData.length} operator(s) - Max Target: {maxTarget}
+        </div>
+
         {/* Bars Container */}
         <div className="space-y-4 sm:space-y-5 md:space-y-6">
           {summaryData.map((operator, idx) => {
@@ -98,19 +109,16 @@ function DailySummaryPerformance({
                   {/* Label - Responsive */}
                   <div className="w-full sm:w-24 md:w-32 flex-shrink-0 mb-2 sm:mb-0">
                     <span className="text-xs sm:text-sm font-bold text-blue-600 block">
-                      {operator.code}
-                    </span>
-                    <span className="text-xs text-gray-500">
                       {operator.name}
                     </span>
                   </div>
 
                   {/* Chart Section */}
                   <div className="flex-1 w-full relative">
-                    {/* Tooltip - Responsive */}
+                      {/* Tooltip - Responsive */}
                     <div className="absolute -top-20 sm:-top-24 left-0 bg-gradient-to-br from-gray-900 to-gray-800 text-white text-xs rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 p-2 sm:p-3 min-w-max border border-gray-700 hidden group-hover:block whitespace-nowrap">
                       <div className="space-y-1">
-                        <div className="font-bold text-blue-300 text-xs">{operator.code} - {operator.name}</div>
+                        <div className="font-bold text-blue-300 text-xs">{operator.name}</div>
                         <div className="h-px bg-gray-600 my-1"></div>
                         <div className="flex items-center justify-between gap-4 sm:gap-6 text-xs">
                           <div>

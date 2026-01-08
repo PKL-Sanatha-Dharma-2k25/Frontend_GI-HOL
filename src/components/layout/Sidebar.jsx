@@ -314,7 +314,7 @@ export default function Sidebar({
         <div className={`transition-all duration-300 ${isSidebarExpanded ? 'w-72' : 'w-20'}`} />
       </div>
 
-      {/* 📱 MOBILE HEADER */}
+      {}
       <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-100 shadow-sm z-40 flex items-center justify-between px-4">
         <img 
           src={iconUrl} 
