@@ -1,5 +1,5 @@
 import { memo, useState } from 'react'
-import { Save, Plus, Trash2, ChevronDown } from 'lucide-react'
+import { Save, Plus, Trash2, ChevronDown, Download, Upload } from 'lucide-react'
 import DataTable from '@/components/tables/DataTable'
 
 const DetailProcessComponent = memo(({
@@ -15,7 +15,142 @@ const DetailProcessComponent = memo(({
   const [addedRows, setAddedRows] = useState([])
   const [nextTempId, setNextTempId] = useState(1)
   const [showAddForm, setShowAddForm] = useState(false)
+  const [iotStatus, setIotStatus] = useState('idle') // idle | loading | success | error
+  const [iotMessage, setIotMessage] = useState('')
+  const [showTestData, setShowTestData] = useState(false)
 
+  // 🆕 FILL FROM LOCALSTORAGE
+  const handleFillFromLocalStorage = () => {
+    setIotStatus('loading')
+    setIotMessage('Reading from localStorage...')
+    
+    try {
+      const iotData = localStorage.getItem('iot_output_data')
+      
+      if (!iotData) {
+        setIotStatus('error')
+        setIotMessage('❌ No IoT data found. Click "Generate Test Data" first!')
+        setTimeout(() => setIotStatus('idle'), 4000)
+        return
+      }
+
+      const data = JSON.parse(iotData)
+      console.log('📥 [IoT] Data dari localStorage:', data)
+
+      // Data format: { '1A': 145, '1B': 148, '1C': 120 }
+      // atau: [{ op_code: '1A', output: 145 }, ...]
+      
+      let outputMap = {}
+      
+      if (Array.isArray(data)) {
+        // Jika array format
+        data.forEach(item => {
+          outputMap[item.op_code] = item.output || 0
+        })
+      } else if (typeof data === 'object') {
+        // Jika object format
+        outputMap = data
+      } else {
+        throw new Error('Invalid data format')
+      }
+
+      console.log('✅ [IoT] Parsed output map:', outputMap)
+
+      // Update detailProcessInput dengan data dari IoT
+      const updatedInput = { ...detailProcessInput }
+      let filledCount = 0
+
+      detailProcessData.forEach(item => {
+        const opCode = item.op_code
+        if (outputMap[opCode] !== undefined) {
+          updatedInput[opCode] = outputMap[opCode]
+          filledCount++
+          console.log(`✅ Filled: ${opCode} = ${outputMap[opCode]}`)
+        }
+      })
+
+      // Panggil parent callback untuk update semua
+      Object.entries(updatedInput).forEach(([opCode, value]) => {
+        onActualOutputChange(opCode, value)
+      })
+
+      setIotStatus('success')
+      setIotMessage(`✅ Filled ${filledCount} outputs from IoT device`)
+      setTimeout(() => setIotStatus('idle'), 4000)
+
+    } catch (error) {
+      console.error('❌ Error reading IoT data:', error)
+      setIotStatus('error')
+      setIotMessage(`❌ Error: ${error.message}`)
+      setTimeout(() => setIotStatus('idle'), 4000)
+    }
+  }
+
+  // 🆕 GENERATE TEST DATA (untuk testing saat backend belum siap)
+  const handleGenerateTestData = () => {
+    try {
+      const testData = {}
+      
+      detailProcessData.forEach(item => {
+        // Generate random output antara 100-200
+        testData[item.op_code] = Math.floor(Math.random() * 100 + 100)
+      })
+
+      localStorage.setItem('iot_output_data', JSON.stringify(testData))
+      
+      setIotStatus('success')
+      setIotMessage(`✅ Generated ${Object.keys(testData).length} test data items`)
+      setShowTestData(false)
+      setTimeout(() => setIotStatus('idle'), 3000)
+      
+      console.log('🧪 [Test] Generated test data:', testData)
+    } catch (error) {
+      setIotStatus('error')
+      setIotMessage(`❌ Error: ${error.message}`)
+      setTimeout(() => setIotStatus('idle'), 3000)
+    }
+  }
+
+  // 🆕 SAVE TO LOCALSTORAGE (untuk testing/setup)
+  const handleSaveToLocalStorage = () => {
+    try {
+      const currentOutput = { ...detailProcessInput }
+      localStorage.setItem('iot_output_data', JSON.stringify(currentOutput))
+      
+      setIotStatus('success')
+      setIotMessage('✅ Current output saved to localStorage (for testing)')
+      setTimeout(() => setIotStatus('idle'), 3000)
+      
+      console.log('💾 [IoT] Saved to localStorage:', currentOutput)
+    } catch (error) {
+      setIotStatus('error')
+      setIotMessage(`❌ Error saving: ${error.message}`)
+      setTimeout(() => setIotStatus('idle'), 3000)
+    }
+  }
+
+  // 🆕 CLEAR LOCALSTORAGE
+  const handleClearLocalStorage = () => {
+    if (confirm('Delete IoT data from localStorage?')) {
+      localStorage.removeItem('iot_output_data')
+      setIotStatus('success')
+      setIotMessage('✅ IoT data cleared from localStorage')
+      setTimeout(() => setIotStatus('idle'), 3000)
+      console.log('🗑️ [IoT] Cleared localStorage')
+    }
+  }
+
+  // 🆕 COPY CURRENT STATE AS JSON (untuk IoT device)
+  const handleCopyForIoT = () => {
+    const jsonData = JSON.stringify(detailProcessInput, null, 2)
+    navigator.clipboard.writeText(jsonData)
+    
+    setIotStatus('success')
+    setIotMessage('✅ JSON copied to clipboard (paste ke IoT device)')
+    setTimeout(() => setIotStatus('idle'), 3000)
+  }
+
+  // Original handlers
   const handleAddRow = () => {
     const code = document.getElementById('new_code').value
     const process = document.getElementById('new_process').value
@@ -56,6 +191,61 @@ const DetailProcessComponent = memo(({
           {currentHeaderData?.orc} • {currentHeaderData?.style} • {currentHeaderData?.date} Hour {currentHeaderData?.hour}:00
         </p>
       </div>
+
+      {/* 🆕 IOT BUTTON - SINGLE BUTTON ONLY */}
+      <div className="bg-gradient-to-r from-cyan-50 to-blue-50 px-6 py-3 border-b border-cyan-200 flex items-center justify-between flex-wrap gap-3">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleFillFromLocalStorage}
+            disabled={loading}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 disabled:opacity-50 text-sm font-semibold transition-colors shadow-md"
+            title="Auto-fill semua actual output dari IoT device"
+          >
+            <Download size={18} />
+            Fill from IoT Device
+          </button>
+
+          {/* 🆕 TEST DATA BUTTON (untuk development) */}
+          <button
+            onClick={() => setShowTestData(!showTestData)}
+            className="inline-flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-xs font-medium transition-colors"
+            title="Generate test data untuk testing (belum ada IoT device)"
+          >
+            🧪 Test Data
+          </button>
+        </div>
+
+        {/* Status Message */}
+        {iotStatus !== 'idle' && (
+          <div className={`text-sm font-semibold ${
+            iotStatus === 'success' ? 'text-green-700' :
+            iotStatus === 'error' ? 'text-red-700' :
+            'text-blue-700'
+          }`}>
+            {iotMessage}
+          </div>
+        )}
+      </div>
+
+      {/* 🆕 TEST DATA MODAL */}
+      {showTestData && (
+        <div className="bg-amber-50 px-6 py-4 border-b border-amber-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-semibold text-amber-900">Generate Test Data</h3>
+              <p className="text-xs text-amber-700 mt-1">
+                Untuk testing saat IoT device belum siap. Klik tombol di bawah untuk generate random data.
+              </p>
+            </div>
+            <button
+              onClick={handleGenerateTestData}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 text-sm font-semibold"
+            >
+              ✅ Generate Now
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="p-6">
         {loadingDetail ? (

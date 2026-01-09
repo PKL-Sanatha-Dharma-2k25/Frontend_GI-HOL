@@ -1,21 +1,22 @@
 import { Eye, Edit } from 'lucide-react'
 import DataTable from '@/components/tables/DataTable'
-import { getDetailOutputByStyle } from '@/services/apiService'  // ← ADD THIS
+import { getDetailOutputByStyle } from '@/services/apiService'
 
 export default function OutputTable({
   data,
   loading,
   onDetailClick,
-  onUpdateClick
+  onUpdateClick,
+  userIdLine  // 🆕 ADD THIS - dari user login
 }) {
   console.log('📊 [OutputTable] Received data:', data)
+  console.log('📊 [OutputTable] User ID Line:', userIdLine)  // 🆕 Log user lane
 
   // ⭐ HELPER FUNCTION: Fetch id_output dari detail
-  // Gunakan style & fallback id_line (default 59)
-  const getIdOutputFromDetail = async (style, idLine = 59) => {
+  const getIdOutputFromDetail = async (style) => {
     try {
-      console.log(`🔍 [getIdOutputFromDetail] Fetching for style: ${style}, idLine: ${idLine}`)
-      const detailResponse = await getDetailOutputByStyle(style, idLine)
+      console.log(`🔍 [getIdOutputFromDetail] Fetching for style: ${style}, idLine: ${userIdLine}`)
+      const detailResponse = await getDetailOutputByStyle(style, userIdLine)  // 🆕 Pakai userIdLine
       const details = detailResponse.data || detailResponse
       
       console.log(`📥 [getIdOutputFromDetail] Detail response:`, details)
@@ -43,8 +44,7 @@ export default function OutputTable({
     
     if (!idOutput) {
       console.log('   id_output not in row, fetching from detail...')
-      // Gunakan style & default id_line (59) jika tidak ada
-      idOutput = await getIdOutputFromDetail(row.style, row.id_line || 59)
+      idOutput = await getIdOutputFromDetail(row.style)  // 🆕 Hapus hardcoded 59
       
       if (!idOutput) {
         console.error('❌ Cannot find id_output')
@@ -66,8 +66,7 @@ export default function OutputTable({
     
     if (!idOutput) {
       console.log('   id_output not in row, fetching from detail...')
-      // Gunakan style & default id_line (59) jika tidak ada
-      idOutput = await getIdOutputFromDetail(row.style, row.id_line || 59)
+      idOutput = await getIdOutputFromDetail(row.style)  // 🆕 Hapus hardcoded 59
       
       if (!idOutput) {
         console.error('❌ Cannot find id_output')
@@ -113,7 +112,6 @@ export default function OutputTable({
       label: 'Action',
       width: '24%',
       render: (value, row) => {
-        // ⭐ DEBUG LOG
         console.log(`🔘 [Action Button] Row:`, {
           date: row.date,
           hour: row.hour,
