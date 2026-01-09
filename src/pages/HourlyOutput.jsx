@@ -5,6 +5,7 @@ import { useFormData } from '@/hooks/useFormData'
 import { useDetailProcess } from '@/hooks/useDetailProcess'
 import { useDetailModal } from '@/hooks/useDetailModal'
 import { useHourlyOutput } from '@/hooks/useHourlyOutput'
+import { useHourValidation } from '@/hooks/useHourValidation' // 🆕 IMPORT
 import { getJakartaTime } from '@/utils/dateTime'
 
 // Components
@@ -27,6 +28,7 @@ export default function HourlyOutputPage() {
   const formHook = useFormData(user)
   const detailProcessHook = useDetailProcess(alert.showAlertMessage)
   const detailModalHook = useDetailModal(alert.showAlertMessage)
+  const hourValidationHook = useHourValidation() // 🆕 ADD THIS
   const outputHook = useHourlyOutput(user, alert.showAlertMessage, detailProcessHook)
 
   // ⭐ UI State
@@ -49,27 +51,47 @@ export default function HourlyOutputPage() {
     }
   }, [formHook.orcSearchTerm, outputHook.orcList])
 
-  // ⭐ Load Initial Data
+  // ⭐ Load Initial Data (includes hour validation)
   useEffect(() => {
-    outputHook.loadInitialData()
+    const loadData = async () => {
+      await outputHook.loadInitialData()
+      // 🆕 Load used hours ketika page pertama kali mount
+      await hourValidationHook.loadUsedHours()
+    }
+    loadData()
   }, [])
 
-  // ⭐ Handle Form Submit
+  // ⭐ Handle Form Submit (with validation)
   const handleFormSubmit = async () => {
+    // 🆕 Check jam sudah terpakai sebelum submit
+    if (formHook.formData.date && formHook.formData.hour) {
+      const isUsed = hourValidationHook.isHourUsed(
+        formHook.formData.date,
+        formHook.formData.hour
+      )
+      if (isUsed) {
+        alert.showAlertMessage(
+          'error',
+          'This hour is already used',
+          [`Hour ${formHook.formData.hour} on ${formHook.formData.date} already has data`]
+        )
+        return
+      }
+    }
+
     const success = await outputHook.handleFormSubmit(
       formHook.formData,
       formHook.selectedOrc
     )
     if (success) {
-      // ✅ JANGAN reset sama sekali, tetap seperti inputan sebelumnya
-      // Form dan semua field tetap
+      // ✅ Refresh validation setelah data baru ditambahkan
+      await hourValidationHook.refreshValidation()
     }
   }
 
   // ⭐ Handle Close Form
   const handleCloseForm = () => {
     setShowForm(false)
-    // ✅ Tutup form, tapi data tetap tersimpan jika form dibuka lagi
   }
 
   // ⭐ Handle Save Detail Process
@@ -81,8 +103,9 @@ export default function HourlyOutputPage() {
     )
     if (success) {
       setCurrentPage(1)
-      // ✅ Tutup detail process, form tetap dengan semua inputan sebelumnya
       detailProcessHook.handleCancel()
+      // 🆕 Refresh validation setelah save detail
+      await hourValidationHook.refreshValidation()
     }
   }
 
@@ -103,6 +126,8 @@ export default function HourlyOutputPage() {
     })
     if (success) {
       setCurrentPage(1)
+      // 🆕 Refresh validation setelah update
+      await hourValidationHook.refreshValidation()
     }
   }
 
@@ -153,9 +178,13 @@ export default function HourlyOutputPage() {
         onSubmit={handleFormSubmit}
         onCancel={handleCloseForm}
         loading={outputHook.loading}
+        // 🆕 Pass validation props
+        isHourUsed={hourValidationHook.isHourUsed}
+        getAvailableHours={hourValidationHook.getAvailableHours}
+        usedHours={hourValidationHook.usedHours}
       />
 
-      {/* ⭐ DETAIL PROCESS SECTION - Untuk input awal */}
+      {/* ⭐ DETAIL PROCESS SECTION */}
       {detailProcessHook.showDetailProcess && (
         <DetailProcessComponent
           detailProcessData={detailProcessHook.detailProcessData}
@@ -193,7 +222,7 @@ export default function HourlyOutputPage() {
         )}
       </div>
 
-      {/* ⭐ DETAIL MODAL - Lihat data yang sudah disimpan */}
+      {/* ⭐ DETAIL MODAL */}
       <DetailModal
         isOpen={detailModalHook.showDetailModal}
         data={detailModalHook.detailData}
@@ -201,7 +230,7 @@ export default function HourlyOutputPage() {
         onClose={detailModalHook.closeDetailModal}
       />
 
-      {/* ⭐ UPDATE MODAL - Edit data yang sudah disimpan */}
+      {/* ⭐ UPDATE MODAL */}
       <UpdateModal
         isOpen={detailModalHook.showUpdateModal}
         data={detailModalHook.updateData}

@@ -1,4 +1,4 @@
-import { Plus, ChevronRight } from 'lucide-react'
+import { Plus, ChevronRight, AlertCircle } from 'lucide-react'
 
 const HOURS = Array.from({ length: 10 }, (_, i) => String(i + 1))
 
@@ -17,15 +17,26 @@ export default function HourlyOutputForm({
   onClearOrc = () => {},
   onSubmit = () => {},
   onCancel = () => {},
-  loading = false
+  loading = false,
+  // 🆕 Props baru untuk validasi jam
+  isHourUsed = () => false,
+  getAvailableHours = () => HOURS.map(h => parseInt(h)),
+  usedHours = {}
 }) {
+  
+  // 🆕 Get available hours untuk date yang dipilih
+  const availableHours = formData.date ? getAvailableHours(formData.date) : []
+  
+  // 🆕 Check apakah jam yang dipilih sudah dipakai
+  const selectedHourUsed = formData.hour && isHourUsed(formData.date, formData.hour)
   
   const isFormValid = 
     formData.date && 
     formData.date.trim() !== '' && 
     formData.hour && 
     formData.hour.trim() !== '' && 
-    selectedOrc
+    selectedOrc &&
+    !selectedHourUsed  // 🆕 Tambahkan validasi jam
 
   const handleOrcSelect = (orc) => {
     onOrcSelect(orc)
@@ -176,6 +187,15 @@ export default function HourlyOutputForm({
                   </div>
                 )}
               </div>
+
+              {/* 🆕 Show used hours untuk date ini */}
+              {formData.date && usedHours[formData.date] && usedHours[formData.date].length > 0 && (
+                <div className="mt-2 p-2 bg-yellow-50 border border-yellow-300 rounded-lg">
+                  <p className="text-xs font-semibold text-yellow-800">
+                    Used hours: {usedHours[formData.date].sort((a, b) => a - b).join(', ')}
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Hour */}
@@ -192,20 +212,55 @@ export default function HourlyOutputForm({
                   value={formData.hour}
                   onChange={(e) => setFormData({ ...formData, hour: e.target.value })}
                   className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 text-sm font-medium h-11 appearance-none transition-all ${
-                    !formData.hour || formData.hour === '' ? 'border-red-500 bg-red-50 focus:ring-red-300 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500 hover:border-blue-400'
+                    !formData.hour || formData.hour === ''
+                      ? 'border-red-500 bg-red-50 focus:ring-red-300 focus:border-red-500'
+                      : selectedHourUsed
+                      ? 'border-orange-500 bg-orange-50 focus:ring-orange-300 focus:border-orange-500'
+                      : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500 hover:border-blue-400'
                   }`}
+                  disabled={!formData.date}
                 >
-                  <option value="" disabled>Select Hour</option>
-                  {HOURS.map((h) => (
-                    <option key={h} value={h}>{h}</option>
-                  ))}
+                  <option value="" disabled>
+                    {!formData.date ? 'Select date first' : 'Select Hour'}
+                  </option>
+                  {HOURS.map((h) => {
+                    const hourNum = parseInt(h)
+                    const isUsed = isHourUsed(formData.date, hourNum)
+                    
+                    return (
+                      <option 
+                        key={h} 
+                        value={h}
+                        disabled={isUsed}
+                      >
+                        {h} {isUsed ? '(Already used)' : ''}
+                      </option>
+                    )
+                  })}
                 </select>
+
+                {/* 🆕 Icon untuk hour error */}
                 {!formData.hour && (
                   <div className="absolute right-3 top-1/2 -translate-y-1/2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold pointer-events-none">
                     !
                   </div>
                 )}
+                {selectedHourUsed && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-orange-600 pointer-events-none">
+                    <AlertCircle size={20} />
+                  </div>
+                )}
               </div>
+
+              {/* 🆕 Warning message ketika jam sudah dipakai */}
+              {selectedHourUsed && (
+                <div className="mt-2 p-2 bg-orange-50 border border-orange-300 rounded-lg flex items-start gap-2">
+                  <AlertCircle size={16} className="text-orange-600 mt-0.5 flex-shrink-0" />
+                  <p className="text-xs font-semibold text-orange-800">
+                    Hour {formData.hour} already used on {formData.date}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
