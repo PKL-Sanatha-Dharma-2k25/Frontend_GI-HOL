@@ -1,14 +1,17 @@
-
 import { useAuth } from '@/hooks/useAuth'
+import { useState } from 'react'
 import BreadCrumb from '@/components/common/BreadCrumb'
 import DashboardStats from '@/components/dashboard/DashboardStats'
 import ProcessPerformanceChart from '@/components/dashboard/ProcessPerformanceChart'
 import DailySummaryPerformance from '@/components/dashboard/DailySummaryPerformance'
 import ProcessDetailsTable from '@/components/dashboard/ProcessDetailsTable'
+import BottleneckDetector from '@/components/dashboard/BottleneckDetector'
+import { FullscreenLayout, FullscreenToggleButton } from '@/components/fullscreen/FullscreenMode'
 import { useDashboardData } from '@/hooks/useDashboardData'
 
 function Dashboard() {
   const { user, loading } = useAuth()
+  const [showBottleneck, setShowBottleneck] = useState(false)
   const {
     selectedHour,
     setSelectedHour,
@@ -34,12 +37,20 @@ function Dashboard() {
     { label: 'Dashboard', href: '/', active: true },
   ]
 
-  return (
-    <div className="space-y-6 px-responsive py-responsive">
+  const dashboardContent = (
+    <div className="space-y-6">
+      {/* Breadcrumb */}
       <div className="slide-in-down">
         <BreadCrumb items={breadcrumbItems} />
       </div>
 
+      {/* Dashboard Header with Fullscreen Toggle */}
+      <div className="flex justify-between items-center mb-2">
+        <h1 className="text-2xl font-bold text-gray-900">Production Dashboard</h1>
+        <FullscreenToggleButton />
+      </div>
+
+      {/* Dashboard Stats - KPI Cards */}
       <DashboardStats
         processChartData={processChartData}
         allHoursData={allHoursData}
@@ -48,6 +59,14 @@ function Dashboard() {
         user={user}
       />
 
+      {/* ⭐ BOTTLENECK DETECTOR - Show only when button is clicked (jadi tampilan pertama) */}
+      {showBottleneck && !viewAllHours && processChartData.length > 0 && (
+        <div id="bottleneck-section">
+          <BottleneckDetector data={processChartData} />
+        </div>
+      )}
+
+      {/* Process Performance Chart - Main chart view */}
       <ProcessPerformanceChart
         selectedHour={selectedHour}
         setSelectedHour={setSelectedHour}
@@ -57,8 +76,11 @@ function Dashboard() {
         allHoursData={allHoursData}
         chartLoading={chartLoading}
         user={user}
+        showBottleneck={showBottleneck}
+        setShowBottleneck={setShowBottleneck}
       />
 
+      {/* Daily Summary Performance - Operator aggregated view */}
       <DailySummaryPerformance
         processChartData={processChartData}
         allHoursData={allHoursData}
@@ -66,6 +88,7 @@ function Dashboard() {
         chartLoading={chartLoading}
       />
 
+      {/* Process Details Table - Detailed breakdown (only for single hour) */}
       {!viewAllHours && (
         <ProcessDetailsTable
           data={processChartData}
@@ -73,6 +96,14 @@ function Dashboard() {
         />
       )}
     </div>
+  )
+
+  return (
+    <FullscreenLayout>
+      <div className="px-responsive py-responsive">
+        {dashboardContent}
+      </div>
+    </FullscreenLayout>
   )
 }
 

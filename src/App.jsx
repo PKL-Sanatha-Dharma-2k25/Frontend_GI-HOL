@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { SidebarProvider } from '@/context/SidebarContext'
+import { FullscreenProvider } from '@/components/fullscreen/FullscreenMode'
 import Login from '@/pages/auth/Login'
 import Dashboard from '@/pages/Dashboard'
 import Line from '@/pages/Line'
@@ -14,34 +15,36 @@ console.log('BASE URL:', BASE)
 
 export default function App() {
   return (
-    <SidebarProvider>
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/login" element={<Login />} />
-        
-        {/* Protected Routes */}
-        <Route element={<ProtectedRoute />}>
-          {/* ⭐ Root route "/" - DashboardRouter decide berdasarkan role */}
-          {/* Supervisor → Dashboard, Admin/Superadmin → Dashboard */}
-          <Route index element={<DashboardRouter />} />
+    <FullscreenProvider>
+      <SidebarProvider>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/login" element={<Login />} />
           
-          {/* ⭐ Direct Dashboard access */}
-          <Route path="dashboard" element={<Dashboard />} />
+          {/* Protected Routes */}
+          <Route element={<ProtectedRoute />}>
+            {/* ⭐ Root route "/" - DashboardRouter decide berdasarkan role */}
+            {/* Supervisor → Dashboard, Admin/Superadmin → Dashboard */}
+            <Route index element={<DashboardRouter />} />
+            
+            {/* ⭐ Direct Dashboard access */}
+            <Route path="dashboard" element={<Dashboard />} />
+            
+            {/* Admin/Superadmin routes */}
+            <Route path="line" element={<Line />} />
+            <Route path="operation-breakdown" element={<OperationBreakdown />} />
+            
+            {/* All roles can access */}
+            <Route path="hourly-output" element={<HourlyOutput />} />
+            
+            {/* Admin & Superadmin */}
+            <Route path="users" element={<UserManagement />} />
+          </Route>
           
-          {/* Admin/Superadmin routes */}
-          <Route path="line" element={<Line />} />
-          <Route path="operation-breakdown" element={<OperationBreakdown />} />
-          
-          {/* All roles can access */}
-          <Route path="hourly-output" element={<HourlyOutput />} />
-          
-          {/* Admin & Superadmin */}
-          <Route path="users" element={<UserManagement />} />
-        </Route>
-        
-        {/* Fallback - redirect ke home */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </SidebarProvider>
+          {/* Fallback - redirect ke home */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </SidebarProvider>
+    </FullscreenProvider>
   )
 }
