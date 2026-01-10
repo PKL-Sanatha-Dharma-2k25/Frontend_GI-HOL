@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react'
 import { getBarChartDash } from '@/services/apiService'
 
@@ -8,6 +7,8 @@ export function useDashboardData(userId) {
   const [processChartData, setProcessChartData] = useState([])
   const [allHoursData, setAllHoursData] = useState({})
   const [chartLoading, setChartLoading] = useState(false)
+  const [orcData, setOrcData] = useState('-')
+  const [styleData, setStyleData] = useState('-')
 
   useEffect(() => {
     if (!userId) {
@@ -39,22 +40,40 @@ export function useDashboardData(userId) {
           console.log('✅ All hours data loaded:', allData)
           setAllHoursData(allData)
           setProcessChartData([])
+          setOrcData('-')
+          setStyleData('-')
         } else {
           console.log('📊 Fetching chart data...', { userId, selectedHour })
           const response = await getBarChartDash(userId, selectedHour)
           
           if (response?.data && Array.isArray(response.data)) {
             console.log('✅ Chart data loaded:', response.data)
+            console.log('📋 First item:', response.data[0])
+            
             setProcessChartData(response.data)
+            
+            // ✅ Extract ORC & Style dari response (bukan dari data array)
+            const orc = response.orc || response.data[0]?.orc || '-'
+            const style = response.style || response.data[0]?.style || '-'
+            
+            console.log('🎯 ORC:', orc)
+            console.log('🎨 Style:', style)
+            
+            setOrcData(orc)
+            setStyleData(style)
           } else {
             console.warn('⚠️ Data format tidak sesuai')
             setProcessChartData([])
+            setOrcData('-')
+            setStyleData('-')
           }
         }
       } catch (error) {
         console.error('❌ Error fetching chart data:', error)
         setProcessChartData([])
         setAllHoursData({})
+        setOrcData('-')
+        setStyleData('-')
       } finally {
         setChartLoading(false)
       }
@@ -70,7 +89,8 @@ export function useDashboardData(userId) {
     setViewAllHours,
     processChartData,
     allHoursData,
-    chartLoading
+    chartLoading,
+    orcData,
+    styleData
   }
 }
-

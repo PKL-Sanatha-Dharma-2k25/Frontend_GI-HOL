@@ -53,7 +53,7 @@ export default function DashboardStats({
       },
       {
         label: 'Current Line',
-        value: user?.id_line || '-',
+        value: user?.username || '-',
         icon: <BarChart3 size={28} className="text-indigo-600" />,
         color: 'indigo',
         trend: 0

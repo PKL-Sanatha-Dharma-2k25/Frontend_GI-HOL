@@ -19,7 +19,9 @@ function Dashboard() {
     setViewAllHours,
     processChartData,
     allHoursData,
-    chartLoading
+    chartLoading,
+    orcData,      // ✅ TAMBAH INI
+    styleData     // ✅ TAMBAH INI
   } = useDashboardData(user?.id_line)
 
   if (loading) {
@@ -46,7 +48,7 @@ function Dashboard() {
 
       {/* Dashboard Header with Fullscreen Toggle */}
       <div className="flex justify-between items-center mb-2">
-        <h1 className="text-2xl font-bold text-gray-900">Production Dashboard</h1>
+        <h1 className="text-2xl font-bold text-gray-900"></h1>
         <FullscreenToggleButton />
       </div>
 
@@ -78,6 +80,8 @@ function Dashboard() {
         user={user}
         showBottleneck={showBottleneck}
         setShowBottleneck={setShowBottleneck}
+        orcData={orcData}           // ✅ TAMBAH INI
+        styleData={styleData}       // ✅ TAMBAH INI
       />
 
       {/* Daily Summary Performance - Operator aggregated view */}

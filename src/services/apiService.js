@@ -271,7 +271,18 @@ export const getBarChartDash = async (idLine, hour) => {
       const response = await api.get('/auth/getbarchartdash', { params })
       console.log('✅ [getBarChartDash] Real API response:', response.data)
       
-      // ✅ TRANSFORM response dari backend ke format yang kita butuh
+      // ✅ EXTRACT ORC & STYLE DARI ORIGINAL DATA SEBELUM TRANSFORM
+      let orcValue = '-'
+      let styleValue = '-'
+      
+      if (response.data?.data && Array.isArray(response.data.data) && response.data.data.length > 0) {
+        const firstItem = response.data.data[0]
+        orcValue = firstItem.orc || firstItem.orc_sewing || '-'
+        styleValue = firstItem.style || firstItem.style_orc || '-'
+        console.log('✅ [getBarChartDash] Extracted ORC:', orcValue, 'Style:', styleValue)
+      }
+      
+      // Transform response dari backend ke format yang kita butuh
       if (response.data?.data && Array.isArray(response.data.data)) {
         // Group by operation_code & operation_name, aggregate output & target
         const grouped = {}
@@ -284,7 +295,9 @@ export const getBarChartDash = async (idLine, hour) => {
               operation_code: item.operation_code,
               operation_name: item.operation_name,
               output: 0,
-              target: 0
+              target: 0,
+              orc: orcValue,      // ✅ TAMBAH ORC
+              style: styleValue    // ✅ TAMBAH STYLE
             }
           }
           
@@ -295,49 +308,31 @@ export const getBarChartDash = async (idLine, hour) => {
         // Convert back to array
         const transformedData = Object.values(grouped)
         
-        console.log('✅ [getBarChartDash] Transformed data:', transformedData)
+        console.log('✅ [getBarChartDash] Transformed data with ORC & Style:', transformedData)
         
         return {
           success: true,
-          data: transformedData
+          data: transformedData,
+          orc: orcValue,
+          style: styleValue
         }
       }
       
-      return response.data
+      return {
+        success: true,
+        data: response.data?.data || [],
+        orc: orcValue,
+        style: styleValue
+      }
     } catch (apiError) {
       console.warn('⚠️ [getBarChartDash] API error, using mock data for development')
       console.log('⚠️ [getBarChartDash] API Error details:', apiError.message)
       
-      // ✅ MOCK DATA - untuk development
-      const mockData = [
-        { operation_code: '1A', operation_name: 'JOIN BOTTOM CENTER', output: 145, target: 143 },
-        { operation_code: '1B', operation_name: 'TOP STITCH BOTTOM', output: 148, target: 150 },
-        { operation_code: '1C', operation_name: 'JOIN TOP CENTER', output: 120, target: 125 },
-        { operation_code: '2A', operation_name: 'JOIN BACK LINING', output: 118, target: 120 },
-        { operation_code: '2B', operation_name: 'ATTACH DN TAPE', output: 122, target: 125 },
-        { operation_code: '2C', operation_name: 'INSERT BOND', output: 155, target: 158 }
-      ]
-      
-      console.log('✅ [getBarChartDash] Using MOCK DATA:', mockData)
-      
-      return {
-        success: true,
-        data: mockData
-      }
+      throw apiError
     }
   } catch (error) {
     console.error('❌ Get bar chart dash error:', error)
-    
-    // Return mock data even on error
-    const mockData = [
-      { operation_code: '1A', operation_name: 'JOIN BOTTOM CENTER', output: 145, target: 143 },
-      { operation_code: '1B', operation_name: 'TOP STITCH BOTTOM', output: 148, target: 150 },
-      { operation_code: '1C', operation_name: 'JOIN TOP CENTER', output: 120, target: 125 },
-      { operation_code: '2A', operation_name: 'JOIN BACK LINING', output: 118, target: 120 },
-      { operation_code: '2B', operation_name: 'ATTACH DN TAPE', output: 122, target: 125 },
-      { operation_code: '2C', operation_name: 'INSERT BOND', output: 155, target: 158 }
-    ]
-    return { success: true, data: mockData }
+    throw error
   }
 }
 

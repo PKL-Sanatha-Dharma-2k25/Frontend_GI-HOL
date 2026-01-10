@@ -12,16 +12,13 @@ export function FullscreenProvider({ children }) {
   const [screenSize, setScreenSize] = useState(getScreenSize())
 
   useEffect(() => {
-    // Update screen size when window resizes
     const handleResize = () => {
       setScreenSize(getScreenSize())
     }
     
     window.addEventListener('resize', handleResize)
 
-    // Keyboard shortcuts handler
     const handleKeyPress = (e) => {
-      // F key untuk toggle fullscreen
       if ((e.key === 'f' || e.key === 'F') && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
         const activeElement = document.activeElement
         if (!['INPUT', 'TEXTAREA'].includes(activeElement?.tagName)) {
@@ -30,7 +27,6 @@ export function FullscreenProvider({ children }) {
         }
       }
       
-      // ESC key untuk exit fullscreen
       if (e.key === 'Escape') {
         if (isFullscreen) {
           e.preventDefault()
@@ -38,13 +34,11 @@ export function FullscreenProvider({ children }) {
         }
       }
 
-      // + key untuk increase zoom (hanya saat fullscreen)
       if ((e.key === '+' || e.key === '=') && isFullscreen) {
         e.preventDefault()
         setZoomLevel(prev => Math.min(prev + 0.2, 3))
       }
 
-      // - key untuk decrease zoom (hanya saat fullscreen)
       if ((e.key === '-' || e.key === '_') && isFullscreen) {
         e.preventDefault()
         setZoomLevel(prev => Math.max(prev - 0.2, 0.8))
@@ -92,7 +86,6 @@ export function FullscreenLayout({ children }) {
     return <>{children}</>
   }
 
-  // Calculate base scale based on screen resolution
   const screenWidth = window.innerWidth
   let baseScale = 1
 
@@ -106,13 +99,8 @@ export function FullscreenLayout({ children }) {
 
   return (
     <div className="fixed inset-0 bg-white z-50 overflow-auto">
-      {/* Exit Button - Fixed Position, Not Scaled */}
-      <FullscreenExitButton />
-
-      {/* Screen Size Debug Info - Top Left */}
       <ScreenSizeIndicator screenSize={screenSize} />
 
-      {/* Main Content Container - Scaled */}
       <div
         className="origin-top-left transition-transform duration-100 ease-out"
         style={{
@@ -127,10 +115,8 @@ export function FullscreenLayout({ children }) {
         </div>
       </div>
 
-      {/* Keyboard Hints - Fixed Position, Not Scaled */}
       <FullscreenHints zoomLevel={zoomLevel} />
 
-      {/* Global Styles untuk Fullscreen Mode */}
       <style>{`
         body.fullscreen-mode {
           overflow: hidden;
@@ -152,76 +138,250 @@ export function FullscreenLayout({ children }) {
         .fullscreen-content-wrapper h4,
         .fullscreen-content-wrapper h5,
         .fullscreen-content-wrapper h6 {
-          margin-bottom: 1rem;
-          font-weight: 600;
+          margin-bottom: 1.5rem;
+          font-weight: 700;
+          line-height: 1.3;
         }
+
+        .fullscreen-content-wrapper h1 { font-size: 2.5rem; }
+        .fullscreen-content-wrapper h2 { font-size: 2rem; }
+        .fullscreen-content-wrapper h3 { font-size: 1.5rem; }
+        .fullscreen-content-wrapper h4 { font-size: 1.25rem; }
 
         .fullscreen-content-wrapper p {
           margin-bottom: 1rem;
           line-height: 1.7;
+          color: #374151;
         }
 
         .fullscreen-content-wrapper a {
           color: #2563eb;
           text-decoration: underline;
           cursor: pointer;
+          transition: color 0.2s ease;
         }
 
         .fullscreen-content-wrapper a:hover {
           color: #1d4ed8;
         }
 
-        /* ===== BUTTONS ===== */
-        .fullscreen-content-wrapper button {
-          min-height: 50px;
+        /* ===== BUTTONS - COMPREHENSIVE ===== */
+        .fullscreen-content-wrapper button,
+        .fullscreen-content-wrapper [role="button"] {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          min-height: 44px;
           padding: 0.75rem 1.5rem;
-          font-size: inherit;
-          border: 1px solid #e5e7eb;
+          font-size: 0.95rem;
+          font-weight: 600;
+          border: 1px solid transparent;
           border-radius: 0.5rem;
           background: white;
+          color: #1f2937;
           cursor: pointer;
           transition: all 0.2s ease;
+          white-space: nowrap;
+          user-select: none;
+          text-decoration: none;
         }
 
-        .fullscreen-content-wrapper button:hover {
+        /* Default Button Style */
+        .fullscreen-content-wrapper button:not([class*="bg-"]):not([class*="text-"]) {
           background: #f3f4f6;
           border-color: #d1d5db;
+          color: #1f2937;
         }
 
-        .fullscreen-content-wrapper button:active {
+        .fullscreen-content-wrapper button:not([class*="bg-"]):not([class*="text-"]):hover {
           background: #e5e7eb;
+          border-color: #9ca3af;
         }
 
-        .fullscreen-content-wrapper button[class*="bg-blue"] {
-          background: #3b82f6;
-          color: white;
-          border-color: #3b82f6;
+        .fullscreen-content-wrapper button:not([class*="bg-"]):not([class*="text-"]):active {
+          background: #d1d5db;
         }
 
-        .fullscreen-content-wrapper button[class*="bg-red"] {
-          background: #ef4444;
+        /* Primary Blue Button */
+        .fullscreen-content-wrapper button[class*="bg-blue"],
+        .fullscreen-content-wrapper button[class*="bg-blue-500"],
+        .fullscreen-content-wrapper button[class*="bg-blue-600"] {
+          background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
           color: white;
-          border-color: #ef4444;
+          border-color: #2563eb;
+          box-shadow: 0 2px 4px rgba(37, 99, 235, 0.3);
         }
 
-        .fullscreen-content-wrapper button[class*="bg-green"] {
-          background: #10b981;
+        .fullscreen-content-wrapper button[class*="bg-blue"]:hover,
+        .fullscreen-content-wrapper button[class*="bg-blue-500"]:hover,
+        .fullscreen-content-wrapper button[class*="bg-blue-600"]:hover {
+          background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+          box-shadow: 0 4px 8px rgba(37, 99, 235, 0.4);
+          transform: translateY(-1px);
+        }
+
+        .fullscreen-content-wrapper button[class*="bg-blue"]:active,
+        .fullscreen-content-wrapper button[class*="bg-blue-500"]:active,
+        .fullscreen-content-wrapper button[class*="bg-blue-600"]:active {
+          transform: translateY(0);
+          box-shadow: 0 1px 2px rgba(37, 99, 235, 0.3);
+        }
+
+        /* Success Green Button */
+        .fullscreen-content-wrapper button[class*="bg-green"],
+        .fullscreen-content-wrapper button[class*="bg-green-500"],
+        .fullscreen-content-wrapper button[class*="bg-green-600"] {
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
           color: white;
-          border-color: #10b981;
+          border-color: #059669;
+          box-shadow: 0 2px 4px rgba(5, 150, 105, 0.3);
+        }
+
+        .fullscreen-content-wrapper button[class*="bg-green"]:hover,
+        .fullscreen-content-wrapper button[class*="bg-green-500"]:hover,
+        .fullscreen-content-wrapper button[class*="bg-green-600"]:hover {
+          background: linear-gradient(135deg, #059669 0%, #047857 100%);
+          box-shadow: 0 4px 8px rgba(5, 150, 105, 0.4);
+          transform: translateY(-1px);
+        }
+
+        .fullscreen-content-wrapper button[class*="bg-green"]:active,
+        .fullscreen-content-wrapper button[class*="bg-green-500"]:active,
+        .fullscreen-content-wrapper button[class*="bg-green-600"]:active {
+          transform: translateY(0);
+          box-shadow: 0 1px 2px rgba(5, 150, 105, 0.3);
+        }
+
+        /* Danger Red Button */
+        .fullscreen-content-wrapper button[class*="bg-red"],
+        .fullscreen-content-wrapper button[class*="bg-red-500"],
+        .fullscreen-content-wrapper button[class*="bg-red-600"] {
+          background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+          color: white;
+          border-color: #dc2626;
+          box-shadow: 0 2px 4px rgba(220, 38, 38, 0.3);
+        }
+
+        .fullscreen-content-wrapper button[class*="bg-red"]:hover,
+        .fullscreen-content-wrapper button[class*="bg-red-500"]:hover,
+        .fullscreen-content-wrapper button[class*="bg-red-600"]:hover {
+          background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+          box-shadow: 0 4px 8px rgba(220, 38, 38, 0.4);
+          transform: translateY(-1px);
+        }
+
+        .fullscreen-content-wrapper button[class*="bg-red"]:active,
+        .fullscreen-content-wrapper button[class*="bg-red-500"]:active,
+        .fullscreen-content-wrapper button[class*="bg-red-600"]:active {
+          transform: translateY(0);
+          box-shadow: 0 1px 2px rgba(220, 38, 38, 0.3);
+        }
+
+        /* Warning Yellow Button */
+        .fullscreen-content-wrapper button[class*="bg-yellow"],
+        .fullscreen-content-wrapper button[class*="bg-yellow-500"],
+        .fullscreen-content-wrapper button[class*="bg-amber"] {
+          background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
+          color: white;
+          border-color: #ca8a04;
+          box-shadow: 0 2px 4px rgba(202, 138, 4, 0.3);
+        }
+
+        .fullscreen-content-wrapper button[class*="bg-yellow"]:hover,
+        .fullscreen-content-wrapper button[class*="bg-yellow-500"]:hover,
+        .fullscreen-content-wrapper button[class*="bg-amber"]:hover {
+          background: linear-gradient(135deg, #ca8a04 0%, #a16207 100%);
+          box-shadow: 0 4px 8px rgba(202, 138, 4, 0.4);
+          transform: translateY(-1px);
+        }
+
+        .fullscreen-content-wrapper button[class*="bg-yellow"]:active,
+        .fullscreen-content-wrapper button[class*="bg-yellow-500"]:active,
+        .fullscreen-content-wrapper button[class*="bg-amber"]:active {
+          transform: translateY(0);
+          box-shadow: 0 1px 2px rgba(202, 138, 4, 0.3);
+        }
+
+        /* Outline/Secondary Button */
+        .fullscreen-content-wrapper button[class*="border-"],
+        .fullscreen-content-wrapper button.secondary {
+          background: white;
+          border: 2px solid #d1d5db;
+          color: #374151;
+        }
+
+        .fullscreen-content-wrapper button[class*="border-"]:hover,
+        .fullscreen-content-wrapper button.secondary:hover {
+          background: #f9fafb;
+          border-color: #9ca3af;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Disabled State */
+        .fullscreen-content-wrapper button:disabled,
+        .fullscreen-content-wrapper button[disabled] {
+          opacity: 0.5;
+          cursor: not-allowed;
+          transform: none !important;
+        }
+
+        .fullscreen-content-wrapper button:disabled:hover,
+        .fullscreen-content-wrapper button[disabled]:hover {
+          transform: none !important;
+        }
+
+        /* Small Button Size */
+        .fullscreen-content-wrapper button[class*="text-sm"],
+        .fullscreen-content-wrapper button.btn-sm {
+          min-height: 36px;
+          padding: 0.5rem 1rem;
+          font-size: 0.85rem;
+        }
+
+        /* Large Button Size */
+        .fullscreen-content-wrapper button[class*="text-lg"],
+        .fullscreen-content-wrapper button.btn-lg {
+          min-height: 52px;
+          padding: 1rem 2rem;
+          font-size: 1.1rem;
+        }
+
+        /* Full Width Button */
+        .fullscreen-content-wrapper button[class*="w-full"],
+        .fullscreen-content-wrapper button.btn-full {
+          width: 100%;
+        }
+
+        /* Button Group - Horizontal Layout */
+        .fullscreen-content-wrapper .button-group,
+        .fullscreen-content-wrapper .flex.gap-2,
+        .fullscreen-content-wrapper .flex.gap-3 {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          flex-wrap: wrap;
+          margin: 1rem 0;
+        }
+
+        .fullscreen-content-wrapper .button-group.vertical {
+          flex-direction: column;
+          align-items: stretch;
         }
 
         /* ===== INPUTS & FORMS ===== */
         .fullscreen-content-wrapper input,
         .fullscreen-content-wrapper select,
         .fullscreen-content-wrapper textarea {
-          min-height: 45px;
-          padding: 0.5rem 1rem;
+          min-height: 44px;
+          padding: 0.75rem 1rem;
           font-size: inherit;
           border: 2px solid #e5e7eb;
           border-radius: 0.5rem;
           background: white;
-          color: #000;
+          color: #1f2937;
           font-family: inherit;
+          transition: all 0.2s ease;
         }
 
         .fullscreen-content-wrapper input:focus,
@@ -242,17 +402,20 @@ export function FullscreenLayout({ children }) {
         .fullscreen-content-wrapper .card {
           padding: 1.5rem;
           border: 1px solid #e5e7eb;
-          border-radius: 0.5rem;
+          border-radius: 0.75rem;
           background: white;
-          margin-bottom: 1rem;
+          margin-bottom: 1.5rem;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
         /* ===== TABLES ===== */
         .fullscreen-content-wrapper table {
           width: 100%;
           border-collapse: collapse;
-          margin-bottom: 1rem;
+          margin-bottom: 1.5rem;
           background: white;
+          border-radius: 0.5rem;
+          overflow: hidden;
         }
 
         .fullscreen-content-wrapper th {
@@ -260,8 +423,9 @@ export function FullscreenLayout({ children }) {
           text-align: left;
           background: #f3f4f6;
           border-bottom: 2px solid #e5e7eb;
-          font-weight: 600;
+          font-weight: 700;
           color: #1f2937;
+          font-size: 0.9rem;
         }
 
         .fullscreen-content-wrapper td {
@@ -274,24 +438,11 @@ export function FullscreenLayout({ children }) {
           background: #f9fafb;
         }
 
-        /* ===== CHARTS & SVG ===== */
-        .fullscreen-content-wrapper svg {
-          width: 100%;
-          height: auto;
-          margin-bottom: 1rem;
-        }
-
-        .fullscreen-content-wrapper svg[class*="lucide"] {
-          width: auto;
-          height: 1em;
-          display: inline;
-        }
-
         /* ===== GRIDS ===== */
         .fullscreen-content-wrapper .grid {
           display: grid;
-          gap: 1rem;
-          margin-bottom: 1rem;
+          gap: 1.5rem;
+          margin-bottom: 1.5rem;
         }
 
         .fullscreen-content-wrapper .grid-cols-1 {
@@ -320,28 +471,28 @@ export function FullscreenLayout({ children }) {
         }
 
         .fullscreen-content-wrapper .gap-4 {
-          gap: 2rem;
+          gap: 1.5rem;
         }
 
         .fullscreen-content-wrapper .gap-6 {
-          gap: 3rem;
+          gap: 2rem;
         }
 
         /* ===== SPACING ===== */
         .fullscreen-content-wrapper .space-y-4 > * + * {
-          margin-top: 2rem;
+          margin-top: 1.5rem;
         }
 
         .fullscreen-content-wrapper .space-y-6 > * + * {
-          margin-top: 3rem;
+          margin-top: 2rem;
         }
 
         .fullscreen-content-wrapper .mb-4 {
-          margin-bottom: 2rem;
+          margin-bottom: 1.5rem;
         }
 
         .fullscreen-content-wrapper .mb-6 {
-          margin-bottom: 3rem;
+          margin-bottom: 2rem;
         }
 
         /* ===== ALERTS & BADGES ===== */
@@ -350,31 +501,8 @@ export function FullscreenLayout({ children }) {
           padding: 1rem;
           border-radius: 0.5rem;
           margin-bottom: 1rem;
-          font-weight: 500;
-        }
-
-        .fullscreen-content-wrapper [class*="bg-red"] {
-          background: #fee2e2;
-          color: #991b1b;
-          border: 1px solid #fecaca;
-        }
-
-        .fullscreen-content-wrapper [class*="bg-green"] {
-          background: #dcfce7;
-          color: #166534;
-          border: 1px solid #bbf7d0;
-        }
-
-        .fullscreen-content-wrapper [class*="bg-yellow"] {
-          background: #fef3c7;
-          color: #92400e;
-          border: 1px solid #fde68a;
-        }
-
-        .fullscreen-content-wrapper [class*="bg-blue"] {
-          background: #dbeafe;
-          color: #1e40af;
-          border: 1px solid #bfdbfe;
+          font-weight: 600;
+          display: inline-block;
         }
 
         /* ===== LISTS ===== */
@@ -385,12 +513,13 @@ export function FullscreenLayout({ children }) {
         }
 
         .fullscreen-content-wrapper li {
-          margin-bottom: 0.5rem;
+          margin-bottom: 0.75rem;
+          line-height: 1.6;
         }
 
         /* ===== SCROLLBAR ===== */
         .fullscreen-content-wrapper::-webkit-scrollbar {
-          width: 15px;
+          width: 12px;
         }
 
         .fullscreen-content-wrapper::-webkit-scrollbar-track {
@@ -446,27 +575,7 @@ function ScreenSizeIndicator({ screenSize }) {
 }
 
 // ============================================
-// EXIT FULLSCREEN BUTTON
-// ============================================
-function FullscreenExitButton() {
-  const { isFullscreen, setIsFullscreen } = useFullscreen()
-
-  if (!isFullscreen) return null
-
-  return (
-    <button
-      onClick={() => setIsFullscreen(false)}
-      className="fixed top-4 right-4 z-50 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg shadow-lg font-bold flex items-center gap-2 transition-all"
-      title="Exit fullscreen (Press ESC)"
-    >
-      <Minimize2 size={20} />
-      <span>Exit (ESC)</span>
-    </button>
-  )
-}
-
-// ============================================
-// FULLSCREEN TOGGLE BUTTON (untuk dashboard)
+// FULLSCREEN TOGGLE BUTTON
 // ============================================
 export function FullscreenToggleButton() {
   const { isFullscreen, setIsFullscreen } = useFullscreen()
@@ -509,7 +618,6 @@ function FullscreenHints({ zoomLevel }) {
       return
     }
 
-    // Auto-hide after 8 seconds
     const timer = setTimeout(() => setShowHints(false), 8000)
     return () => clearTimeout(timer)
   }, [isFullscreen])
@@ -560,7 +668,7 @@ function FullscreenHints({ zoomLevel }) {
 }
 
 // ============================================
-// STATUS INDICATOR (Optional)
+// STATUS INDICATOR
 // ============================================
 export function FullscreenStatusIndicator() {
   const { isFullscreen, screenSize } = useFullscreen()
@@ -575,4 +683,76 @@ export function FullscreenStatusIndicator() {
   )
 }
 
-export default FullscreenLayout
+// ============================================
+// DEMO COMPONENT
+// ============================================
+function DemoPage() {
+  return (
+    <div>
+      <h1>Button Styling Demo</h1>
+      <p>Berikut adalah contoh berbagai style button yang sudah dirapi:</p>
+
+      <h2>Primary Buttons</h2>
+      <div className="button-group">
+        <button className="bg-blue-600">Primary Button</button>
+        <button className="bg-blue-600 text-sm">Small</button>
+        <button className="bg-blue-600 text-lg">Large</button>
+      </div>
+
+      <h2>Success Buttons</h2>
+      <div className="button-group">
+        <button className="bg-green-600">Save Changes</button>
+        <button className="bg-green-600">Confirm</button>
+      </div>
+
+      <h2>Danger Buttons</h2>
+      <div className="button-group">
+        <button className="bg-red-600">Delete</button>
+        <button className="bg-red-600">Cancel Order</button>
+      </div>
+
+      <h2>Warning Buttons</h2>
+      <div className="button-group">
+        <button className="bg-yellow-500">Warning</button>
+      </div>
+
+      <h2>Secondary/Outline Buttons</h2>
+      <div className="button-group">
+        <button className="border-gray-300">Secondary</button>
+        <button className="border-gray-300">View All Hours</button>
+        <button className="border-gray-300">More Options</button>
+      </div>
+
+      <h2>Disabled State</h2>
+      <div className="button-group">
+        <button className="bg-blue-600" disabled>Disabled Button</button>
+        <button className="border-gray-300" disabled>Disabled Outline</button>
+      </div>
+
+      <h2>Full Width Button</h2>
+      <button className="bg-blue-600 w-full">Full Width Button</button>
+
+      <h2>Button Group - Vertical</h2>
+      <div className="button-group vertical">
+        <button className="bg-blue-600">Option 1</button>
+        <button className="border-gray-300">Option 2</button>
+        <button className="bg-green-600">Confirm</button>
+      </div>
+    </div>
+  )
+}
+
+export default function App() {
+  return (
+    <FullscreenProvider>
+      <div className="p-6">
+        <FullscreenToggleButton />
+        <FullscreenStatusIndicator />
+        <hr className="my-6" />
+      </div>
+      <FullscreenLayout>
+        <DemoPage />
+      </FullscreenLayout>
+    </FullscreenProvider>
+  )
+}
