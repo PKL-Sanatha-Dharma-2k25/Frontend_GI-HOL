@@ -1,6 +1,4 @@
-// ============================================
-// FILE 8: /pages/Dashboard.jsx
-// ============================================
+
 import { useAuth } from '@/hooks/useAuth'
 import BreadCrumb from '@/components/common/BreadCrumb'
 import DashboardStats from '@/components/dashboard/DashboardStats'

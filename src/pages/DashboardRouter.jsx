@@ -5,7 +5,7 @@ import HourlyOutput from '@/pages/HourlyOutput'
 export default function DashboardRouter() {
   const { user, loading } = useAuth()
 
-  // ⭐ Tunggu sampai user data loaded
+ 
   if (loading || !user) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-white">

@@ -1,6 +1,4 @@
-// ============================================
-// /components/dashboard/DailySummaryPerformance.jsx (WITH DEBUG)
-// ============================================
+
 import { Activity, RefreshCw } from 'lucide-react'
 import Card from '@/components/ui/Card'
 

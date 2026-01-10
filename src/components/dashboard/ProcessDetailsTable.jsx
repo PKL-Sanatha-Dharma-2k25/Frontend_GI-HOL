@@ -1,6 +1,4 @@
-// ============================================
-// FILE 7: /components/dashboard/ProcessDetailsTable.jsx
-// ============================================
+
 import { Clock } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import DataTable from '@/components/tables/DataTable'

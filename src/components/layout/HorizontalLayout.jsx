@@ -1,4 +1,4 @@
-// src/components/layout/HorizontalLayout.jsx
+
 export default function HorizontalLayout({
   header = null,
   sidebar = null,

@@ -1,6 +1,4 @@
-// ============================================
-// FILE 3: /components/dashboard/StackedBarChart.jsx (RESPONSIVE FIX)
-// ============================================
+
 import { useState } from 'react'
 
 export default function StackedBarChart({ data = [] }) {

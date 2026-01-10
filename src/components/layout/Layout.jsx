@@ -1,4 +1,4 @@
-// src/components/layout/Layout.jsx
+
 export default function Layout({
   header = null,
   sidebar = null,

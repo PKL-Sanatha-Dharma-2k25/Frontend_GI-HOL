@@ -1,6 +1,4 @@
-// ============================================
-// FILE 1: /hooks/useDashboardData.js
-// ============================================
+
 import { useState, useEffect } from 'react'
 import { getBarChartDash } from '@/services/apiService'
 

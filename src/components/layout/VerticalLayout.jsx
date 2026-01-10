@@ -1,5 +1,4 @@
 
-// src/components/layout/VerticalLayout.jsx
 export default function VerticalLayout({
   header = null,
   content = null,

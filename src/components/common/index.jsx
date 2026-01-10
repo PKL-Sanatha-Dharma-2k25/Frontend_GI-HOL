@@ -1,4 +1,4 @@
-// src/components/common/index.jsx
+
 export { default as BreadCrumb } from './BreadCrumb';
 export { default as DeleteModal } from './DeleteModal';
 export { default as Footer } from './Footer';

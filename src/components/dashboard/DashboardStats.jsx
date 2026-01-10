@@ -1,6 +1,3 @@
-// ============================================
-// FILE: /components/dashboard/DashboardStats.jsx
-// ============================================
 
 import { TrendingUp, Activity, Zap, BarChart3 } from 'lucide-react'
 import StatCard from '@/components/ui/StatCard'

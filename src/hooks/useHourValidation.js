@@ -1,7 +1,3 @@
-// ==========================================
-// 🔒 HOUR VALIDATION SYSTEM
-// Mencegah duplikat jam per hari (bahkan setelah reload)
-// ==========================================
 
 import { useState, useEffect, useCallback } from 'react'
 import { getHourlyOutputHeader } from '@/services/apiService'

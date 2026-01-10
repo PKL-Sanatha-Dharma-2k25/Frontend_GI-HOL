@@ -1,4 +1,4 @@
-// src/components/ProtectedRoute.jsx
+
 import { Navigate, Outlet } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import Sidebar from '@/components/layout/Sidebar'

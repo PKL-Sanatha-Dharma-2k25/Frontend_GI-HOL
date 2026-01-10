@@ -1,4 +1,4 @@
-// ✅ DECODE JWT WITHOUT LIBRARY (Simple version)
+
 
 export const decodeJWT = (token) => {
   try {

@@ -1,6 +1,3 @@
-// ============================================
-// FILE 4: /components/dashboard/AllHoursChart.jsx
-// ============================================
 
 import { useState, useEffect } from 'react'
 
