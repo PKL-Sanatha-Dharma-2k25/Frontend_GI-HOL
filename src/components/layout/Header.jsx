@@ -1,3 +1,4 @@
+// HEADER.jsx - FIXED VERSION
 import { useAuth } from '@/hooks/useAuth'
 import { LogOut, ChevronDown, Clock } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
@@ -178,8 +179,8 @@ export default function Header() {
         }
       `}</style>
 
-      {/* Main Header */}
-      <header className="bg-white border-b border-slate-200/60 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between sm:justify-end relative overflow-hidden z-40 marquee-container">
+      {/* Main Header - FIXED HEIGHT: 88px */}
+      <header className="bg-white border-b border-slate-200/60 px-4 sm:px-6 py-0 flex items-center justify-between sm:justify-end relative overflow-hidden z-40 marquee-container h-[88px]">
         
         {/* Mobile Only - Show Username */}
         <div className="sm:hidden text-left z-10 relative">
@@ -200,14 +201,6 @@ export default function Header() {
             <img src={icon} alt="icon" className="w-5 h-5 flex-shrink-0" />
           </div>
         </div>
-        
-        {/* Mobile Only - Show Username */}
-        <div className="sm:hidden text-left z-10 relative">
-          <p className="text-sm font-semibold text-slate-900 truncate">{user?.username}</p>
-          <p className="text-xs text-slate-500 -mt-0.5">Active</p>
-        </div>
-
-        {/* Production Target Tracker - REMOVED */}
 
         {/* Right Section */}
         <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 relative z-10">

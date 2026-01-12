@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { User, Lock, Eye, EyeOff, Zap, Rocket, Shield, TrendingUp } from 'lucide-react';
 import logo from '@/assets/logo/logo.png';
+import hollowedBoxesSvg from '@/assets/hollowed-boxes.svg';
 import Lottie from 'lottie-react';
 import monitoringAnimation from '@/assets/animations/monitoring.json';
 import { loginUser } from '@/services/auth';
@@ -148,6 +149,15 @@ export default function Login() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-white">
+      {/* SVG Background - Left Side */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <img 
+          src={hollowedBoxesSvg}
+          alt="Background Pattern"
+          className="absolute inset-0 w-full h-full object-cover opacity-5 lg:opacity-10"
+        />
+      </div>
+
       {/* Animated Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-96 -left-96 w-screen h-screen bg-gradient-to-br from-blue-100 via-cyan-100 to-transparent rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob"></div>
