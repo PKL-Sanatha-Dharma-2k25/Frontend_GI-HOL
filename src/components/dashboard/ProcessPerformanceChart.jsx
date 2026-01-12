@@ -33,22 +33,292 @@ function ProcessPerformanceChart({
   // Enhanced Filter Section
   const FilterSection = () => (
     <div className="mb-6 sm:mb-8 p-4 sm:p-6 bg-gradient-to-r from-slate-50 via-emerald-50 to-slate-50 rounded-xl border border-emerald-200 shadow-sm">
-      <div className="flex flex-col gap-6">
+      <style>{`
+        /* ===== FULLSCREEN RESPONSIVE FIX ===== */
+        .filter-container {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(1rem, 3vw, 1.5rem);
+        }
+
+        .filter-top-row {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: clamp(0.75rem, 2vw, 1.5rem);
+          flex-wrap: wrap;
+        }
+
+        .filter-group {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(0.5rem, 1vw, 0.75rem);
+          min-width: 0;
+        }
+
+        .filter-label {
+          font-size: clamp(0.65rem, 1.2vw, 0.8rem);
+          font-weight: 600;
+          color: #475569;
+          margin: 0;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          display: flex;
+          align-items: center;
+          gap: clamp(0.4rem, 1vw, 0.5rem);
+        }
+
+        .filter-label svg {
+          width: clamp(16px, 2vw, 18px);
+          height: clamp(16px, 2vw, 18px);
+          flex-shrink: 0;
+        }
+
+        /* Select Input */
+        .filter-select {
+          width: 100%;
+          padding: clamp(0.5rem, 1.5vw, 0.75rem) clamp(0.75rem, 1.5vw, 1rem);
+          border-radius: 0.5rem;
+          border: 2px solid #a7f3d0;
+          background-color: white;
+          font-size: clamp(0.7rem, 1.1vw, 0.875rem);
+          font-weight: 600;
+          color: #0f172a;
+          transition: all 0.2s ease;
+          min-height: clamp(2.5rem, 5vh, 2.75rem);
+        }
+
+        .filter-select:hover:not(:disabled) {
+          border-color: #6ee7b7;
+          background-color: #f0fdf4;
+        }
+
+        .filter-select:focus {
+          outline: none;
+          ring: 2px;
+          ring-color: #10b981;
+          border-color: transparent;
+        }
+
+        .filter-select:disabled {
+          background-color: #f1f5f9;
+          color: #64748b;
+          cursor: not-allowed;
+          border-color: #cbd5e1;
+        }
+
+        /* Filter Button */
+        .filter-button {
+          width: 100%;
+          padding: clamp(0.5rem, 1.5vw, 0.75rem) clamp(0.75rem, 2vw, 1.25rem);
+          border-radius: 0.5rem;
+          font-size: clamp(0.7rem, 1.1vw, 0.875rem);
+          font-weight: 600;
+          transition: all 0.2s ease;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: clamp(0.4rem, 1vw, 0.5rem);
+          border: 2px solid;
+          cursor: pointer;
+          min-height: clamp(2.5rem, 5vh, 2.75rem);
+          flex-shrink: 0;
+          white-space: nowrap;
+        }
+
+        .filter-button svg {
+          width: clamp(14px, 1.5vw, 16px);
+          height: clamp(14px, 1.5vw, 16px);
+          flex-shrink: 0;
+        }
+
+        .filter-button.toggle-all {
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          color: white;
+          border-color: #059669;
+        }
+
+        .filter-button.toggle-all:hover:not(:disabled) {
+          background: linear-gradient(135deg, #059669 0%, #047857 100%);
+          box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
+        }
+
+        .filter-button.toggle-single {
+          background: white;
+          color: #475569;
+          border-color: #cbd5e1;
+        }
+
+        .filter-button.toggle-single:hover:not(:disabled) {
+          background: #f8fafc;
+          border-color: #9ca3af;
+        }
+
+        .filter-button.bottleneck {
+          background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+          color: white;
+          border-color: #dc2626;
+        }
+
+        .filter-button.bottleneck:hover:not(:disabled) {
+          background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+          box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+        }
+
+        .filter-button:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        /* Info Cards Row */
+        .filter-bottom-row {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: clamp(0.75rem, 2vw, 1rem);
+          border-top: 1px solid #a7f3d0;
+          padding-top: clamp(0.75rem, 2vw, 1rem);
+        }
+
+        .info-card {
+          position: relative;
+          overflow: hidden;
+          padding: clamp(0.75rem, 2vw, 1rem);
+          border-radius: 0.5rem;
+          border: 2px solid;
+          background: white;
+          transition: all 0.3s ease;
+          display: flex;
+          flex-direction: column;
+          gap: clamp(0.4rem, 1vw, 0.6rem);
+        }
+
+        .info-card:hover {
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+          transform: translateY(-2px);
+        }
+
+        .info-card-header {
+          display: flex;
+          align-items: center;
+          gap: clamp(0.5rem, 1.5vw, 0.75rem);
+        }
+
+        .info-card-icon {
+          padding: clamp(0.4rem, 1vw, 0.6rem);
+          border-radius: 0.375rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          transition: transform 0.3s ease;
+        }
+
+        .info-card:hover .info-card-icon {
+          transform: scale(1.15);
+        }
+
+        .info-card-label {
+          font-size: clamp(0.6rem, 1vw, 0.75rem);
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.02em;
+          margin: 0;
+        }
+
+        .info-card-value {
+          font-size: clamp(1rem, 2.5vw, 1.25rem);
+          font-weight: 700;
+          margin: 0;
+          word-break: break-word;
+          padding-left: clamp(0.4rem, 1vw, 0.6rem);
+        }
+
+        /* Card Variants */
+        .info-card.orc {
+          border-color: #e9d5ff;
+        }
+
+        .info-card.orc .info-card-icon {
+          background-color: #ede9fe;
+        }
+
+        .info-card.orc .info-card-icon svg {
+          color: #a855f7;
+        }
+
+        .info-card.orc .info-card-label {
+          color: #64748b;
+        }
+
+        .info-card.orc .info-card-value {
+          color: #a855f7;
+        }
+
+        .info-card.style {
+          border-color: #fed7aa;
+        }
+
+        .info-card.style .info-card-icon {
+          background-color: #fef3c7;
+        }
+
+        .info-card.style .info-card-icon svg {
+          color: #d97706;
+        }
+
+        .info-card.style .info-card-label {
+          color: #64748b;
+        }
+
+        .info-card.style .info-card-value {
+          color: #d97706;
+        }
+
+        /* ===== FULLSCREEN ADJUSTMENTS ===== */
+        .fullscreen-content-wrapper .filter-container {
+          gap: 1.5rem;
+        }
+
+        .fullscreen-content-wrapper .filter-select,
+        .fullscreen-content-wrapper .filter-button {
+          font-size: 1rem;
+          min-height: 3rem;
+          padding: 0.875rem 1.25rem;
+        }
+
+        .fullscreen-content-wrapper .filter-label {
+          font-size: 0.9rem;
+        }
+
+        .fullscreen-content-wrapper .info-card {
+          padding: 1.25rem;
+          gap: 0.75rem;
+        }
+
+        .fullscreen-content-wrapper .info-card-value {
+          font-size: 1.5rem;
+        }
+
+        .fullscreen-content-wrapper .info-card-label {
+          font-size: 0.85rem;
+        }
+      `}</style>
+
+      <div className="filter-container">
         
         {/* Top Row - Controls */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6 flex-wrap">
+        <div className="filter-top-row">
           
           {/* Hour Selector */}
-          <div className="w-full sm:w-auto">
-            <label className="text-xs font-semibold text-slate-700 mb-2.5 flex items-center gap-2 uppercase tracking-wider">
-              <Clock size={16} className="text-emerald-600" strokeWidth={2.5} />
+          <div className="filter-group">
+            <label className="filter-label">
+              <Clock size={16} strokeWidth={2.5} />
               Select Hour
             </label>
             <select
               value={selectedHour}
               onChange={(e) => setSelectedHour(e.target.value)}
               disabled={viewAllHours || chartLoading}
-              className="w-full sm:w-48 px-4 py-2.5 bg-white border-2 border-emerald-300 rounded-lg text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent disabled:bg-slate-100 disabled:text-slate-500 disabled:cursor-not-allowed disabled:border-slate-300 transition-all hover:border-emerald-400"
+              className="filter-select"
             >
               {Array.from({ length: 10 }, (_, i) => i + 1).map((hour) => (
                 <option key={hour} value={hour.toString()}>
@@ -59,19 +329,15 @@ function ProcessPerformanceChart({
           </div>
 
           {/* View Toggle Button */}
-          <div className="w-full sm:w-auto">
-            <label className="text-xs font-semibold text-slate-700 mb-2.5 flex items-center gap-2 uppercase tracking-wider">
-              <Filter size={16} className="text-emerald-600" strokeWidth={2.5} />
+          <div className="filter-group">
+            <label className="filter-label">
+              <Filter size={16} strokeWidth={2.5} />
               View Type
             </label>
             <button
               onClick={() => setViewAllHours(!viewAllHours)}
               disabled={chartLoading}
-              className={`w-full sm:w-auto px-5 py-2.5 rounded-lg font-semibold transition-all text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md ${
-                viewAllHours
-                  ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 border-2 border-emerald-600'
-                  : 'bg-white text-slate-700 border-2 border-slate-300 hover:border-slate-400 hover:bg-slate-50'
-              }`}
+              className={`filter-button ${viewAllHours ? 'toggle-all' : 'toggle-single'}`}
             >
               {chartLoading && <RefreshCw size={16} className="animate-spin" strokeWidth={2.5} />}
               {!chartLoading && <TrendingUp size={16} strokeWidth={2.5} />}
@@ -79,12 +345,10 @@ function ProcessPerformanceChart({
             </button>
           </div>
 
-          {/* Bottleneck Detector Button - Show only in single hour view */}
+          {/* Bottleneck Detector Button */}
           {!viewAllHours && processChartData.length > 0 && (
-            <div className="w-full sm:w-auto">
-              <label className="text-xs font-semibold text-slate-700 mb-2.5 flex items-center gap-2 uppercase tracking-wider opacity-0">
-                Bottleneck
-              </label>
+            <div className="filter-group">
+              <label className="filter-label opacity-0">Bottleneck</label>
               <button
                 onClick={() => {
                   setShowBottleneck(!showBottleneck)
@@ -98,7 +362,7 @@ function ProcessPerformanceChart({
                   }, 100)
                 }}
                 disabled={chartLoading}
-                className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-red-500 to-orange-600 hover:from-red-600 hover:to-orange-700 text-white rounded-lg font-semibold transition-all text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md border-2 border-red-600"
+                className="filter-button bottleneck"
               >
                 <AlertTriangle size={16} strokeWidth={2.5} />
                 <span>{showBottleneck ? 'Hide Bottlenecks' : 'View Bottlenecks'}</span>
@@ -107,38 +371,32 @@ function ProcessPerformanceChart({
           )}
         </div>
 
-        {/* Bottom Row - ORC and Style Info Display (User Friendly Cards) */}
+        {/* Bottom Row - Info Cards */}
         {!viewAllHours && processChartData.length > 0 && (
-          <div className="flex flex-col sm:flex-row gap-4 border-t border-emerald-200 pt-4">
+          <div className="filter-bottom-row">
             
-            {/* ORC Info Card */}
-            <div className="flex-1 relative overflow-hidden px-5 py-4 bg-white rounded-lg border-2 border-purple-200 shadow-md hover:shadow-lg transition-all group">
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <div className="relative z-10">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 bg-purple-100 rounded-lg group-hover:scale-110 transition-transform duration-300">
-                    <Filter size={18} className="text-purple-600" strokeWidth={2.5} />
-                  </div>
-                  <span className="text-xs text-slate-600 font-bold uppercase tracking-wider">ORC</span>
+            {/* ORC Card */}
+            <div className="info-card orc">
+              <div className="info-card-header">
+                <div className="info-card-icon">
+                  <Filter size={18} strokeWidth={2.5} />
                 </div>
-                <p className="text-lg font-bold text-purple-600 ml-11">{orcData}</p>
+                <p className="info-card-label">ORC</p>
               </div>
+              <p className="info-card-value">{orcData}</p>
             </div>
 
-            {/* Style Info Card */}
-            <div className="flex-1 relative overflow-hidden px-5 py-4 bg-white rounded-lg border-2 border-amber-200 shadow-md hover:shadow-lg transition-all group">
-              <div className="absolute inset-0 bg-gradient-to-r from-amber-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <div className="relative z-10">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 bg-amber-100 rounded-lg group-hover:scale-110 transition-transform duration-300">
-                    <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                    </svg>
-                  </div>
-                  <span className="text-xs text-slate-600 font-bold uppercase tracking-wider">Style</span>
+            {/* Style Card */}
+            <div className="info-card style">
+              <div className="info-card-header">
+                <div className="info-card-icon">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                  </svg>
                 </div>
-                <p className="text-lg font-bold text-amber-600 ml-11">{styleData}</p>
+                <p className="info-card-label">Style</p>
               </div>
+              <p className="info-card-value">{styleData}</p>
             </div>
           </div>
         )}

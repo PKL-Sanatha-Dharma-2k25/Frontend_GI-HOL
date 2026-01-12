@@ -92,24 +92,6 @@ export default function Header() {
     navigate('/login')
   }
 
-  const getStatusColor = () => {
-    if (targetData.status === 'On Track') return 'from-emerald-400 to-green-500'
-    if (targetData.status === 'Moderate') return 'from-yellow-400 to-orange-500'
-    return 'from-red-400 to-red-600'
-  }
-
-  const getStatusBg = () => {
-    if (targetData.status === 'On Track') return 'bg-emerald-50'
-    if (targetData.status === 'Moderate') return 'bg-yellow-50'
-    return 'bg-red-50'
-  }
-
-  const getStatusBorder = () => {
-    if (targetData.status === 'On Track') return 'border-emerald-200'
-    if (targetData.status === 'Moderate') return 'border-yellow-200'
-    return 'border-red-200'
-  }
-
   return (
     <>
       <style>{`
