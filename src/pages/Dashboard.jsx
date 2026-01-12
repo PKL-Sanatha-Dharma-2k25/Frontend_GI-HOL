@@ -8,6 +8,7 @@ import ProcessDetailsTable from '@/components/dashboard/ProcessDetailsTable'
 import BottleneckDetector from '@/components/dashboard/BottleneckDetector'
 import { FullscreenLayout, FullscreenToggleButton } from '@/components/fullscreen/FullscreenMode'
 import { useDashboardData } from '@/hooks/useDashboardData'
+import BgHero from '@/assets/images/Picture1.png'
 
 function Dashboard() {
   const { user, loading } = useAuth()
@@ -20,8 +21,8 @@ function Dashboard() {
     processChartData,
     allHoursData,
     chartLoading,
-    orcData,      // ✅ TAMBAH INI
-    styleData     // ✅ TAMBAH INI
+    orcData,
+    styleData
   } = useDashboardData(user?.id_line)
 
   if (loading) {
@@ -40,30 +41,50 @@ function Dashboard() {
   ]
 
   const dashboardContent = (
-    <div className="space-y-6">
+    <div className="space-y-6 relative z-0">
       {/* Breadcrumb */}
       <div className="slide-in-down">
         <BreadCrumb items={breadcrumbItems} />
       </div>
 
-      {/* Dashboard Header with Fullscreen Toggle */}
-      <div className="flex justify-between items-center mb-2">
-        <h1 className="text-2xl font-bold text-gray-900"></h1>
-        <FullscreenToggleButton />
+      {/* Dashboard Header with Fullscreen Toggle - INSIDE Stats Card Now */}
+      {/* ⭐ Dashboard Stats - With Real Background Image */}
+      <div 
+        className="relative overflow-hidden rounded-2xl shadow-xl"
+        style={{
+          backgroundImage: `url(${BgHero})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed'
+        }}
+      >
+        {/* Dark Overlay - Untuk readability */}
+        <div className="absolute inset-0 bg-black/35" />
+        
+        {/* Color Gradient Overlay - Green & Blue tone */}
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-900/40 via-blue-900/30 to-teal-900/40" />
+        
+        {/* Header dengan Fullscreen Button */}
+        <div className="relative z-10 flex justify-between items-center p-6 border-b border-white/20">
+          <h2 className="text-xl font-bold text-white">Dashboard Overview</h2>
+          <FullscreenToggleButton />
+        </div>
+        
+        {/* Content - Stats Cards */}
+        <div className="relative z-10 p-10 sm:p-12">
+          <DashboardStats
+            processChartData={processChartData}
+            allHoursData={allHoursData}
+            viewAllHours={viewAllHours}
+            selectedHour={selectedHour}
+            user={user}
+          />
+        </div>
       </div>
 
-      {/* Dashboard Stats - KPI Cards */}
-      <DashboardStats
-        processChartData={processChartData}
-        allHoursData={allHoursData}
-        viewAllHours={viewAllHours}
-        selectedHour={selectedHour}
-        user={user}
-      />
-
-      {/* ⭐ BOTTLENECK DETECTOR - Show only when button is clicked (jadi tampilan pertama) */}
+      {/* ⭐ BOTTLENECK DETECTOR */}
       {showBottleneck && !viewAllHours && processChartData.length > 0 && (
-        <div id="bottleneck-section">
+        <div id="bottleneck-section" className="relative z-0">
           <BottleneckDetector data={processChartData} />
         </div>
       )}
@@ -80,11 +101,11 @@ function Dashboard() {
         user={user}
         showBottleneck={showBottleneck}
         setShowBottleneck={setShowBottleneck}
-        orcData={orcData}           // ✅ TAMBAH INI
-        styleData={styleData}       // ✅ TAMBAH INI
+        orcData={orcData}
+        styleData={styleData}
       />
 
-      {/* Daily Summary Performance - Operator aggregated view */}
+      {/* Daily Summary Performance */}
       <DailySummaryPerformance
         processChartData={processChartData}
         allHoursData={allHoursData}
@@ -92,7 +113,7 @@ function Dashboard() {
         chartLoading={chartLoading}
       />
 
-      {/* Process Details Table - Detailed breakdown (only for single hour) */}
+      {/* Process Details Table */}
       {!viewAllHours && (
         <ProcessDetailsTable
           data={processChartData}
@@ -104,7 +125,7 @@ function Dashboard() {
 
   return (
     <FullscreenLayout>
-      <div className="px-responsive py-responsive">
+      <div className="px-responsive py-responsive relative z-0">
         {dashboardContent}
       </div>
     </FullscreenLayout>

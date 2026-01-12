@@ -1,4 +1,3 @@
-
 import { TrendingUp, Activity, Zap, BarChart3 } from 'lucide-react'
 import StatCard from '@/components/ui/StatCard'
 
@@ -14,7 +13,7 @@ export default function DashboardStats({
     let totalTarget = 0
 
     if (viewAllHours) {
-      // Hitung total dari semua jam
+      // Calculate total from all hours
       Object.values(allHoursData).forEach(data => {
         if (Array.isArray(data)) {
           totalOutput += data.reduce((sum, item) => sum + (parseInt(item.output) || 0), 0)
@@ -22,7 +21,7 @@ export default function DashboardStats({
         }
       })
     } else {
-      // Hitung total dari hour terpilih
+      // Calculate total from selected hour
       totalOutput = processChartData.reduce((sum, item) => sum + (parseInt(item.output) || 0), 0)
       totalTarget = processChartData.reduce((sum, item) => sum + (parseInt(item.target) || 0), 0)
     }
@@ -64,7 +63,7 @@ export default function DashboardStats({
   const stats = getStatsData()
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 w-full">
       {stats.map((stat, idx) => (
         <div
           key={idx}
@@ -73,6 +72,7 @@ export default function DashboardStats({
             opacity: 0,
             animationDelay: `${idx * 100}ms`
           }}
+          className="h-full"
         >
           <StatCard
             label={stat.label}
@@ -83,6 +83,19 @@ export default function DashboardStats({
           />
         </div>
       ))}
+
+      <style>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </div>
   )
 }

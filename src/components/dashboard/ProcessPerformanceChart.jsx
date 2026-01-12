@@ -35,143 +35,109 @@ function ProcessPerformanceChart({
     <div className="mb-6 sm:mb-8 p-4 sm:p-6 bg-gradient-to-r from-slate-50 via-emerald-50 to-slate-50 rounded-xl border border-emerald-200 shadow-sm">
       <div className="flex flex-col gap-6">
         
-        {/* Top Row - Hour, View Type, Bottleneck */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
+        {/* Top Row - Controls */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6 flex-wrap">
           
-          {/* Left Section - Controls */}
-          <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-            
-            {/* Hour Selector */}
-            <div className="w-full sm:w-auto">
-              <label className="text-xs font-semibold text-slate-700 mb-2.5 flex items-center gap-2 uppercase tracking-wider">
-                <Clock size={16} className="text-emerald-600" strokeWidth={2.5} />
-                Select Hour
-              </label>
-              <select
-                value={selectedHour}
-                onChange={(e) => setSelectedHour(e.target.value)}
-                disabled={viewAllHours || chartLoading}
-                className="w-full sm:w-48 px-4 py-2.5 bg-white border-2 border-emerald-300 rounded-lg text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent disabled:bg-slate-100 disabled:text-slate-500 disabled:cursor-not-allowed disabled:border-slate-300 transition-all hover:border-emerald-400"
-              >
-                {Array.from({ length: 10 }, (_, i) => i + 1).map((hour) => (
-                  <option key={hour} value={hour.toString()}>
-                    Hour {hour}
-                  </option>
-                ))}
-              </select>
-            </div>
+          {/* Hour Selector */}
+          <div className="w-full sm:w-auto">
+            <label className="text-xs font-semibold text-slate-700 mb-2.5 flex items-center gap-2 uppercase tracking-wider">
+              <Clock size={16} className="text-emerald-600" strokeWidth={2.5} />
+              Select Hour
+            </label>
+            <select
+              value={selectedHour}
+              onChange={(e) => setSelectedHour(e.target.value)}
+              disabled={viewAllHours || chartLoading}
+              className="w-full sm:w-48 px-4 py-2.5 bg-white border-2 border-emerald-300 rounded-lg text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent disabled:bg-slate-100 disabled:text-slate-500 disabled:cursor-not-allowed disabled:border-slate-300 transition-all hover:border-emerald-400"
+            >
+              {Array.from({ length: 10 }, (_, i) => i + 1).map((hour) => (
+                <option key={hour} value={hour.toString()}>
+                  Hour {hour}
+                </option>
+              ))}
+            </select>
+          </div>
 
-            {/* View Toggle Button */}
+          {/* View Toggle Button */}
+          <div className="w-full sm:w-auto">
+            <label className="text-xs font-semibold text-slate-700 mb-2.5 flex items-center gap-2 uppercase tracking-wider">
+              <Filter size={16} className="text-emerald-600" strokeWidth={2.5} />
+              View Type
+            </label>
+            <button
+              onClick={() => setViewAllHours(!viewAllHours)}
+              disabled={chartLoading}
+              className={`w-full sm:w-auto px-5 py-2.5 rounded-lg font-semibold transition-all text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md ${
+                viewAllHours
+                  ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 border-2 border-emerald-600'
+                  : 'bg-white text-slate-700 border-2 border-slate-300 hover:border-slate-400 hover:bg-slate-50'
+              }`}
+            >
+              {chartLoading && <RefreshCw size={16} className="animate-spin" strokeWidth={2.5} />}
+              {!chartLoading && <TrendingUp size={16} strokeWidth={2.5} />}
+              <span>{viewAllHours ? 'All Hours' : 'Single Hour'}</span>
+            </button>
+          </div>
+
+          {/* Bottleneck Detector Button - Show only in single hour view */}
+          {!viewAllHours && processChartData.length > 0 && (
             <div className="w-full sm:w-auto">
-              <label className="text-xs font-semibold text-slate-700 mb-2.5 flex items-center gap-2 uppercase tracking-wider">
-                <Filter size={16} className="text-emerald-600" strokeWidth={2.5} />
-                View Type
+              <label className="text-xs font-semibold text-slate-700 mb-2.5 flex items-center gap-2 uppercase tracking-wider opacity-0">
+                Bottleneck
               </label>
               <button
-                onClick={() => setViewAllHours(!viewAllHours)}
+                onClick={() => {
+                  setShowBottleneck(!showBottleneck)
+                  setTimeout(() => {
+                    if (!showBottleneck) {
+                      document.getElementById('bottleneck-section')?.scrollIntoView({ 
+                        behavior: 'smooth',
+                        block: 'start'
+                      })
+                    }
+                  }, 100)
+                }}
                 disabled={chartLoading}
-                className={`w-full sm:w-auto px-5 py-2.5 rounded-lg font-semibold transition-all text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md ${
-                  viewAllHours
-                    ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 border-2 border-emerald-600'
-                    : 'bg-white text-slate-700 border-2 border-slate-300 hover:border-slate-400 hover:bg-slate-50'
-                }`}
+                className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-red-500 to-orange-600 hover:from-red-600 hover:to-orange-700 text-white rounded-lg font-semibold transition-all text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md border-2 border-red-600"
               >
-                {chartLoading && <RefreshCw size={16} className="animate-spin" strokeWidth={2.5} />}
-                {!chartLoading && <TrendingUp size={16} strokeWidth={2.5} />}
-                <span>{viewAllHours ? 'All Hours' : 'Single Hour'}</span>
+                <AlertTriangle size={16} strokeWidth={2.5} />
+                <span>{showBottleneck ? 'Hide Bottlenecks' : 'View Bottlenecks'}</span>
               </button>
             </div>
-
-            {/* Bottleneck Detector Button - Show only in single hour view */}
-            {!viewAllHours && processChartData.length > 0 && (
-              <div className="w-full sm:w-auto">
-                <label className="text-xs font-semibold text-slate-700 mb-2.5 flex items-center gap-2 uppercase tracking-wider opacity-0">
-                  Bottleneck
-                </label>
-                <button
-                  onClick={() => {
-                    setShowBottleneck(!showBottleneck)
-                    setTimeout(() => {
-                      if (!showBottleneck) {
-                        document.getElementById('bottleneck-section')?.scrollIntoView({ 
-                          behavior: 'smooth',
-                          block: 'start'
-                        })
-                      }
-                    }, 100)
-                  }}
-                  disabled={chartLoading}
-                  className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-red-500 to-orange-600 hover:from-red-600 hover:to-orange-700 text-white rounded-lg font-semibold transition-all text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md border-2 border-red-600"
-                >
-                  <AlertTriangle size={16} strokeWidth={2.5} />
-                  <span>{showBottleneck ? 'Hide Bottlenecks' : 'View Bottlenecks'}</span>
-                </button>
-              </div>
-            )}
-          
-          </div>
-
-          {/* Right Section - Info Cards */}
-          <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-            
-            {/* Line Info Card */}
-            <div className="flex-1 sm:flex-none px-4 py-2.5 bg-white rounded-lg border-2 border-emerald-200 shadow-sm hover:shadow-md transition-all">
-              <div className="flex items-center gap-2">
-                <div className="p-2 bg-emerald-100 rounded-lg">
-                  <Activity size={16} className="text-emerald-600" strokeWidth={2.5} />
-                </div>
-                <div>
-                  <span className="text-xs text-slate-600 font-medium block">Current Line</span>
-                  <span className="text-base font-bold text-emerald-600">{user?.id_line || '-'}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Loading Indicator */}
-            {chartLoading && (
-              <div className="flex items-center gap-2 px-3 py-2.5 bg-white rounded-lg border-2 border-emerald-200">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-2 h-2 bg-emerald-600 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
-                  <div className="w-2 h-2 bg-emerald-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                  <div className="w-2 h-2 bg-emerald-600 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
-                </div>
-                <span className="text-xs text-slate-600 font-medium">Loading...</span>
-              </div>
-            )}
-          </div>
+          )}
         </div>
 
-        {/* Bottom Row - ORC and Style Info Display */}
+        {/* Bottom Row - ORC and Style Info Display (User Friendly Cards) */}
         {!viewAllHours && processChartData.length > 0 && (
-          <div className="flex flex-col sm:flex-row gap-3 border-t border-emerald-200 pt-4">
+          <div className="flex flex-col sm:flex-row gap-4 border-t border-emerald-200 pt-4">
             
             {/* ORC Info Card */}
-            <div className="flex-1 relative overflow-hidden px-4 py-3 bg-white rounded-lg border-2 border-purple-200 shadow-md hover:shadow-lg transition-all group">
+            <div className="flex-1 relative overflow-hidden px-5 py-4 bg-white rounded-lg border-2 border-purple-200 shadow-md hover:shadow-lg transition-all group">
               <div className="absolute inset-0 bg-gradient-to-r from-purple-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <div className="relative z-10 flex items-center gap-3">
-                <div className="p-2 bg-purple-100 rounded-lg group-hover:scale-110 transition-transform duration-300">
-                  <Filter size={16} className="text-purple-600" strokeWidth={2.5} />
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 bg-purple-100 rounded-lg group-hover:scale-110 transition-transform duration-300">
+                    <Filter size={18} className="text-purple-600" strokeWidth={2.5} />
+                  </div>
+                  <span className="text-xs text-slate-600 font-bold uppercase tracking-wider">ORC</span>
                 </div>
-                <div className="flex-1">
-                  <span className="text-xs text-slate-600 font-bold block uppercase tracking-wider">ORC</span>
-                  <span className="text-base font-bold text-purple-600 block">{orcData}</span>
-                </div>
+                <p className="text-lg font-bold text-purple-600 ml-11">{orcData}</p>
               </div>
             </div>
 
             {/* Style Info Card */}
-            <div className="flex-1 relative overflow-hidden px-4 py-3 bg-white rounded-lg border-2 border-amber-200 shadow-md hover:shadow-lg transition-all group">
+            <div className="flex-1 relative overflow-hidden px-5 py-4 bg-white rounded-lg border-2 border-amber-200 shadow-md hover:shadow-lg transition-all group">
               <div className="absolute inset-0 bg-gradient-to-r from-amber-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <div className="relative z-10 flex items-center gap-3">
-                <div className="p-2 bg-amber-100 rounded-lg group-hover:scale-110 transition-transform duration-300">
-                  <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                  </svg>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 bg-amber-100 rounded-lg group-hover:scale-110 transition-transform duration-300">
+                    <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                    </svg>
+                  </div>
+                  <span className="text-xs text-slate-600 font-bold uppercase tracking-wider">Style</span>
                 </div>
-                <div className="flex-1">
-                  <span className="text-xs text-slate-600 font-bold block uppercase tracking-wider">Style</span>
-                  <span className="text-base font-bold text-amber-600 block">{styleData}</span>
-                </div>
+                <p className="text-lg font-bold text-amber-600 ml-11">{styleData}</p>
               </div>
             </div>
           </div>

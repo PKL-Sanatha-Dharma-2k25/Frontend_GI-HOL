@@ -2,6 +2,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { LogOut, ChevronDown, Clock } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { createPortal } from 'react-dom'
 
 import icon from '@/assets/icons/icon.png'
 
@@ -10,7 +11,17 @@ export default function Header() {
   const navigate = useNavigate()
   const [userDropdownOpen, setUserDropdownOpen] = useState(false)
   const [currentTime, setCurrentTime] = useState('')
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, right: 0 })
   const userDropdownRef = useRef(null)
+  const buttonRef = useRef(null)
+  const [targetData, setTargetData] = useState({
+    dailyTarget: 5000,
+    currentOutput: 4068,
+    progress: 81.36,
+    status: 'On Track',
+    remaining: 932,
+    timeRemaining: '4h 32m'
+  })
 
   const rawRole = user?.role
 
@@ -33,9 +44,41 @@ export default function Header() {
     return () => clearInterval(interval)
   }, [])
 
+  // Simulate real-time target update
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTargetData(prev => {
+        const newOutput = Math.min(prev.dailyTarget, prev.currentOutput + Math.floor(Math.random() * 50))
+        const newProgress = (newOutput / prev.dailyTarget) * 100
+        const status = newProgress >= 80 ? 'On Track' : newProgress >= 60 ? 'Moderate' : 'Behind Schedule'
+        
+        return {
+          ...prev,
+          currentOutput: newOutput,
+          progress: newProgress,
+          remaining: Math.max(0, prev.dailyTarget - newOutput),
+          status: status
+        }
+      })
+    }, 4000)
+    return () => clearInterval(interval)
+  }, [])
+
+  // Update dropdown position when it opens
+  useEffect(() => {
+    if (userDropdownOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect()
+      setDropdownPos({
+        top: rect.bottom + 8,
+        right: window.innerWidth - rect.right
+      })
+    }
+  }, [userDropdownOpen])
+
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target)) {
+      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target) && 
+          buttonRef.current && !buttonRef.current.contains(event.target)) {
         setUserDropdownOpen(false)
       }
     }
@@ -49,9 +92,38 @@ export default function Header() {
     navigate('/login')
   }
 
+  const getStatusColor = () => {
+    if (targetData.status === 'On Track') return 'from-emerald-400 to-green-500'
+    if (targetData.status === 'Moderate') return 'from-yellow-400 to-orange-500'
+    return 'from-red-400 to-red-600'
+  }
+
+  const getStatusBg = () => {
+    if (targetData.status === 'On Track') return 'bg-emerald-50'
+    if (targetData.status === 'Moderate') return 'bg-yellow-50'
+    return 'bg-red-50'
+  }
+
+  const getStatusBorder = () => {
+    if (targetData.status === 'On Track') return 'border-emerald-200'
+    if (targetData.status === 'Moderate') return 'border-yellow-200'
+    return 'border-red-200'
+  }
+
   return (
     <>
       <style>{`
+        @keyframes slideDown {
+          0% {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
         @keyframes scrollRight {
           0% {
             left: 100%;
@@ -61,13 +133,47 @@ export default function Header() {
           }
         }
 
+        @keyframes fillBar {
+          0% {
+            width: 0%;
+          }
+          100% {
+            width: ${targetData.progress}%;
+          }
+        }
+
+        @keyframes pulse-stat {
+          0%, 100% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.02);
+          }
+        }
+
+        .target-container {
+          animation: slideDown 0.6s ease-out;
+        }
+
+        .progress-bar {
+          animation: fillBar 1s ease-out forwards;
+        }
+
+        .stat-number {
+          animation: pulse-stat 2s ease-in-out infinite;
+        }
+
+        .status-icon {
+          animation: pulse-stat 1.5s ease-in-out infinite;
+        }
+
         .marquee-text {
           display: flex;
           align-items: center;
           gap: 0.5rem;
           padding: 0 20px;
           white-space: nowrap;
-          animation: scrollRight 40s linear infinite;
+          animation: scrollRight 50s linear infinite;
           font-weight: 500;
           letter-spacing: 0.05em;
           background: linear-gradient(90deg, #1e293b 0%, #475569 50%, #1e293b 100%);
@@ -77,6 +183,12 @@ export default function Header() {
           position: absolute;
           top: 50%;
           transform: translateY(-50%);
+          font-size: 0.95rem;
+        }
+
+        .marquee-container {
+          position: relative;
+          overflow: hidden;
         }
 
         .marquee-container:hover .marquee-text {
@@ -85,7 +197,7 @@ export default function Header() {
       `}</style>
 
       {/* Main Header */}
-      <header className="bg-white border-b border-slate-200/60 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between sm:justify-end h-16 sm:h-[88px] relative overflow-hidden marquee-container">
+      <header className="bg-white border-b border-slate-200/60 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between sm:justify-end relative overflow-hidden z-40 marquee-container">
         
         {/* Mobile Only - Show Username */}
         <div className="sm:hidden text-left z-10 relative">
@@ -93,17 +205,27 @@ export default function Header() {
           <p className="text-xs text-slate-500 -mt-0.5">Active</p>
         </div>
 
-        {/* Marquee - Hidden on Mobile, Show on Desktop */}
-        <div className="hidden sm:block absolute left-0 right-0 top-0 bottom-0 overflow-hidden" style={{ width: 'calc(100% - 320px)' }}>
+        {/* Marquee Text - Desktop Only */}
+        <div className="hidden sm:block absolute left-0 right-0 top-0 bottom-0 overflow-hidden" style={{ width: 'calc(100% - 400px)' }}>
           <div className="marquee-text">
             <img src={icon} alt="icon" className="w-5 h-5 flex-shrink-0" />
             Quality In Every Single Stitch
+            <img src={icon} alt="icon" className="w-5 h-5 flex-shrink-0" />
           </div>
-          <div className="marquee-text" style={{ animation: 'scrollRight 40s linear infinite 0s' }}>
+          <div className="marquee-text" style={{ animation: 'scrollRight 50s linear infinite 0s' }}>
             <img src={icon} alt="icon" className="w-5 h-5 flex-shrink-0" />
             Quality In Every Single Stitch
+            <img src={icon} alt="icon" className="w-5 h-5 flex-shrink-0" />
           </div>
         </div>
+        
+        {/* Mobile Only - Show Username */}
+        <div className="sm:hidden text-left z-10 relative">
+          <p className="text-sm font-semibold text-slate-900 truncate">{user?.username}</p>
+          <p className="text-xs text-slate-500 -mt-0.5">Active</p>
+        </div>
+
+        {/* Production Target Tracker - REMOVED */}
 
         {/* Right Section */}
         <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 relative z-10">
@@ -122,8 +244,9 @@ export default function Header() {
           </div>
 
           {/* User Menu Dropdown */}
-          <div className="relative" ref={userDropdownRef}>
+          <div className="relative">
             <button
+              ref={buttonRef}
               onClick={() => setUserDropdownOpen(!userDropdownOpen)}
               className="flex items-center gap-1.5 sm:gap-2 pl-2.5 sm:pl-3 lg:pl-4 pr-1 sm:pr-2 py-1.5 border-l border-slate-200 hover:bg-slate-50 rounded-lg transition-all duration-300"
             >
@@ -145,9 +268,16 @@ export default function Header() {
               />
             </button>
 
-            {/* Dropdown Menu */}
-            {userDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-white border border-slate-200/80 rounded-xl shadow-lg z-50 overflow-hidden">
+            {/* Dropdown Menu - Rendered with Portal */}
+            {userDropdownOpen && createPortal(
+              <div
+                ref={userDropdownRef}
+                className="fixed w-56 bg-white border border-slate-200/80 rounded-xl shadow-2xl z-9999 overflow-hidden"
+                style={{
+                  top: `${dropdownPos.top}px`,
+                  right: `${dropdownPos.right}px`
+                }}
+              >
                 {/* User Info Section */}
                 <div className="px-4 py-3 border-b bg-gradient-to-r from-emerald-50 to-teal-50">
                   <p className="text-xs text-slate-600 font-medium uppercase tracking-wider">Logged in as</p>
@@ -174,7 +304,8 @@ export default function Header() {
                   <LogOut size={16} />
                   Logout
                 </button>
-              </div>
+              </div>,
+              document.body
             )}
           </div>
         </div>
