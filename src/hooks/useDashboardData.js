@@ -20,22 +20,29 @@ export function useDashboardData(userId) {
       setChartLoading(true)
       try {
         if (viewAllHours) {
-          console.log('📊 Fetching all hours data...')
-          const allData = {}
+          console.log('📊 Fetching all hours data (PARALLEL)...')
           
-          for (let hour = 1; hour <= 10; hour++) {
-            try {
-              const response = await getBarChartDash(userId, hour.toString())
-              if (response?.data && Array.isArray(response.data)) {
-                allData[hour] = response.data
-              } else {
-                allData[hour] = []
-              }
-            } catch (error) {
-              console.warn(`⚠️ Error fetching hour ${hour}:`, error)
-              allData[hour] = []
-            }
-          }
+          // ✅ PARALEL: Fetch semua jam sekaligus dengan Promise.all()
+          const promises = Array.from({ length: 10 }, (_, i) => 
+            getBarChartDash(userId, (i + 1).toString())
+              .then(response => ({
+                hour: i + 1,
+                data: response?.data && Array.isArray(response.data) ? response.data : []
+              }))
+              .catch(error => {
+                console.warn(`⚠️ Error fetching hour ${i + 1}:`, error)
+                return { hour: i + 1, data: [] }
+              })
+          )
+
+          // Tunggu semua request selesai
+          const results = await Promise.all(promises)
+          
+          // Konversi hasil ke object dengan key hour
+          const allData = {}
+          results.forEach(({ hour, data }) => {
+            allData[hour] = data
+          })
           
           console.log('✅ All hours data loaded:', allData)
           setAllHoursData(allData)
@@ -48,21 +55,16 @@ export function useDashboardData(userId) {
           
           if (response?.data && Array.isArray(response.data)) {
             console.log('✅ Chart data loaded:', response.data)
-            console.log('📋 First item:', response.data[0])
             
             setProcessChartData(response.data)
             
-            // ✅ Extract ORC & Style dari response (bukan dari data array)
+            // ✅ Extract ORC & Style
             const orc = response.orc || response.data[0]?.orc || '-'
             const style = response.style || response.data[0]?.style || '-'
-            
-            console.log('🎯 ORC:', orc)
-            console.log('🎨 Style:', style)
             
             setOrcData(orc)
             setStyleData(style)
           } else {
-            console.warn('⚠️ Data format tidak sesuai')
             setProcessChartData([])
             setOrcData('-')
             setStyleData('-')
