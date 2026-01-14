@@ -9,7 +9,8 @@ import {
   Menu,
   X,
   Lock,
-  LockOpen
+  LockOpen,
+  BarChart3
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
@@ -51,6 +52,10 @@ export default function Sidebar({
       '/hourly-output': 'hourly-output',
       '/line': 'line',
       '/operation-breakdown': 'operation-breakdown',
+      '/report': 'report',
+      '/report/summary': 'report',
+      '/report/all-hours': 'report',
+      '/report/orc-analysis': 'report',
       '/users': 'users'
     }
     setActiveMenu(pathMenuMap[location.pathname] || 'dashboard')
@@ -75,6 +80,18 @@ export default function Sidebar({
           path: '/hourly-output',
           submenu: [],
           section: 'production'
+        },
+        {
+          id: 'report',
+          label: 'Report',
+          icon: 'report',
+          path: '/report',
+          submenu: [
+            { id: 'report-summary', label: 'Summary Report', path: '/report/summary' },
+            { id: 'report-all-hours', label: 'All Hours Analysis', path: '/report/all-hours' },
+            { id: 'report-orc', label: 'ORC Analysis', path: '/report/orc-analysis' }
+          ],
+          section: 'production'
         }
       ]
     }
@@ -86,6 +103,18 @@ export default function Sidebar({
         { id: 'line', label: 'Line', icon: 'line', path: '/line', submenu: [], section: 'production' },
         { id: 'operation-breakdown', label: 'Operation Breakdown', icon: 'operation-breakdown', path: '/operation-breakdown', submenu: [], section: 'production' },
         { id: 'hourly-output', label: 'Hourly Output', icon: 'hourly-output', path: '/hourly-output', submenu: [], section: 'production' },
+        {
+          id: 'report',
+          label: 'Report',
+          icon: 'report',
+          path: '/report',
+          submenu: [
+            { id: 'report-summary', label: 'Summary Report', path: '/report/summary' },
+            { id: 'report-all-hours', label: 'All Hours Analysis', path: '/report/all-hours' },
+            { id: 'report-orc', label: 'ORC Analysis', path: '/report/orc-analysis' }
+          ],
+          section: 'production'
+        },
         {
           id: 'users',
           label: 'User Management',
@@ -107,6 +136,18 @@ export default function Sidebar({
         { id: 'line', label: 'Line', icon: 'line', path: '/line', submenu: [], section: 'production' },
         { id: 'operation-breakdown', label: 'Operation Breakdown', icon: 'operation-breakdown', path: '/operation-breakdown', submenu: [], section: 'production' },
         { id: 'hourly-output', label: 'Hourly Output', icon: 'hourly-output', path: '/hourly-output', submenu: [], section: 'production' },
+        {
+          id: 'report',
+          label: 'Report',
+          icon: 'report',
+          path: '/report',
+          submenu: [
+            { id: 'report-summary', label: 'Summary Report', path: '/report/summary' },
+            { id: 'report-all-hours', label: 'All Hours Analysis', path: '/report/all-hours' },
+            { id: 'report-orc', label: 'ORC Analysis', path: '/report/orc-analysis' }
+          ],
+          section: 'production'
+        },
         {
           id: 'users',
           label: 'User Management',
@@ -155,6 +196,7 @@ export default function Sidebar({
       line: <Map size={20} />,
       'operation-breakdown': <ShoppingBag size={20} />,
       'hourly-output': <Clock size={20} />,
+      report: <BarChart3 size={20} />,
       users: <Users size={20} />
     }
     return icons[iconName] || <LayoutDashboard size={20} />
@@ -166,6 +208,7 @@ export default function Sidebar({
       line: 'from-green-400 to-green-600',
       'operation-breakdown': 'from-purple-400 to-purple-600',
       'hourly-output': 'from-orange-400 to-orange-600',
+      report: 'from-red-400 to-red-600',
       users: 'from-pink-400 to-pink-600'
     }
     return colors[iconName] || 'from-blue-400 to-blue-600'

@@ -4,10 +4,9 @@ import { TrendingUp, Zap, Target, AlertCircle, ArrowUpDown, BarChart3 } from 'lu
 import { useState } from 'react'
 
 function OrcProcessLineChart({ chartData = [], loading = false, orc = '-' }) {
-  const [chartType, setChartType] = useState('line') // 'line' atau 'bar'
-  const [sortOrder, setSortOrder] = useState('original') // 'original', 'highest', 'lowest'
+  const [chartType, setChartType] = useState('line')
+  const [sortOrder, setSortOrder] = useState('original')
 
-  // Sort data
   const getSortedData = () => {
     let sorted = [...chartData]
     if (sortOrder === 'highest') {
@@ -62,88 +61,175 @@ function OrcProcessLineChart({ chartData = [], loading = false, orc = '-' }) {
 
   return (
     <div className="fade-in space-y-6">
-      {/* Header Card */}
-      <div className="relative bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-600 rounded-3xl p-8 overflow-hidden shadow-2xl">
-        <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
-        </div>
+      {/* ===== SIMPLIFIED HEADER SECTION ===== */}
+      <div className="mb-6 p-6 bg-gradient-to-r from-slate-50 via-emerald-50 to-slate-50 rounded-xl border border-emerald-200 shadow-sm">
+        <style>{`
+          .header-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+          }
 
-        <div className="relative z-10">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-4">
-              <div className="p-4 bg-white/20 backdrop-blur-md rounded-2xl border border-white/30">
-                <Zap size={32} className="text-white" />
+          .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+          }
+
+          .header-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+          }
+
+          .header-title-icon {
+            padding: 0.75rem;
+            background-color: #10b981;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+          }
+
+          .header-title-icon svg {
+            color: white;
+            width: 24px;
+            height: 24px;
+          }
+
+          .header-title-text h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0;
+            line-height: 1.2;
+          }
+
+          .header-title-text p {
+            font-size: 0.85rem;
+            color: #475569;
+            margin: 0.5rem 0 0 0;
+          }
+
+          .header-orc {
+            display: inline-block;
+            background-color: #d1fae5;
+            border: 2px solid #6ee7b7;
+            border-radius: 0.375rem;
+            padding: 0.375rem 0.75rem;
+            font-weight: 700;
+            color: #059669;
+            font-size: 0.875rem;
+          }
+
+          .header-ops-box {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: center;
+          }
+
+          .header-ops-count {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #059669;
+            margin: 0;
+            line-height: 1;
+          }
+
+          .header-ops-label {
+            font-size: 0.75rem;
+            color: #475569;
+            font-weight: 600;
+            margin: 0.25rem 0 0 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+          }
+
+          .header-bottom {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            border-top: 1px solid #a7f3d0;
+            padding-top: 1.5rem;
+          }
+
+          .stat-item {
+            background: white;
+            border: 2px solid #a7f3d0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.2s ease;
+          }
+
+          .stat-item:hover {
+            border-color: #6ee7b7;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.1);
+          }
+
+          .stat-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+          }
+
+          .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #059669;
+            line-height: 1.2;
+          }
+
+          .stat-unit {
+            font-size: 0.7rem;
+            color: #64748b;
+            margin-top: 0.375rem;
+          }
+        `}</style>
+
+        <div className="header-container">
+          {/* Top Row - Title & Operations Count */}
+          <div className="header-top">
+            <div className="header-title">
+              <div className="header-title-icon">
+                <Zap />
               </div>
-              <div>
-                <h2 className="text-4xl font-bold text-white">Process Performance</h2>
-                <p className="text-blue-100 text-lg mt-2">ORC: <span className="font-bold bg-white/20 px-3 py-1 rounded-lg">{orc}</span></p>
+              <div className="header-title-text">
+                <h2>Process Performance</h2>
+                <p>ORC: <span className="header-orc">{orc}</span></p>
               </div>
             </div>
-            <div className="text-right">
-              <p className="text-6xl font-bold text-white drop-shadow-lg">{chartData.length}</p>
-              <p className="text-blue-100 text-lg font-semibold">Operations</p>
+
+            <div className="header-ops-box">
+              <p className="header-ops-count">{chartData.length}</p>
+              <p className="header-ops-label">Operations</p>
             </div>
           </div>
 
-          {/* Stats Row */}
-          <div className="grid grid-cols-3 gap-4">
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 hover:bg-white/20 transition-all duration-300">
-              <p className="text-blue-100 text-sm font-bold uppercase tracking-wider mb-2">Average</p>
-              <p className="text-3xl font-bold text-white">{averageOutput.toLocaleString()}</p>
-              <p className="text-blue-200 text-xs mt-1">Units</p>
+          {/* Bottom Row - Stats Cards */}
+          <div className="header-bottom">
+            <div className="stat-item">
+              <div className="stat-label">Average</div>
+              <div className="stat-value">{averageOutput.toLocaleString()}</div>
+              <div className="stat-unit">Units</div>
             </div>
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 hover:bg-white/20 transition-all duration-300">
-              <p className="text-blue-100 text-sm font-bold uppercase tracking-wider mb-2">Peak</p>
-              <p className="text-3xl font-bold text-white">{maxOutput.toLocaleString()}</p>
-              <p className="text-blue-200 text-xs mt-1">Highest</p>
+            <div className="stat-item">
+              <div className="stat-label">Peak</div>
+              <div className="stat-value">{maxOutput.toLocaleString()}</div>
+              <div className="stat-unit">Highest</div>
             </div>
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 hover:bg-white/20 transition-all duration-300">
-              <p className="text-blue-100 text-sm font-bold uppercase tracking-wider mb-2">Variance</p>
-              <p className="text-3xl font-bold text-white">{variance}%</p>
-              <p className="text-blue-200 text-xs mt-1">Difference</p>
+            <div className="stat-item">
+              <div className="stat-label">Variance</div>
+              <div className="stat-value">{variance}%</div>
+              <div className="stat-unit">Difference</div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Stats Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="group bg-gradient-to-br from-emerald-400 to-green-600 rounded-2xl p-6 text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 cursor-pointer">
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <p className="text-emerald-100 text-sm font-bold uppercase tracking-wider">Peak Output</p>
-              <p className="text-4xl font-black mt-2">{maxOutput.toLocaleString()}</p>
-            </div>
-            <TrendingUp size={40} className="text-white/80 group-hover:text-white transition" />
-          </div>
-          <div className="h-1 bg-white/30 rounded-full overflow-hidden">
-            <div className="h-full bg-white rounded-full w-4/5 group-hover:w-full transition-all duration-500"></div>
-          </div>
-        </div>
-
-        <div className="group bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl p-6 text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 cursor-pointer">
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <p className="text-blue-100 text-sm font-bold uppercase tracking-wider">Average</p>
-              <p className="text-4xl font-black mt-2">{averageOutput.toLocaleString()}</p>
-            </div>
-            <Target size={40} className="text-white/80 group-hover:text-white transition" />
-          </div>
-          <div className="h-1 bg-white/30 rounded-full overflow-hidden">
-            <div className="h-full bg-white rounded-full w-3/5 group-hover:w-full transition-all duration-500"></div>
-          </div>
-        </div>
-
-        <div className="group bg-gradient-to-br from-orange-400 to-red-600 rounded-2xl p-6 text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 cursor-pointer">
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <p className="text-orange-100 text-sm font-bold uppercase tracking-wider">Lowest</p>
-              <p className="text-4xl font-black mt-2">{minOutput.toLocaleString()}</p>
-            </div>
-            <AlertCircle size={40} className="text-white/80 group-hover:text-white transition" />
-          </div>
-          <div className="h-1 bg-white/30 rounded-full overflow-hidden">
-            <div className="h-full bg-white rounded-full w-2/5 group-hover:w-full transition-all duration-500"></div>
           </div>
         </div>
       </div>
@@ -230,7 +316,7 @@ function OrcProcessLineChart({ chartData = [], loading = false, orc = '-' }) {
 
         {/* Chart Container */}
         {!loading ? (
-          <div style={{ width: '100%', height: '520px' }}>
+          <div style={{ width: '100%', height: '600px' }}>
             <ResponsiveContainer width="100%" height="100%">
               {chartType === 'line' ? (
                 <LineChart
@@ -460,6 +546,48 @@ function OrcProcessLineChart({ chartData = [], loading = false, orc = '-' }) {
             </div>
           </div>
         )}
+
+        {/* Stats Cards Grid - Inside Card Bottom */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 -mt-40">
+          <div className="group bg-gradient-to-br from-emerald-400 to-green-600 rounded-2xl p-5 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 cursor-pointer">
+            <div className="flex items-start justify-between mb-3">
+              <div>
+                <p className="text-emerald-100 text-xs font-bold uppercase tracking-wider">Peak Output</p>
+                <p className="text-3xl font-black mt-1">{maxOutput.toLocaleString()}</p>
+              </div>
+              <TrendingUp size={32} className="text-white/80 group-hover:text-white transition" />
+            </div>
+            <div className="h-0.5 bg-white/30 rounded-full overflow-hidden">
+              <div className="h-full bg-white rounded-full w-4/5 group-hover:w-full transition-all duration-500"></div>
+            </div>
+          </div>
+
+          <div className="group bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl p-5 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 cursor-pointer">
+            <div className="flex items-start justify-between mb-3">
+              <div>
+                <p className="text-blue-100 text-xs font-bold uppercase tracking-wider">Average</p>
+                <p className="text-3xl font-black mt-1">{averageOutput.toLocaleString()}</p>
+              </div>
+              <Target size={32} className="text-white/80 group-hover:text-white transition" />
+            </div>
+            <div className="h-0.5 bg-white/30 rounded-full overflow-hidden">
+              <div className="h-full bg-white rounded-full w-3/5 group-hover:w-full transition-all duration-500"></div>
+            </div>
+          </div>
+
+          <div className="group bg-gradient-to-br from-orange-400 to-red-600 rounded-2xl p-5 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 cursor-pointer">
+            <div className="flex items-start justify-between mb-3">
+              <div>
+                <p className="text-orange-100 text-xs font-bold uppercase tracking-wider">Lowest</p>
+                <p className="text-3xl font-black mt-1">{minOutput.toLocaleString()}</p>
+              </div>
+              <AlertCircle size={32} className="text-white/80 group-hover:text-white transition" />
+            </div>
+            <div className="h-0.5 bg-white/30 rounded-full overflow-hidden">
+              <div className="h-full bg-white rounded-full w-2/5 group-hover:w-full transition-all duration-500"></div>
+            </div>
+          </div>
+        </div>
       </Card>
 
       <style>{`

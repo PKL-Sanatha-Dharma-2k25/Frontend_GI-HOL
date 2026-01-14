@@ -6,6 +6,7 @@ import Dashboard from '@/pages/Dashboard'
 import Line from '@/pages/Line'
 import OperationBreakdown from '@/pages/OperationBreakdown'
 import HourlyOutput from '@/pages/HourlyOutput'
+import Report from '@/pages/Report' // ⭐ IMPORT REPORT
 import UserManagement from '@/pages/UserManagement'
 import ProtectedRoute from '@/components/ProtectedRoute'
 import DashboardRouter from '@/pages/DashboardRouter'
@@ -36,6 +37,9 @@ export default function App() {
             
             {/* All roles can access */}
             <Route path="hourly-output" element={<HourlyOutput />} />
+            
+            {/* ⭐ REPORT ROUTE - All roles dapat akses */}
+            <Route path="report" element={<Report />} />
             
             {/* Admin & Superadmin */}
             <Route path="users" element={<UserManagement />} />
