@@ -373,7 +373,26 @@ export const healthCheck = async () => {
     return false
   }
 }
-
+export const getOrcProcessAllReports = async (orc) => {
+  try {
+    console.log('📊 [getOrcProcessAllReports] Fetching ORC reports...', { orc })
+    
+    if (!orc) {
+      throw new Error('ORC parameter is required')
+    }
+    
+    const params = { orc }
+    console.log('📊 [getOrcProcessAllReports] Params:', params)
+    
+    const response = await api.get('/auth/getOrcProcessAllReports', { params })
+    console.log('✅ [getOrcProcessAllReports] Success response:', response.data)
+    
+    return response.data
+  } catch (error) {
+    console.error('❌ Get ORC process reports error:', error)
+    throw error
+  }
+}
 export const checkAPIStatus = async () => {
   try {
     const response = await api.get('/up')

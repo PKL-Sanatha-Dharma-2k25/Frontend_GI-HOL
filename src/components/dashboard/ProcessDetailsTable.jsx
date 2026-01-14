@@ -33,7 +33,7 @@ function ProcessDetailsTable({ data = [], loading = false }) {
       label: 'Achievement',
       width: '20%',
       render: (value, row) => {
-        // Calculate percentage from output and target
+
         const percentage = row.target > 0 ? Math.round((row.output / row.target) * 100) : 0
         
         const statusColor = 
@@ -92,5 +92,4 @@ function ProcessDetailsTable({ data = [], loading = false }) {
     </Card>
   )
 }
-
 export default ProcessDetailsTable

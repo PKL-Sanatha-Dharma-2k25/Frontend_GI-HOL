@@ -6,8 +6,10 @@ import ProcessPerformanceChart from '@/components/dashboard/ProcessPerformanceCh
 import DailySummaryPerformance from '@/components/dashboard/DailySummaryPerformance'
 import ProcessDetailsTable from '@/components/dashboard/ProcessDetailsTable'
 import BottleneckDetector from '@/components/dashboard/BottleneckDetector'
+import OrcProcessLineChart from '@/components/dashboard/OrcProcessLineChart'
 import { FullscreenLayout, FullscreenToggleButton } from '@/components/fullscreen/FullscreenMode'
 import { useDashboardData } from '@/hooks/useDashboardData'
+import { useOrcLineChartData } from '@/hooks/useOrcLineChartData'
 import BgHero from '@/assets/images/Picture1.png'
 
 function Dashboard() {
@@ -24,6 +26,9 @@ function Dashboard() {
     orcData,
     styleData
   } = useDashboardData(user?.id_line)
+
+  // NEW: Hook untuk line chart
+  const { chartData: orcLineChartData, lineChartLoading } = useOrcLineChartData(orcData)
 
   if (loading) {
     return (
@@ -104,6 +109,17 @@ function Dashboard() {
         orcData={orcData}
         styleData={styleData}
       />
+
+      {/* ⭐ ORC PROCESS LINE CHART - NEW */}
+      {!viewAllHours && orcData !== '-' && (
+        <div id="orc-line-chart-section" className="relative z-0">
+          <OrcProcessLineChart
+            chartData={orcLineChartData}
+            loading={lineChartLoading}
+            orc={orcData}
+          />
+        </div>
+      )}
 
       {/* Daily Summary Performance */}
       <DailySummaryPerformance
