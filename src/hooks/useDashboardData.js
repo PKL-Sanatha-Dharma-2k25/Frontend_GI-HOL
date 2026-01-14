@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { getBarChartDash } from '@/services/apiService'
 
 export function useDashboardData(userId) {
-  const [selectedHour, setSelectedHour] = useState('3')
+  const [selectedHour, setSelectedHour] = useState('1')  
   const [viewAllHours, setViewAllHours] = useState(false)
   const [processChartData, setProcessChartData] = useState([])
   const [allHoursData, setAllHoursData] = useState({})
@@ -35,10 +35,10 @@ export function useDashboardData(userId) {
               })
           )
 
-          // Tunggu semua request selesai
+          
           const results = await Promise.all(promises)
           
-          // Konversi hasil ke object dengan key hour
+          
           const allData = {}
           results.forEach(({ hour, data }) => {
             allData[hour] = data
