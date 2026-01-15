@@ -35,9 +35,7 @@ export function useDashboardData(userId) {
               })
           )
 
-          
           const results = await Promise.all(promises)
-          
           
           const allData = {}
           results.forEach(({ hour, data }) => {
@@ -58,7 +56,6 @@ export function useDashboardData(userId) {
             
             setProcessChartData(response.data)
             
-            // ✅ Extract ORC & Style
             const orc = response.orc || response.data[0]?.orc || '-'
             const style = response.style || response.data[0]?.style || '-'
             
