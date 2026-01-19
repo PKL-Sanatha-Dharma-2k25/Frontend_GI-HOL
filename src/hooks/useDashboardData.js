@@ -15,7 +15,6 @@ export function useDashboardData(userId) {
       console.warn('⚠️ User ID tidak tersedia')
       return
     }
-
     const fetchChartData = async () => {
       setChartLoading(true)
       try {
