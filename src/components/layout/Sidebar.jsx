@@ -86,11 +86,7 @@ export default function Sidebar({
           label: 'Report',
           icon: 'report',
           path: '/report',
-          submenu: [
-            { id: 'report-summary', label: 'Summary Report', path: '/report/summary' },
-            { id: 'report-all-hours', label: 'All Hours Analysis', path: '/report/all-hours' },
-            { id: 'report-orc', label: 'ORC Analysis', path: '/report/orc-analysis' }
-          ],
+          submenu: [],
           section: 'production'
         }
       ]
@@ -103,18 +99,7 @@ export default function Sidebar({
         { id: 'line', label: 'Line', icon: 'line', path: '/line', submenu: [], section: 'production' },
         { id: 'operation-breakdown', label: 'Operation Breakdown', icon: 'operation-breakdown', path: '/operation-breakdown', submenu: [], section: 'production' },
         { id: 'hourly-output', label: 'Hourly Output', icon: 'hourly-output', path: '/hourly-output', submenu: [], section: 'production' },
-        {
-          id: 'report',
-          label: 'Report',
-          icon: 'report',
-          path: '/report',
-          submenu: [
-            { id: 'report-summary', label: 'Summary Report', path: '/report/summary' },
-            { id: 'report-all-hours', label: 'All Hours Analysis', path: '/report/all-hours' },
-            { id: 'report-orc', label: 'ORC Analysis', path: '/report/orc-analysis' }
-          ],
-          section: 'production'
-        },
+        { id: 'report', label: 'Report', icon: 'report', path: '/report', submenu: [], section: 'production' },
         {
           id: 'users',
           label: 'User Management',
@@ -136,18 +121,7 @@ export default function Sidebar({
         { id: 'line', label: 'Line', icon: 'line', path: '/line', submenu: [], section: 'production' },
         { id: 'operation-breakdown', label: 'Operation Breakdown', icon: 'operation-breakdown', path: '/operation-breakdown', submenu: [], section: 'production' },
         { id: 'hourly-output', label: 'Hourly Output', icon: 'hourly-output', path: '/hourly-output', submenu: [], section: 'production' },
-        {
-          id: 'report',
-          label: 'Report',
-          icon: 'report',
-          path: '/report',
-          submenu: [
-            { id: 'report-summary', label: 'Summary Report', path: '/report/summary' },
-            { id: 'report-all-hours', label: 'All Hours Analysis', path: '/report/all-hours' },
-            { id: 'report-orc', label: 'ORC Analysis', path: '/report/orc-analysis' }
-          ],
-          section: 'production'
-        },
+        { id: 'report', label: 'Report', icon: 'report', path: '/report', submenu: [], section: 'production' },
         {
           id: 'users',
           label: 'User Management',

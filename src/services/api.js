@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { getToken, clearAuth } from '@/utils/token'
+import { isTokenExpired } from '@/utils/jwt'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -12,6 +13,14 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = getToken()
+
+    // ⭐ NEW: Check token expiry before request
+    if (token && isTokenExpired(token)) {
+      console.warn('⚠️ [Axios] Token expired before request, clearing auth')
+      clearAuth()
+      window.location.href = '/GI-HOL/login'
+      return Promise.reject(new Error('Token expired'))
+    }
 
     if (token) {
       console.log('📤 [API Request]', config.method.toUpperCase(), config.url)

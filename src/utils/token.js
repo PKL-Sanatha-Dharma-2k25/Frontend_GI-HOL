@@ -1,5 +1,14 @@
+
+// =====================================================
+// CONSTANTS
+// =====================================================
 const TOKEN_KEY = 'authToken'
 const USER_KEY = 'userData'
+
+// =====================================================
+// ⭐ IMPORTS (DI BAGIAN ATAS - FIXED POSITION)
+// =====================================================
+import { decodeJWT } from './jwt'
 
 // =====================================================
 // TOKEN MANAGEMENT
@@ -268,5 +277,75 @@ export const getAllAuthData = () => {
     tokenValid: isTokenValid(),
     userValid: isUserValid(),
     isAuthenticated: isTokenValid() && isUserValid(),
+  }
+}
+
+// =====================================================
+// ⭐ SILENT TOKEN REFRESH - AUTO REFRESH SEBELUM EXPIRED
+// =====================================================
+
+export const refreshTokenIfNeeded = async () => {
+  try {
+    const token = getToken()
+    
+    if (!token) {
+      console.log('⏳ [refreshTokenIfNeeded] No token to refresh')
+      return false
+    }
+
+    // Decode token untuk cek berapa lama lagi habis
+    const decoded = decodeJWT(token)
+    if (!decoded || !decoded.exp) {
+      console.warn('⚠️ [refreshTokenIfNeeded] Cannot decode token or no exp field')
+      return false
+    }
+
+    const now = Math.floor(Date.now() / 1000)
+    const expiresIn = decoded.exp - now
+    const fiveMinutesInSeconds = 5 * 60
+
+    console.log(`⏳ [refreshTokenIfNeeded] Token expires in: ${expiresIn}s (${Math.floor(expiresIn / 60)}m)`)
+
+    // ⭐ KEY: Refresh jika kurang 5 menit dari expired
+    if (expiresIn > 0 && expiresIn < fiveMinutesInSeconds) {
+      console.log('🔄 [refreshTokenIfNeeded] Token will expire soon, attempting refresh...')
+      
+      try {
+        // Dynamic import untuk avoid circular dependency
+        const { refreshToken } = await import('@/services/auth')
+        const response = await refreshToken()
+        
+        console.log('📦 [refreshTokenIfNeeded] Refresh response:', response)
+
+        // Handle berbagai format response dari backend
+        let newToken = null
+        
+        if (response?.data?.access_token) {
+          newToken = response.data.access_token
+        } else if (response?.data?.data?.access_token) {
+          newToken = response.data.data.access_token
+        } else if (response?.access_token) {
+          newToken = response.access_token
+        }
+
+        if (newToken) {
+          saveToken(newToken)
+          console.log('✅ [refreshTokenIfNeeded] Token refreshed successfully! New token saved.')
+          return true
+        } else {
+          console.warn('⚠️ [refreshTokenIfNeeded] No new token in refresh response')
+          return false
+        }
+      } catch (error) {
+        console.warn('⚠️ [refreshTokenIfNeeded] Token refresh failed:', error.message)
+        return false
+      }
+    }
+
+    console.log('✅ [refreshTokenIfNeeded] Token still valid, no refresh needed')
+    return false
+  } catch (error) {
+    console.error('❌ [refreshTokenIfNeeded] Error:', error)
+    return false
   }
 }

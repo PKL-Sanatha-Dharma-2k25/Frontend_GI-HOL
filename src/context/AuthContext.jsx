@@ -4,10 +4,11 @@ import {
   saveUser,
   getToken,
   getUser,
-  clearAuth
+  clearAuth,
+  refreshTokenIfNeeded  // ⭐ TAMBAH IMPORT INI
 } from '@/utils/token'
 import { getUserProfile } from '@/services/auth'
-import { getUserIdFromToken } from '@/utils/jwt'
+import { getUserIdFromToken, isTokenExpired } from '@/utils/jwt'
 
 export const AuthContext = createContext()
 
@@ -15,20 +16,68 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [sessionWarning, setSessionWarning] = useState(false)  // ⭐ NEW: Warning state
+  const [timeLeftInSeconds, setTimeLeftInSeconds] = useState(0)  // ⭐ NEW: Timer state
 
+  // ⭐ INIT: Check token & user dari localStorage
   useEffect(() => {
+    console.group('🔍 [AuthProvider] Initialize auth')
+    
     const token = getToken()
     const savedUser = getUser()
 
-    if (token && savedUser) {
-      setUser(savedUser)
-      setIsLoggedIn(true)
+    console.log('Token exists?', !!token)
+    console.log('User exists?', !!savedUser)
+
+    // ⭐ Check apakah token sudah expired
+    if (token) {
+      const expired = isTokenExpired(token)
+      console.log('Token expired?', expired)
+      
+      if (expired) {
+        console.warn('⚠️ Token sudah expired, clearing auth')
+        clearAuth()
+        setUser(null)
+        setIsLoggedIn(false)
+        setSessionWarning(false)
+      } else {
+        // Token masih valid
+        if (savedUser) {
+          setUser(savedUser)
+          setIsLoggedIn(true)
+          console.log('✅ Auth valid, user logged in')
+        }
+      }
     } else {
       clearAuth()
     }
 
     setLoading(false)
+    console.groupEnd()
   }, [])
+
+  // ⭐ CHANGED: Gentle refresh INSTEAD OF aggressive logout
+  useEffect(() => {
+    if (!isLoggedIn) return
+
+    console.log('⏰ [AuthProvider] Starting safe token refresh interval (every 30 seconds)')
+
+    // Check token setiap 30 detik (GENTLE, tidak aggressive)
+    const interval = setInterval(async () => {
+      const token = getToken()
+      
+      if (token) {
+        // ⭐ Try refresh SEBELUM expired
+        // Jangan langsung logout!
+        await refreshTokenIfNeeded()
+      }
+    }, 30000)  // Check setiap 30 detik
+
+    return () => {
+      console.log('🛑 [AuthProvider] Clearing token refresh interval')
+      clearInterval(interval)
+    }
+  }, [isLoggedIn])
 
   // 🔥 LOGIN FINAL (ROLE AMAN & KONSISTEN)
   const login = async (loginResponse, usernameFromForm = null) => {
@@ -128,7 +177,7 @@ export const AuthProvider = ({ children }) => {
           return 'supervisor'
         }
 
-        // ⭐ PRIORITY 2: FALLBACK - CEK BERDASARKAN ID_USER
+        // ⭐ PRIORITY 4: FALLBACK - CEK BERDASARKAN ID_USER
         console.log('→ Role string tidak jelas, checking id_user...')
         
         if (id_user === 1 || id_user === '1') {
@@ -151,7 +200,7 @@ export const AuthProvider = ({ children }) => {
           return 'supervisor'
         }
 
-        // ⭐ PRIORITY 3: FALLBACK TERAKHIR - CEK USERNAME
+        // ⭐ PRIORITY 5: FALLBACK TERAKHIR - CEK USERNAME
         console.log('→ id_user tidak match, checking username...')
         
         if (username && (username.toLowerCase().includes('supervisor') || username.toLowerCase().includes('spv'))) {
@@ -204,6 +253,7 @@ export const AuthProvider = ({ children }) => {
       console.log('\n📍 STEP 7: Update React state')
       setUser(userData)
       setIsLoggedIn(true)
+      setSessionWarning(false)
       console.log('✅ State updated')
 
       console.log('\n✅✅✅ LOGIN SUCCESSFUL ✅✅✅')
@@ -221,6 +271,7 @@ export const AuthProvider = ({ children }) => {
       clearAuth()
       setUser(null)
       setIsLoggedIn(false)
+      setSessionWarning(false)
       
       throw error
     }
@@ -231,11 +282,20 @@ export const AuthProvider = ({ children }) => {
     clearAuth()
     setUser(null)
     setIsLoggedIn(false)
+    setSessionWarning(false)
     console.log('✅ Logout completed')
   }
 
   return (
-    <AuthContext.Provider value={{ user, isLoggedIn, loading, login, logout }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      isLoggedIn, 
+      loading, 
+      login, 
+      logout,
+      sessionWarning,      // ⭐ NEW: Export warning state
+      timeLeftInSeconds    // ⭐ NEW: Export timer state
+    }}>
       {children}
     </AuthContext.Provider>
   )

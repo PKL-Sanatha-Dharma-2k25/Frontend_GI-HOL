@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { SidebarProvider } from '@/context/SidebarContext'
 import { FullscreenProvider } from '@/components/fullscreen/FullscreenMode'
+import SessionWarningModal from '@/components/SessionWarningModal'  // ⭐ TAMBAH IMPORT INI
 import Login from '@/pages/auth/Login'
 import Dashboard from '@/pages/Dashboard'
 import Line from '@/pages/Line'
@@ -18,6 +19,7 @@ export default function App() {
   return (
     <FullscreenProvider>
       <SidebarProvider>
+        <SessionWarningModal />  {/* ⭐ TAMBAH KOMPONEN INI */}
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
