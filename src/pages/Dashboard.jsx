@@ -24,7 +24,10 @@ function Dashboard() {
     allHoursData,
     chartLoading,
     orcData,
-    styleData
+    styleData,
+    // ⭐ NEW: Get stats data dari hook
+    statsData,
+    statsLoading
   } = useDashboardData(user?.id_line)
 
   // NEW: Hook untuk line chart
@@ -75,9 +78,11 @@ function Dashboard() {
           <FullscreenToggleButton />
         </div>
         
-        {/* Content - Stats Cards */}
+        {/* Content - Stats Cards dengan all-time data */}
         <div className="relative z-10 p-10 sm:p-12">
           <DashboardStats
+            statsData={statsData}
+            statsLoading={statsLoading}
             processChartData={processChartData}
             allHoursData={allHoursData}
             viewAllHours={viewAllHours}

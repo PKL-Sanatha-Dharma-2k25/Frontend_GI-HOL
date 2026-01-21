@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getBarChartDash } from '@/services/apiService'
+import { getBarChartDash, getOutputAllDash } from '@/services/apiService'
 
 export function useDashboardData(userId) {
   const [selectedHour, setSelectedHour] = useState('1')  
@@ -9,19 +9,75 @@ export function useDashboardData(userId) {
   const [chartLoading, setChartLoading] = useState(false)
   const [orcData, setOrcData] = useState('-')
   const [styleData, setStyleData] = useState('-')
+  
+  // ⭐ NEW: Stats data (all-time, bukan per jam)
+  const [statsData, setStatsData] = useState({
+    totalOutput: 0,
+    totalTarget: 0,
+    efficiency: 0
+  })
+  const [statsLoading, setStatsLoading] = useState(false)
 
+  // ⭐ NEW: Fetch stats data (all-time)
   useEffect(() => {
     if (!userId) {
       console.warn('⚠️ User ID tidak tersedia')
       return
     }
+
+    const fetchStatsData = async () => {
+      setStatsLoading(true)
+      try {
+        console.log('📊 Fetching all-time stats data...')
+        const response = await getOutputAllDash(userId)
+        
+        if (response?.success) {
+          console.log('✅ Stats data loaded:', {
+            totalOutput: response.totalOutput,
+            totalTarget: response.totalTarget,
+            efficiency: response.efficiency
+          })
+          
+          setStatsData({
+            totalOutput: response.totalOutput,
+            totalTarget: response.totalTarget,
+            efficiency: response.efficiency
+          })
+        } else {
+          setStatsData({
+            totalOutput: 0,
+            totalTarget: 0,
+            efficiency: 0
+          })
+        }
+      } catch (error) {
+        console.error('❌ Error fetching stats data:', error)
+        setStatsData({
+          totalOutput: 0,
+          totalTarget: 0,
+          efficiency: 0
+        })
+      } finally {
+        setStatsLoading(false)
+      }
+    }
+
+    fetchStatsData()
+  }, [userId])
+
+  // Existing chart data fetch (tetap sama, tapi dipisah)
+  useEffect(() => {
+    if (!userId) {
+      console.warn('⚠️ User ID tidak tersedia')
+      return
+    }
+
     const fetchChartData = async () => {
       setChartLoading(true)
       try {
         if (viewAllHours) {
           console.log('📊 Fetching all hours data (PARALLEL)...')
           
-          // ✅ PARALEL: Fetch semua jam sekaligus dengan Promise.all()
           const promises = Array.from({ length: 10 }, (_, i) => 
             getBarChartDash(userId, (i + 1).toString())
               .then(response => ({
@@ -89,6 +145,9 @@ export function useDashboardData(userId) {
     allHoursData,
     chartLoading,
     orcData,
-    styleData
+    styleData,
+    // ⭐ NEW: Return stats data
+    statsData,
+    statsLoading
   }
 }

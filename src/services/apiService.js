@@ -103,6 +103,22 @@ export const getAllUser = async () => {
 }
 
 // ========================================
+// HOUR MASTER FUNCTIONS ⭐ NEW
+// ========================================
+
+export const getHour = async () => {
+  try {
+    console.log('⏰ [getHour] Fetching hour master data...')
+    const response = await api.get('/auth/gethour')
+    console.log('✅ [getHour] Success response:', response.data)
+    return response.data
+  } catch (error) {
+    console.error('❌ Get hour error:', error)
+    throw error
+  }
+}
+
+// ========================================
 // HOURLY OUTPUT FUNCTIONS
 // ========================================
 
@@ -176,8 +192,6 @@ export const getDetailOutputByStyle = async (style, idLine) => {
 export const storeHourlyOutput = async (data) => {
   try {
     console.log('💾 [storeHourlyOutput] Saving header data:', data)
-  
-  
     const response = await api.post('/auth/store', data)
     console.log('✅ [storeHourlyOutput] Success response:', response.data)
     return response.data
@@ -248,14 +262,13 @@ export const updateDetailOutput = async (data) => {
 }
 
 // ========================================
-// DASHBOARD CHART FUNCTIONS ⭐ NEW
+// DASHBOARD CHART FUNCTIONS
 // ========================================
 
 export const getBarChartDash = async (idLine, hour) => {
   try {
     console.log('📊 [getBarChartDash] Fetching bar chart data...', { idLine, hour })
     
-    // Validasi input
     if (!idLine || !hour) {
       throw new Error('id_line dan hour harus diisi')
     }
@@ -266,72 +279,145 @@ export const getBarChartDash = async (idLine, hour) => {
     
     console.log('📊 [getBarChartDash] Final params sent:', params)
     
-    // Try real API
-    try {
-      const response = await api.get('/auth/getbarchartdash', { params })
-      console.log('✅ [getBarChartDash] Real API response:', response.data)
+    const response = await api.get('/auth/getbarchartdash', { params })
+    console.log('✅ [getBarChartDash] Real API response:', response.data)
+    
+    let orcValue = '-'
+    let styleValue = '-'
+    
+    if (response.data?.data && Array.isArray(response.data.data) && response.data.data.length > 0) {
+      const firstItem = response.data.data[0]
+      orcValue = firstItem.orc || firstItem.orc_sewing || '-'
+      styleValue = firstItem.style || firstItem.style_orc || '-'
+      console.log('✅ [getBarChartDash] Extracted ORC:', orcValue, 'Style:', styleValue)
+    }
+    
+    if (response.data?.data && Array.isArray(response.data.data)) {
+      const grouped = {}
       
-      // ✅ EXTRACT ORC & STYLE DARI ORIGINAL DATA SEBELUM TRANSFORM
-      let orcValue = '-'
-      let styleValue = '-'
-      
-      if (response.data?.data && Array.isArray(response.data.data) && response.data.data.length > 0) {
-        const firstItem = response.data.data[0]
-        orcValue = firstItem.orc || firstItem.orc_sewing || '-'
-        styleValue = firstItem.style || firstItem.style_orc || '-'
-        console.log('✅ [getBarChartDash] Extracted ORC:', orcValue, 'Style:', styleValue)
-      }
-      
-      // Transform response dari backend ke format yang kita butuh
-      if (response.data?.data && Array.isArray(response.data.data)) {
-        // Group by operation_code & operation_name, aggregate output & target
-        const grouped = {}
+      response.data.data.forEach(item => {
+        const key = `${item.operation_code}|${item.operation_name}`
         
-        response.data.data.forEach(item => {
-          const key = `${item.operation_code}|${item.operation_name}`
-          
-          if (!grouped[key]) {
-            grouped[key] = {
-              operation_code: item.operation_code,
-              operation_name: item.operation_name,
-              output: 0,
-              target: 0,
-              orc: orcValue,      // ✅ TAMBAH ORC
-              style: styleValue    // ✅ TAMBAH STYLE
-            }
+        if (!grouped[key]) {
+          grouped[key] = {
+            operation_code: item.operation_code,
+            operation_name: item.operation_name,
+            output: 0,
+            target: 0,
+            orc: orcValue,
+            style: styleValue
           }
-          
-          grouped[key].output += parseInt(item.output) || 0
-          grouped[key].target += parseInt(item.target) || 0
-        })
-        
-        // Convert back to array
-        const transformedData = Object.values(grouped)
-        
-        console.log('✅ [getBarChartDash] Transformed data with ORC & Style:', transformedData)
-        
-        return {
-          success: true,
-          data: transformedData,
-          orc: orcValue,
-          style: styleValue
         }
-      }
+        
+        grouped[key].output += parseInt(item.output) || 0
+        grouped[key].target += parseInt(item.target) || 0
+      })
+      
+      const transformedData = Object.values(grouped)
+      
+      console.log('✅ [getBarChartDash] Transformed data with ORC & Style:', transformedData)
       
       return {
         success: true,
-        data: response.data?.data || [],
+        data: transformedData,
         orc: orcValue,
         style: styleValue
       }
-    } catch (apiError) {
-      console.warn('⚠️ [getBarChartDash] API error, using mock data for development')
-      console.log('⚠️ [getBarChartDash] API Error details:', apiError.message)
-      
-      throw apiError
+    }
+    
+    return {
+      success: true,
+      data: response.data?.data || [],
+      orc: orcValue,
+      style: styleValue
     }
   } catch (error) {
     console.error('❌ Get bar chart dash error:', error)
+    throw error
+  }
+}
+
+// ========================================
+// DASHBOARD STATS FUNCTIONS
+// ========================================
+
+export const getOutputAllDash = async (idLine) => {
+  try {
+    console.log('📊 [getOutputAllDash] Fetching total output all-time...', { idLine })
+    
+    if (!idLine) {
+      throw new Error('id_line harus diisi')
+    }
+    
+    const params = {
+      id_line: idLine
+    }
+    
+    console.log('📊 [getOutputAllDash] Final params sent:', params)
+    const response = await api.get('/auth/getoutputalldash', { params })
+    console.log('✅ [getOutputAllDash] Success response:', response.data)
+    
+    if (response.data?.data && Array.isArray(response.data.data)) {
+      const firstItem = response.data.data[0]
+      console.log('📋 [getOutputAllDash] Raw data item:', firstItem)
+      console.log('📋 [getOutputAllDash] Available keys:', Object.keys(firstItem || {}))
+      console.log('📋 [getOutputAllDash] Full item content:', JSON.stringify(firstItem, null, 2))
+    }
+    
+    if (response.data?.data && Array.isArray(response.data.data)) {
+      let totalOutput = 0
+      let totalTarget = 0
+      
+      response.data.data.forEach((item, idx) => {
+        const output = parseInt(
+          item.total_output ?? 
+          item.output ?? 
+          item.jumlah_output ?? 
+          item.qty_output ?? 
+          0
+        ) || 0
+        
+        const target = parseInt(
+          item.total_target ?? 
+          item.target ?? 
+          item.target_output ?? 
+          item.jumlah_target ?? 
+          item.qty_target ?? 
+          0
+        ) || 0
+        
+        console.log(`📋 [getOutputAllDash] Item ${idx}: output=${output}, target=${target}`)
+        
+        totalOutput += output
+        totalTarget += target
+      })
+      
+      const efficiency = totalTarget > 0 ? Math.round((totalOutput / totalTarget) * 100) : 0
+      
+      console.log('✅ [getOutputAllDash] Calculated stats:', {
+        totalOutput,
+        totalTarget,
+        efficiency
+      })
+      
+      return {
+        success: true,
+        totalOutput,
+        totalTarget,
+        efficiency,
+        rawData: response.data.data
+      }
+    }
+    
+    return {
+      success: true,
+      totalOutput: 0,
+      totalTarget: 0,
+      efficiency: 0,
+      rawData: []
+    }
+  } catch (error) {
+    console.error('❌ Get output all dash error:', error)
     throw error
   }
 }
@@ -373,6 +459,7 @@ export const healthCheck = async () => {
     return false
   }
 }
+
 export const getOrcProcessAllReports = async (orc) => {
   try {
     console.log('📊 [getOrcProcessAllReports] Fetching ORC reports...', { orc })
@@ -393,6 +480,7 @@ export const getOrcProcessAllReports = async (orc) => {
     throw error
   }
 }
+
 export const checkAPIStatus = async () => {
   try {
     const response = await api.get('/up')

@@ -5,7 +5,7 @@ import {
   getToken,
   getUser,
   clearAuth,
-  refreshTokenIfNeeded  // ⭐ TAMBAH IMPORT INI
+  refreshTokenIfNeeded  
 } from '@/utils/token'
 import { getUserProfile } from '@/services/auth'
 import { getUserIdFromToken, isTokenExpired } from '@/utils/jwt'
@@ -293,8 +293,8 @@ export const AuthProvider = ({ children }) => {
       loading, 
       login, 
       logout,
-      sessionWarning,      // ⭐ NEW: Export warning state
-      timeLeftInSeconds    // ⭐ NEW: Export timer state
+      sessionWarning,     
+      timeLeftInSeconds    
     }}>
       {children}
     </AuthContext.Provider>

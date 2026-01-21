@@ -25,7 +25,7 @@ export default function UserManagement() {
     username: '',
     email: '',
     password: '',
-    id_role: '4', // Default role ID
+    id_role: '4', 
     id_line: '',
     status: 'Active'
   })
@@ -71,8 +71,8 @@ export default function UserManagement() {
         id_user: user.id_user || user.id,
         username: user.username || 'Unknown',
         email: user.email || '',
-        id_role: user.id_role || '4', // Gunakan id_role dari database
-        role: getRoleLabel(user.id_role), // Convert id_role ke label
+        id_role: user.id_role || '4', 
+        role: getRoleLabel(user.id_role), 
         id_line: user.id_line || null,
         line_name: user.line_name || user.line?.line_name || '-',
         status: user.status || 'Active',
@@ -141,7 +141,7 @@ export default function UserManagement() {
       username: '',
       email: '',
       password: '',
-      id_role: '4', // Default ke User
+      id_role: '4', 
       id_line: '',
       status: 'Active'
     })
@@ -186,7 +186,7 @@ export default function UserManagement() {
       setSubmitting(true)
 
       if (editingId) {
-        // ⭐ UPDATE USER
+       
         console.group('📤 [updateUser]')
         const payload = {
           username: formData.username,
@@ -196,7 +196,7 @@ export default function UserManagement() {
           status: formData.status
         }
 
-        // Jika password diisi, tambahkan ke payload
+        
         if (formData.password) {
           payload.password = formData.password
         }

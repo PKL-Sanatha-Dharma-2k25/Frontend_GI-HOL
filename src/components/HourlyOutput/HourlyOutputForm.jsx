@@ -1,12 +1,17 @@
-import { Plus, ChevronRight, AlertCircle, Check, X } from 'lucide-react'
+import { Plus, ChevronRight, AlertCircle, Check, X, Clock } from 'lucide-react'
 
-const HOURS = Array.from({ length: 10 }, (_, i) => String(i + 1))
-
+/**
+ * ⭐ HourlyOutputForm Component
+ * Fully integrated with useHour hook untuk dynamic hour master data
+ */
 export default function HourlyOutputForm({
+  // Form State
   showForm = true,
   onToggleForm = () => {},
   formData = { line: '', date: '', hour: '' },
   setFormData = () => {},
+
+  // ORC Selection
   selectedOrc = null,
   orcSearchTerm = '',
   setOrcSearchTerm = () => {},
@@ -15,15 +20,26 @@ export default function HourlyOutputForm({
   filteredOrcList = [],
   onOrcSelect = () => {},
   onClearOrc = () => {},
+
+  // Form Submission
   onSubmit = () => {},
   onCancel = () => {},
   loading = false,
+
+  // Hour Validation
   isHourUsed = () => false,
-  getAvailableHours = () => HOURS.map(h => parseInt(h)),
-  usedHours = {}
+  usedHours = {},
+
+  // ⭐ Hour Hook Integration
+  hourOptions = [],
+  hourLoading = false,
+  hourHook = null // Optional: untuk advanced usage
 }) {
   
-  const availableHours = formData.date ? getAvailableHours(formData.date) : []
+  // ========================================
+  // STATES & CALCULATIONS
+  // ========================================
+  
   const selectedHourUsed = formData.hour && isHourUsed(formData.date, formData.hour)
   
   const isFormValid = 
@@ -34,13 +50,54 @@ export default function HourlyOutputForm({
     selectedOrc &&
     !selectedHourUsed
 
+  // Used hours untuk date yang dipilih
+  const usedHoursForDate = formData.date && usedHours[formData.date] 
+    ? usedHours[formData.date] 
+    : []
+
+  // ========================================
+  // EVENT HANDLERS
+  // ========================================
+  
   const handleOrcSelect = (orc) => {
     onOrcSelect(orc)
     setOrcSearchTerm(orc.orc)
     setShowOrcDropdown(false)
   }
 
-  // ✨ NEW: Smooth animation
+  /**
+   * Get selected hour info untuk display
+   * Shows time range jika available
+   */
+  const getSelectedHourInfo = () => {
+    if (!formData.hour) return 'Select Hour'
+    
+    const selected = hourOptions.find(h => String(h.value) === String(formData.hour))
+    return selected ? selected.label : formData.hour
+  }
+
+  /**
+   * Get formatted used hours untuk display
+   * Menampilkan sebagai badge array
+   */
+  const getFormattedUsedHours = () => {
+    if (!Array.isArray(usedHoursForDate) || usedHoursForDate.length === 0) {
+      return []
+    }
+    
+    return usedHoursForDate.map(hourId => {
+      const hourOption = hourOptions.find(h => String(h.value) === String(hourId))
+      if (hourOption) {
+        // Extract just the name part (e.g., "H-1" from "H-1 (07:30:00 - 08:29:59)")
+        return hourOption.label.split('(')[0].trim()
+      }
+      return `H-${hourId}`
+    })
+  }
+
+  /**
+   * Progress indicator steps
+   */
   const formSteps = [
     { label: 'ORC', valid: !!selectedOrc, icon: '📦' },
     { label: 'Date', valid: !!formData.date, icon: '📅' },
@@ -48,8 +105,15 @@ export default function HourlyOutputForm({
     { label: 'Ready', valid: isFormValid, icon: '✓' }
   ]
 
+  // ========================================
+  // RENDER
+  // ========================================
+
   return (
     <div className="overflow-hidden bg-white rounded-xl shadow-sm border border-slate-200">
+      {/* ========================================
+          STYLES & ANIMATIONS
+          ======================================== */}
       <style>{`
         @keyframes slideDown {
           from {
@@ -72,9 +136,18 @@ export default function HourlyOutputForm({
         .animate-pulse-soft {
           animation: pulse 2s ease-in-out infinite;
         }
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        .animate-spin-soft {
+          animation: spin 1s linear infinite;
+        }
       `}</style>
 
-      {/* Header Button */}
+      {/* ========================================
+          HEADER BUTTON
+          ======================================== */}
       <button
         onClick={() => onToggleForm(!showForm)}
         className="w-full px-6 py-4 flex items-center justify-between bg-gradient-to-r from-blue-600 via-blue-700 to-cyan-700 hover:from-blue-700 hover:via-blue-800 hover:to-cyan-800 transition-all duration-200 group"
@@ -94,11 +167,15 @@ export default function HourlyOutputForm({
         />
       </button>
 
-      {/* Form Content */}
+      {/* ========================================
+          FORM CONTENT
+          ======================================== */}
       <div className="form-content">
         <div className="p-8 border-t border-slate-200 space-y-8 bg-gradient-to-b from-white to-blue-50/50">
           
-          {/* Progress Indicator - Enhanced */}
+          {/* ========================================
+              PROGRESS INDICATOR
+              ======================================== */}
           <div className="flex gap-2 items-center flex-wrap">
             {formSteps.map((step, idx) => (
               <div key={idx} className="flex items-center gap-2">
@@ -123,9 +200,12 @@ export default function HourlyOutputForm({
             ))}
           </div>
 
+          {/* ========================================
+              FORM FIELDS GRID
+              ======================================== */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
             
-            {/* Line - Read Only */}
+            {/* LINE - Read Only */}
             <div>
               <label className="flex items-center gap-2 text-xs font-bold text-slate-700 mb-3 uppercase tracking-wider">
                 <div className="p-1 bg-blue-100 rounded">
@@ -140,7 +220,7 @@ export default function HourlyOutputForm({
               </div>
             </div>
 
-            {/* ORC Search */}
+            {/* ORC SEARCH */}
             <div className="lg:col-span-2 relative">
               <label className="flex items-center gap-2 text-xs font-bold text-slate-700 mb-3 uppercase tracking-wider">
                 <div className="p-1 bg-orange-100 rounded">
@@ -186,7 +266,7 @@ export default function HourlyOutputForm({
                   </div>
                 )}
 
-                {/* Dropdown ORC */}
+                {/* ORC DROPDOWN */}
                 {showOrcDropdown && filteredOrcList.length > 0 && (
                   <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-blue-300 rounded-lg shadow-2xl z-40 max-h-60 overflow-y-auto">
                     <div className="sticky top-0 px-4 py-3 bg-gradient-to-r from-blue-50 to-blue-100 border-b border-blue-200">
@@ -222,7 +302,7 @@ export default function HourlyOutputForm({
               </div>
             </div>
 
-            {/* Style */}
+            {/* STYLE - Auto filled */}
             <div>
               <label className="flex items-center gap-2 text-xs font-bold text-slate-700 mb-3 uppercase tracking-wider">
                 <div className="p-1 bg-purple-100 rounded">
@@ -237,7 +317,7 @@ export default function HourlyOutputForm({
               </div>
             </div>
 
-            {/* Buyer */}
+            {/* BUYER - Auto filled */}
             <div>
               <label className="flex items-center gap-2 text-xs font-bold text-slate-700 mb-3 uppercase tracking-wider">
                 <div className="p-1 bg-amber-100 rounded">
@@ -252,7 +332,7 @@ export default function HourlyOutputForm({
               </div>
             </div>
 
-            {/* Date */}
+            {/* DATE */}
             <div>
               <label className="flex items-center gap-2 text-xs font-bold text-slate-700 mb-3 uppercase tracking-wider">
                 <div className="p-1 bg-cyan-100 rounded">
@@ -276,70 +356,90 @@ export default function HourlyOutputForm({
                 />
               </div>
 
-              {/* Show used hours */}
-              {formData.date && usedHours[formData.date] && usedHours[formData.date].length > 0 && (
-                <div className="mt-2 p-2.5 bg-amber-50 border border-amber-300 rounded-lg">
-                  <p className="text-xs font-bold text-amber-800">
-                    Used: <span className="font-mono">{usedHours[formData.date].sort((a, b) => a - b).join(', ')}</span>
-                  </p>
+              {/* USED HOURS DISPLAY */}
+              {formData.date && getFormattedUsedHours().length > 0 && (
+                <div className="mt-3 p-3 bg-amber-50 border border-amber-300 rounded-lg">
+                  <p className="text-xs font-bold text-amber-800 mb-2">Used Hours:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {getFormattedUsedHours().map((hourName, idx) => (
+                      <span 
+                        key={idx} 
+                        className="px-2.5 py-1 bg-amber-200 text-amber-900 text-xs font-bold rounded-md shadow-sm"
+                      >
+                        {hourName}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
 
-            {/* Hour */}
+            {/* HOUR - ⭐ Dynamic from Master */}
             <div>
               <label className="flex items-center gap-2 text-xs font-bold text-slate-700 mb-3 uppercase tracking-wider">
                 <div className="p-1 bg-green-100 rounded">
-                  <svg className="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+                  <Clock size={14} className="text-green-600" strokeWidth={2.5} />
                 </div>
                 <span>Hour</span>
                 <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-                <select
-                  value={formData.hour}
-                  onChange={(e) => setFormData({ ...formData, hour: e.target.value })}
-                  className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 text-sm font-medium h-11 appearance-none transition-all ${
-                    !formData.hour || formData.hour === ''
-                      ? 'border-red-400 bg-red-50 focus:ring-red-300 focus:border-red-500'
-                      : selectedHourUsed
-                      ? 'border-orange-500 bg-orange-50 focus:ring-orange-300 focus:border-orange-500'
-                      : 'border-emerald-500 bg-emerald-50 focus:ring-emerald-200 focus:border-emerald-600'
-                  }`}
-                  disabled={!formData.date}
-                >
-                  <option value="" disabled>
-                    {!formData.date ? 'Select date first' : 'Select Hour'}
-                  </option>
-                  {HOURS.map((h) => {
-                    const isUsed = isHourUsed(formData.date, parseInt(h))
-                    return (
-                      <option 
-                        key={h} 
-                        value={h}
-                        disabled={isUsed}
-                      >
-                        {h}{isUsed ? ' (Used)' : ''}
-                      </option>
-                    )
-                  })}
-                </select>
+                {hourLoading ? (
+                  <div className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg bg-slate-100 text-sm font-medium h-11 flex items-center justify-center gap-2">
+                    <div className="w-3.5 h-3.5 border-2 border-slate-400 border-t-slate-600 rounded-full animate-spin-soft"></div>
+                    <span className="text-xs text-slate-600">Loading...</span>
+                  </div>
+                ) : hourOptions.length === 0 ? (
+                  <div className="w-full px-4 py-3 border-2 border-orange-300 rounded-lg bg-orange-50 text-sm font-medium h-11 flex items-center text-orange-600">
+                    No hours available
+                  </div>
+                ) : (
+                  <select
+                    value={formData.hour}
+                    onChange={(e) => setFormData({ ...formData, hour: e.target.value })}
+                    className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 text-sm font-medium h-11 appearance-none transition-all ${
+                      !formData.hour || formData.hour === ''
+                        ? 'border-red-400 bg-red-50 focus:ring-red-300 focus:border-red-500'
+                        : selectedHourUsed
+                        ? 'border-orange-500 bg-orange-50 focus:ring-orange-300 focus:border-orange-500'
+                        : 'border-emerald-500 bg-emerald-50 focus:ring-emerald-200 focus:border-emerald-600'
+                    }`}
+                    disabled={!formData.date || hourOptions.length === 0}
+                  >
+                    <option value="" disabled>
+                      {!formData.date ? 'Select date first' : 'Select Hour'}
+                    </option>
+                    {hourOptions.map((option) => {
+                      const isUsed = usedHoursForDate.includes(option.value)
+                      return (
+                        <option 
+                          key={option.value} 
+                          value={option.value}
+                          disabled={isUsed}
+                        >
+                          {option.label}{isUsed ? ' (Used)' : ''}
+                        </option>
+                      )
+                    })}
+                  </select>
+                )}
               </div>
 
+              {/* HOUR ALREADY USED WARNING */}
               {selectedHourUsed && (
-                <div className="mt-2 p-2.5 bg-orange-50 border border-orange-300 rounded-lg flex items-start gap-2">
+                <div className="mt-3 p-3 bg-orange-50 border border-orange-300 rounded-lg flex items-start gap-2">
                   <AlertCircle size={16} className="text-orange-600 mt-0.5 flex-shrink-0" strokeWidth={2.5} />
                   <p className="text-xs font-bold text-orange-800">
-                    Hour {formData.hour} already used
+                    {getSelectedHourInfo()} is already used on {formData.date}
                   </p>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Buttons */}
+          {/* ========================================
+              ACTION BUTTONS
+              ======================================== */}
           <div className="flex justify-end gap-3 pt-6 border-t-2 border-slate-200">
             <button
               onClick={onCancel}
@@ -358,7 +458,7 @@ export default function HourlyOutputForm({
             >
               {loading ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin-soft"></div>
                   Saving...
                 </>
               ) : (

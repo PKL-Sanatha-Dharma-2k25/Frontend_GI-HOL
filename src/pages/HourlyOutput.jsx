@@ -6,6 +6,7 @@ import { useDetailProcess } from '@/hooks/useDetailProcess'
 import { useDetailModal } from '@/hooks/useDetailModal'
 import { useHourlyOutput } from '@/hooks/useHourlyOutput'
 import { useHourValidation } from '@/hooks/useHourValidation'
+import { useHour } from '@/hooks/useHour' // ⭐ NEW: Import useHour hook
 import { getJakartaTime } from '@/utils/dateTime'
 
 // Components
@@ -30,6 +31,7 @@ export default function HourlyOutputPage() {
   const detailModalHook = useDetailModal(alert.showAlertMessage)
   const hourValidationHook = useHourValidation()
   const outputHook = useHourlyOutput(user, alert.showAlertMessage, detailProcessHook)
+  const hourHook = useHour() // ⭐ NEW: Use hour hook untuk fetch master data
 
   //  UI State
   const [showForm, setShowForm] = useState(true)
@@ -56,6 +58,7 @@ export default function HourlyOutputPage() {
     const loadData = async () => {
       await outputHook.loadInitialData()
       await hourValidationHook.loadUsedHours()
+      // hourHook sudah auto-load di mount via useEffect di hook
     }
     loadData()
   }, [])
@@ -68,10 +71,11 @@ export default function HourlyOutputPage() {
         formHook.formData.hour
       )
       if (isUsed) {
+        const hourName = hourHook.getHourName(parseInt(formHook.formData.hour))
         alert.showAlertMessage(
           'error',
           'This hour is already used',
-          [`Hour ${formHook.formData.hour} on ${formHook.formData.date} already has data`]
+          [`${hourName} on ${formHook.formData.date} already has data`]
         )
         return
       }
@@ -114,6 +118,7 @@ export default function HourlyOutputPage() {
   const handleUpdateClick = async (idOutput) => {
     await detailModalHook.loadUpdateData(idOutput)
   }
+
   //  Handle Save Update
   const handleSaveUpdate = async () => {
     const success = await detailModalHook.handleSaveUpdate(() => {
@@ -173,8 +178,9 @@ export default function HourlyOutputPage() {
         onCancel={handleCloseForm}
         loading={outputHook.loading}
         isHourUsed={hourValidationHook.isHourUsed}
-        getAvailableHours={hourValidationHook.getAvailableHours}
         usedHours={hourValidationHook.usedHours}
+        hourOptions={hourHook.getHourOptions()} // ⭐ NEW: Pass hour options
+        hourLoading={hourHook.loading} // ⭐ NEW: Pass loading state
       />
 
       {/*  DETAIL PROCESS SECTION */}
@@ -200,6 +206,8 @@ export default function HourlyOutputPage() {
           onDetailClick={handleDetailClick}
           onUpdateClick={handleUpdateClick}
           userIdLine={user?.id_line} 
+          // ⭐ NEW: Pass hourHook untuk format hour info di table
+          hourHook={hourHook}
         />
 
         {/*  PAGINATION */}
