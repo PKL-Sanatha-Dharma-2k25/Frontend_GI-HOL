@@ -3,31 +3,23 @@ import { useState, useEffect, useCallback } from 'react'
 import { getHourlyOutputHeader } from '@/services/apiService'
 import { getJakartaTime } from '@/utils/dateTime'
 
-/**
- * Hook untuk track jam yang sudah terpakai per hari
- * Data dari database, bukan local state
- * 
- * @param {string} date - Tanggal dalam format YYYY-MM-DD
- * @returns {object} usedHours object & loading state
- */
+
+ 
 export function useHourValidation() {
   const [usedHours, setUsedHours] = useState({})
   const [loadingValidation, setLoadingValidation] = useState(false)
 
-  /**
-   * Fetch data dari backend untuk mendapat jam yang sudah terpakai
-   * Format return: { '2024-01-09': [1, 3, 5], '2024-01-10': [2, 7] }
-   */
+  
   const loadUsedHours = useCallback(async () => {
     setLoadingValidation(true)
     try {
-      console.log('📊 [useHourValidation] Loading used hours from backend...')
+      console.log(' [useHourValidation] Loading used hours from backend...')
       
       // Ambil semua output header dari database
       const response = await getHourlyOutputHeader()
       const allOutputs = response.data || response || []
       
-      console.log('📥 [useHourValidation] All outputs:', allOutputs)
+      console.log(' [useHourValidation] All outputs:', allOutputs)
 
       // Group by date dan ambil semua jam yang sudah ada
       // Format: { 'YYYY-MM-DD': [1, 2, 3, ...], ... }
@@ -43,10 +35,10 @@ export function useHourValidation() {
         }
       })
 
-      console.log('✅ [useHourValidation] Used hours by date:', hoursByDate)
+      console.log(' [useHourValidation] Used hours by date:', hoursByDate)
       setUsedHours(hoursByDate)
     } catch (error) {
-      console.error('❌ [useHourValidation] Error loading used hours:', error)
+      console.error(' [useHourValidation] Error loading used hours:', error)
     } finally {
       setLoadingValidation(false)
     }
@@ -65,7 +57,7 @@ export function useHourValidation() {
     const hourNum = parseInt(hour)
     
     const used = hoursForDate.includes(hourNum)
-    console.log(`🔍 [isHourUsed] date=${date}, hour=${hour}, used=${used}`)
+    console.log(` [isHourUsed] date=${date}, hour=${hour}, used=${used}`)
     
     return used
   }, [usedHours])
@@ -80,7 +72,7 @@ export function useHourValidation() {
     const usedHoursForDate = usedHours[date] || []
     const available = HOURS.filter(h => !usedHoursForDate.includes(h))
     
-    console.log(`📅 [getAvailableHours] date=${date}, available hours:`, available)
+    console.log(` [getAvailableHours] date=${date}, available hours:`, available)
     return available
   }, [usedHours])
 
@@ -174,7 +166,7 @@ export function useHourlyOutputV2(user, showAlertMessage, detailHook, hourValida
         status: 0
       }
 
-      console.log('📤 [handleFormSubmit] Payload:', payload)
+      console.log(' [handleFormSubmit] Payload:', payload)
 
       const response = await storeHourlyOutput(payload)
       const headerId = response.data?.id_output || response.id_output
@@ -229,14 +221,14 @@ export function useHourlyOutputV2(user, showAlertMessage, detailHook, hourValida
         }))
       }
 
-      console.log('💾 [handleSaveDetailProcess] Final Payload:', detailPayload)
+      console.log(' [handleSaveDetailProcess] Final Payload:', detailPayload)
 
       await storeDetailOutput(detailPayload)
       showAlertMessage('success', 'Detail output saved successfully')
 
       detailHook.handleCancel()
       
-      // 🆕 Reload data dan refresh validation
+      //  Reload data dan refresh validation
       await loadInitialData()
       await hourValidation.refreshValidation()
       

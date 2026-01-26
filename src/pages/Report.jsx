@@ -34,7 +34,7 @@ function DashboardReport() {
 
   const { chartData: orcLineChartData, lineChartLoading } = useOrcLineChartData(orcData)
 
-  // ✅ EXPORT FUNCTIONALITY
+  
   const handleExport = async (format) => {
     setExporting(true)
     try {
@@ -48,7 +48,7 @@ function DashboardReport() {
       setShowExportMenu(false)
     } catch (error) {
       console.error('Export error:', error)
-      alert('❌ Gagal export file. Silakan coba lagi.')
+      alert(' Gagal export file. Silakan coba lagi.')
     } finally {
       setExporting(false)
     }
@@ -75,7 +75,7 @@ function DashboardReport() {
       }
 
       window.html2pdf().set(opt).from(element).save()
-      alert('✅ PDF berhasil diunduh!')
+      alert(' PDF berhasil diunduh!')
     } catch (error) {
       console.error('PDF export error:', error)
       window.print()
@@ -103,10 +103,10 @@ function DashboardReport() {
       const wb = window.XLSX.utils.book_new()
       window.XLSX.utils.book_append_sheet(wb, ws, 'Production Data')
       window.XLSX.writeFile(wb, `Production_Report_${new Date().toISOString().split('T')[0]}.xlsx`)
-      alert('✅ Excel berhasil diunduh!')
+      alert(' Excel berhasil diunduh!')
     } catch (error) {
       console.error('Excel export error:', error)
-      alert('❌ Gagal export Excel.')
+      alert(' Gagal export Excel.')
     }
   }
 
@@ -132,10 +132,10 @@ function DashboardReport() {
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
-      alert('✅ CSV berhasil diunduh!')
+      alert('CSV berhasil diunduh!')
     } catch (error) {
       console.error('CSV export error:', error)
-      alert('❌ Gagal export CSV')
+      alert('Gagal export CSV')
     }
   }
 
@@ -327,7 +327,7 @@ function DashboardReport() {
               </div>
             </div>
 
-            {/* TAB NAVIGATION - Modern Sliding Underline */}
+            {/* TAB NAVIGATION */}
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
               <div className="flex overflow-x-auto scrollbar-hide border-b border-slate-200">
                 {tabs.map((tab) => {
@@ -408,7 +408,7 @@ function DashboardReport() {
               {[
                 { label: 'Generated', value: new Date().toLocaleDateString('id-ID', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }), icon: Calendar },
                 { label: 'Operations', value: processChartData.length || 0, icon: TrendingUp },
-                { label: 'Status', value: '✅ Complete', icon: CheckCircle2 }
+                { label: 'Status', value: ' Complete', icon: CheckCircle2 }
               ].map((item, i) => {
                 const Icon = item.icon
                 return (

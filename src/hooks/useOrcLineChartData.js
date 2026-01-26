@@ -2,27 +2,6 @@ import { useState, useEffect } from 'react'
 import { getOrcProcessAllReports } from '@/services/apiService'
 
 function transformLineChartData(rawData) {
-  /**
-   * Input: Array dari API
-   * [
-   *   { orc: "INQ-26A030L-1", operation_code: "1A", operation_name: "...", output: "1748", target: "1500" },
-   *   { orc: "INQ-26A030L-1", operation_code: "1B", operation_name: "...", output: "1245", target: "1300" },
-   *   ...
-   * ]
-   * 
-   * Output: Array yang siap untuk Recharts LineChart dengan 2 lines (output & target)
-   * [
-   *   { 
-   *     operation_code: "1A", 
-   *     operation_name: "...", 
-   *     output: 1748,
-   *     target: 1500,
-   *     efficiency: 116.5,
-   *     status: "exceeding"
-   *   },
-   *   ...
-   * ]
-   */
   
   if (!Array.isArray(rawData) || rawData.length === 0) {
     return []
@@ -50,7 +29,7 @@ function transformLineChartData(rawData) {
       }
     })
     .sort((a, b) => {
-      // Sort by operation_code (alphanumeric)
+
       return a.operation_code.localeCompare(b.operation_code, undefined, {
         numeric: true,
         sensitivity: 'base'

@@ -25,7 +25,6 @@ function Dashboard() {
     chartLoading,
     orcData,
     styleData,
-    // ⭐ NEW: Get stats data dari hook
     statsData,
     statsLoading
   } = useDashboardData(user?.id_line)
@@ -56,7 +55,7 @@ function Dashboard() {
       </div>
 
       {/* Dashboard Header with Fullscreen Toggle - INSIDE Stats Card Now */}
-      {/* ⭐ Dashboard Stats - With Real Background Image */}
+      {/*  Dashboard Stats - With Real Background Image */}
       <div 
         className="relative overflow-hidden rounded-2xl shadow-xl"
         style={{
@@ -92,7 +91,7 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* ⭐ BOTTLENECK DETECTOR */}
+      {/*  BOTTLENECK DETECTOR */}
       {showBottleneck && !viewAllHours && processChartData.length > 0 && (
         <div id="bottleneck-section" className="relative z-0">
           <BottleneckDetector data={processChartData} />
@@ -115,7 +114,7 @@ function Dashboard() {
         styleData={styleData}
       />
 
-      {/* ⭐ ORC PROCESS LINE CHART - NEW */}
+      {/*  ORC PROCESS LINE CHART -*/}
       {!viewAllHours && orcData !== '-' && (
         <div id="orc-line-chart-section" className="relative z-0">
           <OrcProcessLineChart

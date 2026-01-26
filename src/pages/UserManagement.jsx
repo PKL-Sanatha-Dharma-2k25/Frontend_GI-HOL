@@ -34,7 +34,7 @@ export default function UserManagement() {
     { label: 'User Management', href: '/user-management', active: true }
   ]
 
-  // ⭐ ROLE MAPPING: id_role sebagai value
+
   const roleOptions = [
     { value: '1', label: 'Superadmin' },
     { value: '2', label: 'Admin' },
@@ -52,7 +52,7 @@ export default function UserManagement() {
 
   const loadUsers = async () => {
     try {
-      console.group('📥 [loadUsers] Fetching users')
+      console.group(' [loadUsers] Fetching users')
       setLoading(true)
 
       const response = await api.get('/auth/getalluser')
@@ -66,7 +66,7 @@ export default function UserManagement() {
         usersData = response.data
       }
 
-      // ⭐ NORMALIZE DATA - Gunakan id_role dari database
+    
       const normalizedUsers = usersData.map(user => ({
         id_user: user.id_user || user.id,
         username: user.username || 'Unknown',
@@ -85,7 +85,7 @@ export default function UserManagement() {
 
       console.groupEnd()
     } catch (error) {
-      console.group('❌ [loadUsers] Error')
+      console.group(' [loadUsers] Error')
       console.error('Error:', error.message)
       console.error('Error response:', error.response?.data)
       console.groupEnd()
@@ -93,7 +93,7 @@ export default function UserManagement() {
       setShowAlert(true)
       setAlertType('error')
       
-      // ⭐ BETTER ERROR MESSAGE
+      
       const errorMsg = error.response?.data?.message || error.message
       setAlertMessage('Failed to load users: ' + errorMsg)
       setUsers([])
@@ -104,7 +104,7 @@ export default function UserManagement() {
 
   const loadLines = async () => {
     try {
-      console.group('📥 [loadLines] Fetching lines')
+      console.group(' [loadLines] Fetching lines')
 
       const response = await api.get('/auth/getline')
       console.log('Response:', response.data)
@@ -126,7 +126,7 @@ export default function UserManagement() {
     }
   }
 
-  // ⭐ Helper function: Convert id_role ke label
+  
   const getRoleLabel = (idRole) => {
     const role = roleOptions.find(r => r.value === String(idRole))
     return role ? role.label : 'Unknown'
@@ -187,11 +187,11 @@ export default function UserManagement() {
 
       if (editingId) {
        
-        console.group('📤 [updateUser]')
+        console.group(' [updateUser]')
         const payload = {
           username: formData.username,
           email: formData.email,
-          id_role: parseInt(formData.id_role), // ⭐ Kirim sebagai number
+          id_role: parseInt(formData.id_role), 
           id_line: formData.id_line ? parseInt(formData.id_line) : null,
           status: formData.status
         }
@@ -215,13 +215,13 @@ export default function UserManagement() {
         // Reload users
         await loadUsers()
       } else {
-        // ⭐ CREATE USER - Kirim id_role sebagai number
-        console.group('📤 [createUser]')
+       
+        console.group(' [createUser]')
         const payload = {
           username: formData.username,
           email: formData.email,
           password: formData.password,
-          id_role: parseInt(formData.id_role), // ⭐ Kirim sebagai number
+          id_role: parseInt(formData.id_role),
           id_line: formData.id_line ? parseInt(formData.id_line) : null,
           status: formData.status
         }
@@ -243,7 +243,7 @@ export default function UserManagement() {
 
       setShowForm(false)
     } catch (error) {
-      console.group('❌ [handleFormSubmit] Error')
+      console.group(' [handleFormSubmit] Error')
       console.error('Error:', error.response?.data || error.message)
       console.groupEnd()
 
@@ -261,7 +261,7 @@ export default function UserManagement() {
     }
 
     try {
-      console.group('📤 [deleteUser]')
+      console.group(' [deleteUser]')
       console.log('Deleting user:', userId)
 
       await api.post(`/auth/delete-user/${userId}`)
@@ -276,7 +276,7 @@ export default function UserManagement() {
       // Reload users
       await loadUsers()
     } catch (error) {
-      console.group('❌ [handleDelete] Error')
+      console.group(' [handleDelete] Error')
       console.error('Error:', error.response?.data || error.message)
       console.groupEnd()
 
@@ -288,12 +288,12 @@ export default function UserManagement() {
 
   return (
     <div className="space-y-6 px-responsive py-responsive bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
-      {/* ✅ Breadcrumb */}
+      {/*  Breadcrumb */}
       <div className="slide-in-down">
         <BreadCrumb items={breadcrumbItems} />
       </div>
 
-      {/* ✅ Alert */}
+      {/*  Alert */}
       {showAlert && (
         <div className="slide-in-up">
           <Alert
@@ -305,7 +305,7 @@ export default function UserManagement() {
         </div>
       )}
 
-      {/* ✅ Add User Button */}
+      {/*  Add User Button */}
       <div className="flex justify-end scale-in">
         <Button
           onClick={handleAddNew}
@@ -318,7 +318,7 @@ export default function UserManagement() {
         </Button>
       </div>
 
-      {/* ✅ UserTable Card */}
+      {/*  UserTable Card */}
       <Card shadow="lg" padding="lg" rounded="lg" className="scale-in transition-shadow duration-300">
         <UserTable 
           users={users}
@@ -330,7 +330,7 @@ export default function UserManagement() {
         />
       </Card>
 
-      {/* ✅ Form Modal */}
+      {/* Form Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 fade-in overflow-y-auto">
           <Card shadow="2xl" padding="lg" rounded="lg" className="w-full max-w-md my-8 scale-in">

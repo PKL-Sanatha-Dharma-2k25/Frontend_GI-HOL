@@ -41,7 +41,7 @@ export default function Line() {
       setLoading(true)
       const response = await api.get('/auth/getline')
       
-      console.log('📊 [Line] API Response:', response.data)
+      console.log(' [Line] API Response:', response.data)
       
       if (!response.data || !response.data.data) {
         throw new Error('Invalid response structure from API')
@@ -62,10 +62,10 @@ export default function Line() {
       }))
 
       setLines(mappedLines)
-      console.log('✅ [Line] Lines loaded:', mappedLines.length)
+      console.log(' [Line] Lines loaded:', mappedLines.length)
       setLoading(false)
     } catch (error) {
-      console.error('❌ [Line] Error fetching lines:', error)
+      console.error(' [Line] Error fetching lines:', error)
       setShowAlert(true)
       setAlertType('error')
       setAlertMessage(error.message || 'Failed to load lines data')
@@ -179,7 +179,7 @@ export default function Line() {
     setCurrentPage(1)
   }
 
-  // ✅ Modal Component - View dengan animasi
+  //  Modal Component - View dengan animasi
   const ViewModal = () => (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 fade-in">
       <div className="bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto scale-in">

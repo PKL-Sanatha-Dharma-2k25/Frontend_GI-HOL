@@ -54,7 +54,7 @@ export default function Login() {
     setShowAlert(false);
 
     try {
-      console.group('🔐 [Login.handleSubmit] START LOGIN');
+      console.group(' [Login.handleSubmit] START LOGIN');
       console.log('Username:', formData.username);
       
       console.log('STEP 1: Calling loginUser API...');
@@ -67,17 +67,17 @@ export default function Login() {
       console.log('access_token:', response.data?.access_token);
 
       if (response.code !== 200) {
-        console.error('❌ Response code bukan 200:', response.code);
+        console.error(' Response code bukan 200:', response.code);
         console.error('Message:', response.message);
         throw new Error(response.message || 'LOGIN_FAILED');
       }
 
       if (!response.data?.access_token) {
-        console.error('❌ No access_token in response');
+        console.error(' No access_token in response');
         throw new Error('NO_TOKEN_IN_RESPONSE');
       }
 
-      console.log('✅ Response valid');
+      console.log(' Response valid');
 
       console.log('STEP 3: Calling login context...');
       const userData = await login(response, formData.username);
@@ -87,11 +87,11 @@ export default function Login() {
       console.log('User role:', userData.role);
 
       if (!userData) {
-        console.error('❌ login() returned null');
+        console.error(' login() returned null');
         throw new Error('LOGIN_CONTEXT_FAILED');
       }
 
-      console.log('✅ LOGIN SUCCESS');
+      console.log(' LOGIN SUCCESS');
       console.groupEnd();
 
       setAlertType('success');
@@ -99,15 +99,15 @@ export default function Login() {
       setShowAlert(true);
       setLoginSuccess(true);
 
-      // ⭐ FIXED: SEMUA ROLE REDIRECT KE DASHBOARD (/)
-      console.log('🔄 Redirecting to dashboard');
+   
+      console.log(' Redirecting to dashboard');
       setTimeout(() => {
         console.log('→ Redirect to /');
         navigate('/', { replace: true });
       }, 500);
 
     } catch (error) {
-      console.group('❌ [Login.handleSubmit] ERROR');
+      console.group(' [Login.handleSubmit] ERROR');
       console.error('Error message:', error.message);
       console.error('Error status:', error.response?.status);
       console.groupEnd();

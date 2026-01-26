@@ -71,8 +71,8 @@ export function useHourlyOutput(user, showAlertMessage, detailHook) {
         status: 0
       }
 
-      console.log('📤 [handleFormSubmit] Payload:', JSON.stringify(payload, null, 2))
-      console.log('🕐 Frontend time:', fullDateTime)
+      console.log(' [handleFormSubmit] Payload:', JSON.stringify(payload, null, 2))
+      console.log(' Frontend time:', fullDateTime)
 
       const response = await storeHourlyOutput(payload)
       const headerId = response.data?.id_output || response.id_output

@@ -17,6 +17,6 @@ export default function DashboardRouter() {
     )
   }
 
-  console.log('🎯 [DashboardRouter] User role:', user.role, '→ Render Dashboard')
+  console.log(' [DashboardRouter] User role:', user.role, '→ Render Dashboard')
   return <Dashboard />
 }

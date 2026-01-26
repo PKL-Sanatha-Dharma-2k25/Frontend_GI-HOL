@@ -30,22 +30,22 @@ export function useDetailModal(showAlertMessage) {
   const loadDetailData = useCallback(async (idOutput) => {
     setLoadingModal(true)
     try {
-      console.log('👁️ [loadDetailData] Loading with idOutput:', idOutput)
+      console.log('[loadDetailData] Loading with idOutput:', idOutput)
       const response = await getDetailFromDetailOpt(idOutput)
       
       let data = response.data || response || []
-      console.log('👁️ [loadDetailData] Raw data:', data)
+      console.log('[loadDetailData] Raw data:', data)
       
       // Normalize structure
       const normalizedData = normalizeData(data)
-      console.log('👁️ [loadDetailData] Normalized data:', normalizedData)
+      console.log(' [loadDetailData] Normalized data:', normalizedData)
       
       setDetailData(normalizedData)
       setCurrentModalData({ idOutput, type: 'detail' })
       setShowDetailModal(true)
       showAlertMessage('success', `Detail loaded successfully (${normalizedData.length} items)`)
     } catch (error) {
-      console.error('❌ Error loading detail:', error)
+      console.error(' Error loading detail:', error)
       showAlertMessage('error', `Failed to load detail data: ${error.message}`)
     } finally {
       setLoadingModal(false)
@@ -56,7 +56,7 @@ export function useDetailModal(showAlertMessage) {
   const loadUpdateData = useCallback(async (idOutput) => {
     setLoadingModal(true)
     try {
-      console.log('✏️ [loadUpdateData] Loading with idOutput:', idOutput)
+      console.log('[loadUpdateData] Loading with idOutput:', idOutput)
       const response = await getUpdateFromDetailOpt(idOutput)
       
       let data = response.data || response || []
@@ -64,7 +64,7 @@ export function useDetailModal(showAlertMessage) {
       
       // Normalize structure
       const normalizedData = normalizeData(data)
-      console.log('✏️ [loadUpdateData] Normalized data:', normalizedData)
+      console.log('[loadUpdateData] Normalized data:', normalizedData)
       
       // Initialize input dengan data yang sudah ada
       const initialInput = {}
@@ -81,7 +81,7 @@ export function useDetailModal(showAlertMessage) {
       setShowUpdateModal(true)
       showAlertMessage('success', `Update data loaded successfully (${normalizedData.length} items)`)
     } catch (error) {
-      console.error('❌ Error loading update data:', error)
+      console.error('Error loading update data:', error)
       showAlertMessage('error', `Failed to load update data: ${error.message}`)
     } finally {
       setLoadingModal(false)
@@ -120,7 +120,7 @@ export function useDetailModal(showAlertMessage) {
         }))
       }
 
-      console.log('🔄 [handleSaveUpdate] Payload:', JSON.stringify(updatePayload, null, 2))
+      console.log(' [handleSaveUpdate] Payload:', JSON.stringify(updatePayload, null, 2))
 
       await updateDetailOutput(updatePayload)
       showAlertMessage('success', 'Detail output updated successfully')
@@ -133,7 +133,7 @@ export function useDetailModal(showAlertMessage) {
       if (onSuccess) onSuccess()
       return true
     } catch (error) {
-      console.error('❌ Error saving update:', error)
+      console.error(' Error saving update:', error)
       showAlertMessage('error', `Failed to save update: ${error.message}`)
       return false
     } finally {

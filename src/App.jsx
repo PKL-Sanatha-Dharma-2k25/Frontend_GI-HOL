@@ -1,13 +1,13 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { SidebarProvider } from '@/context/SidebarContext'
 import { FullscreenProvider } from '@/components/fullscreen/FullscreenMode'
-import SessionWarningModal from '@/components/SessionWarningModal'  // ⭐ TAMBAH IMPORT INI
+import SessionWarningModal from '@/components/SessionWarningModal'  
 import Login from '@/pages/auth/Login'
 import Dashboard from '@/pages/Dashboard'
 import Line from '@/pages/Line'
 import OperationBreakdown from '@/pages/OperationBreakdown'
 import HourlyOutput from '@/pages/HourlyOutput'
-import Report from '@/pages/Report' // ⭐ IMPORT REPORT
+import Report from '@/pages/Report' 
 import UserManagement from '@/pages/UserManagement'
 import ProtectedRoute from '@/components/ProtectedRoute'
 import DashboardRouter from '@/pages/DashboardRouter'
@@ -19,18 +19,16 @@ export default function App() {
   return (
     <FullscreenProvider>
       <SidebarProvider>
-        <SessionWarningModal />  {/* ⭐ TAMBAH KOMPONEN INI */}
+        <SessionWarningModal />  { }
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
           
           {/* Protected Routes */}
           <Route element={<ProtectedRoute />}>
-            {/* ⭐ Root route "/" - DashboardRouter decide berdasarkan role */}
-            {/* Supervisor → Dashboard, Admin/Superadmin → Dashboard */}
             <Route index element={<DashboardRouter />} />
             
-            {/* ⭐ Direct Dashboard access */}
+            {}
             <Route path="dashboard" element={<Dashboard />} />
             
             {/* Admin/Superadmin routes */}

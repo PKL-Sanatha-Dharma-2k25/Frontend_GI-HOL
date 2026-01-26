@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { getHour } from '@/services/apiService'
 
 /**
- * ⭐ Custom Hook: useHour
+ * Custom Hook: useHour
  * 
  * Manage master hour data from backend endpoint /auth/gethour
  * Provides utilities untuk format, filter, dan access hour data
@@ -10,19 +10,17 @@ import { getHour } from '@/services/apiService'
  * @returns {Object} Hour hook object dengan methods & state
  */
 export function useHour() {
-  // ========================================
+  
   // STATE MANAGEMENT
-  // ========================================
   const [hours, setHours] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [lastFetch, setLastFetch] = useState(null)
 
-  // ========================================
   // LIFECYCLE - Load data on mount
-  // ========================================
+ 
   useEffect(() => {
-    console.log('⏰ [useHour] Hook mounted, loading hour data...')
+    console.log(' [useHour] Hook mounted, loading hour data...')
     loadHours()
   }, [])
 
@@ -39,7 +37,7 @@ export function useHour() {
     try {
       setLoading(true)
       setError(null)
-      console.log('⏰ [useHour] Fetching hour master data from API...')
+      console.log(' [useHour] Fetching hour master data from API...')
       
       const response = await getHour()
       
@@ -50,12 +48,12 @@ export function useHour() {
 
       // Handle response data
       if (response.data && Array.isArray(response.data)) {
-        console.log('✅ [useHour] Hour data successfully loaded:', response.data)
-        console.log(`📊 [useHour] Total hours: ${response.data.length}`)
+        console.log(' [useHour] Hour data successfully loaded:', response.data)
+        console.log(` [useHour] Total hours: ${response.data.length}`)
         
         // Log sample data
         if (response.data.length > 0) {
-          console.log('📋 [useHour] Sample hour data:', response.data[0])
+          console.log(' [useHour] Sample hour data:', response.data[0])
         }
         
         setHours(response.data)
@@ -63,7 +61,7 @@ export function useHour() {
         setError(null)
       } else if (Array.isArray(response)) {
         // Handle case where response is directly an array
-        console.log('✅ [useHour] Hour data loaded (direct array):', response)
+        console.log(' [useHour] Hour data loaded (direct array):', response)
         setHours(response)
         setLastFetch(new Date())
         setError(null)
@@ -71,8 +69,8 @@ export function useHour() {
         throw new Error(`Unexpected response format: ${JSON.stringify(response)}`)
       }
     } catch (err) {
-      console.error('❌ [useHour] Error loading hours:', err)
-      console.error('❌ [useHour] Error message:', err.message)
+      console.error(' [useHour] Error loading hours:', err)
+      console.error(' [useHour] Error message:', err.message)
       setError(err.message || 'Failed to load hour data')
       setHours([])
     } finally {
@@ -156,7 +154,7 @@ export function useHour() {
    */
   const getHourOptions = () => {
     if (!Array.isArray(hours)) {
-      console.warn('⚠️ [useHour] Hours is not an array:', hours)
+      console.warn(' [useHour] Hours is not an array:', hours)
       return []
     }
     
@@ -404,7 +402,7 @@ export function useHour() {
    * Useful for cleanup or testing
    */
   const reset = () => {
-    console.log('🔄 [useHour] Resetting hook state...')
+    console.log(' [useHour] Resetting hook state...')
     setHours([])
     setLoading(false)
     setError(null)

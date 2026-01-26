@@ -1,13 +1,7 @@
 
-// =====================================================
-// CONSTANTS
-// =====================================================
 const TOKEN_KEY = 'authToken'
 const USER_KEY = 'userData'
 
-// =====================================================
-// ⭐ IMPORTS (DI BAGIAN ATAS - FIXED POSITION)
-// =====================================================
 import { decodeJWT } from './jwt'
 
 // =====================================================
@@ -17,30 +11,29 @@ import { decodeJWT } from './jwt'
 export const saveToken = (token) => {
   try {
     if (!token) {
-      console.warn('⚠️ [saveToken] Token is empty/null')
+      console.warn(' [saveToken] Token is empty/null')
       return false
     }
 
-    console.log('💾 [saveToken] Saving token...')
+    console.log(' [saveToken] Saving token...')
     console.log('Token length:', token.length)
     console.log('Token preview:', token.substring(0, 30) + '...')
 
     localStorage.setItem(TOKEN_KEY, token)
 
-    // ⭐ VERIFY TERSIMPAN
     const saved = localStorage.getItem(TOKEN_KEY)
     const verified = saved === token
 
     if (verified) {
-      console.log('✅ [saveToken] Token saved & verified successfully')
+      console.log(' [saveToken] Token saved & verified successfully')
     } else {
-      console.error('❌ [saveToken] Token saved but verification failed!')
+      console.error(' [saveToken] Token saved but verification failed!')
     }
 
     return verified
 
   } catch (error) {
-    console.error('❌ [saveToken] Error:', error.message)
+    console.error(' [saveToken] Error:', error.message)
     return false
   }
 }
@@ -50,15 +43,15 @@ export const getToken = () => {
     const token = localStorage.getItem(TOKEN_KEY)
 
     if (token) {
-      console.log('✅ [getToken] Token found (length:', token.length, ')')
+      console.log('[getToken] Token found (length:', token.length, ')')
       return token
     } else {
-      console.log('❌ [getToken] No token found in localStorage')
+      console.log(' [getToken] No token found in localStorage')
       return null
     }
 
   } catch (error) {
-    console.error('❌ [getToken] Error:', error.message)
+    console.error(' [getToken] Error:', error.message)
     return null
   }
 }
@@ -66,10 +59,10 @@ export const getToken = () => {
 export const removeToken = () => {
   try {
     localStorage.removeItem(TOKEN_KEY)
-    console.log('🗑️ [removeToken] Token removed')
+    console.log(' [removeToken] Token removed')
     return true
   } catch (error) {
-    console.error('❌ [removeToken] Error:', error.message)
+    console.error(' [removeToken] Error:', error.message)
     return false
   }
 }
@@ -105,20 +98,20 @@ export const saveUser = (user) => {
     const jsonStr = JSON.stringify(userData)
     localStorage.setItem(USER_KEY, jsonStr)
 
-    // ⭐ VERIFY TERSIMPAN
+
     const saved = localStorage.getItem(USER_KEY)
     const verified = saved === jsonStr
 
     if (verified) {
-      console.log('✅ [saveUser] User data saved & verified successfully')
+      console.log(' [saveUser] User data saved & verified successfully')
     } else {
-      console.error('❌ [saveUser] User data saved but verification failed!')
+      console.error(' [saveUser] User data saved but verification failed!')
     }
 
     return verified
 
   } catch (error) {
-    console.error('❌ [saveUser] Error:', error.message)
+    console.error(' [saveUser] Error:', error.message)
     return false
   }
 }
@@ -128,15 +121,15 @@ export const getUser = () => {
     const userStr = localStorage.getItem(USER_KEY)
 
     if (!userStr) {
-      console.log('❌ [getUser] No user data found in localStorage')
+      console.log(' [getUser] No user data found in localStorage')
       return null
     }
 
-    console.log('📖 [getUser] User data found, parsing...')
+    console.log(' [getUser] User data found, parsing...')
 
     const user = JSON.parse(userStr)
 
-    console.log('✅ [getUser] User retrieved:')
+    console.log(' [getUser] User retrieved:')
     console.log('  - id_user:', user.id_user)
     console.log('  - username:', user.username)
     console.log('  - role:', user.role)
@@ -145,7 +138,7 @@ export const getUser = () => {
     return user
 
   } catch (error) {
-    console.error('❌ [getUser] Error parsing user:', error.message)
+    console.error(' [getUser] Error parsing user:', error.message)
     return null
   }
 }
@@ -153,10 +146,10 @@ export const getUser = () => {
 export const removeUser = () => {
   try {
     localStorage.removeItem(USER_KEY)
-    console.log('🗑️ [removeUser] User data removed')
+    console.log(' [removeUser] User data removed')
     return true
   } catch (error) {
-    console.error('❌ [removeUser] Error:', error.message)
+    console.error(' [removeUser] Error:', error.message)
     return false
   }
 }
