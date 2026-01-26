@@ -269,6 +269,7 @@ export const getBarChartDash = async (idLine, hour) => {
   try {
     console.log('📊 [getBarChartDash] Fetching bar chart data...', { idLine, hour })
     
+    // Validasi input
     if (!idLine || !hour) {
       throw new Error('id_line dan hour harus diisi')
     }
@@ -303,6 +304,8 @@ export const getBarChartDash = async (idLine, hour) => {
             operation_code: item.operation_code,
             operation_name: item.operation_name,
             output: 0,
+            repair: 0,
+            reject: 0,
             target: 0,
             orc: orcValue,
             style: styleValue
@@ -310,6 +313,8 @@ export const getBarChartDash = async (idLine, hour) => {
         }
         
         grouped[key].output += parseInt(item.output) || 0
+        grouped[key].repair += parseInt(item.repair) || 0
+        grouped[key].reject += parseInt(item.reject) || 0
         grouped[key].target += parseInt(item.target) || 0
       })
       

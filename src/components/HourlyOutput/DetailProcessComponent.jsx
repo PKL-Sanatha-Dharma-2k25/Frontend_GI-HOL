@@ -1,4 +1,4 @@
-import { memo, useState } from 'react'
+import { memo, useState, useEffect } from 'react'
 import { Save, Plus, Trash2, ChevronDown, Download, AlertCircle, CheckCircle2 } from 'lucide-react'
 
 const DetailProcessComponent = memo(({
@@ -7,11 +7,15 @@ const DetailProcessComponent = memo(({
     { op_code: '1B', op_name: 'Sewing', name: 'Jane', target_per_day: 150 },
     { op_code: '1C', op_name: 'Finishing', name: 'Bob', target_per_day: 120 }
   ],
-  detailProcessInput = { '1A': '', '1B': '', '1C': '' },
+  detailProcessInput = {},
+  detailProcessRepair = {},
+  detailProcessReject = {},
   currentHeaderData = { orc: 'ORC-01', style: 'Style-A', date: '2024-01-12', hour: '08' },
   loadingDetail = false,
   loading = false,
   onActualOutputChange = () => {},
+  onRepairChange = () => {},
+  onRejectChange = () => {},
   onSaveDetailProcess = () => {},
   onCancelDetailProcess = () => {}
 }) => {
@@ -20,78 +24,121 @@ const DetailProcessComponent = memo(({
   const [showAddForm, setShowAddForm] = useState(false)
   const [iotStatus, setIotStatus] = useState('idle')
   const [iotMessage, setIotMessage] = useState('')
-  const [showTestData, setShowTestData] = useState(false)
 
-  const handleFillFromLocalStorage = () => {
+  // Initialize detailProcessInput, detailProcessRepair, detailProcessReject jika kosong
+  const [localInput, setLocalInput] = useState(detailProcessInput)
+  const [localRepair, setLocalRepair] = useState(detailProcessRepair)
+  const [localReject, setLocalReject] = useState(detailProcessReject)
+
+  // Update local state ketika props berubah
+  useEffect(() => {
+    setLocalInput(Object.keys(detailProcessInput).length > 0 ? detailProcessInput : {})
+    setLocalRepair(Object.keys(detailProcessRepair).length > 0 ? detailProcessRepair : {})
+    setLocalReject(Object.keys(detailProcessReject).length > 0 ? detailProcessReject : {})
+  }, [detailProcessInput, detailProcessRepair, detailProcessReject])
+
+  // Initialize empty objects untuk setiap op_code
+  useEffect(() => {
+    if (detailProcessData.length > 0) {
+      const initialInput = {}
+      const initialRepair = {}
+      const initialReject = {}
+
+      detailProcessData.forEach(item => {
+        initialInput[item.op_code] = localInput[item.op_code] ?? ''
+        initialRepair[item.op_code] = localRepair[item.op_code] ?? ''
+        initialReject[item.op_code] = localReject[item.op_code] ?? ''
+      })
+
+      setLocalInput(initialInput)
+      setLocalRepair(initialRepair)
+      setLocalReject(initialReject)
+    }
+  }, [detailProcessData])
+
+  const handleFillFromIoT = () => {
     setIotStatus('loading')
     setIotMessage('Reading from IoT device...')
     
     try {
-      const iotData = localStorage.getItem('iot_output_data')
-      
-      if (!iotData) {
-        setIotStatus('error')
-        setIotMessage('No IoT data found. Generate test data first!')
-        setTimeout(() => setIotStatus('idle'), 4000)
-        return
-      }
+      // Simulasi atau bisa di-replace dengan API call ke IoT device
+      const iotData = {}
+      const newInput = { ...localInput }
+      const newRepair = { ...localRepair }
+      const newReject = { ...localReject }
 
-      const data = JSON.parse(iotData)
-      let outputMap = {}
-      
-      if (Array.isArray(data)) {
-        data.forEach(item => {
-          outputMap[item.op_code] = item.output || 0
-        })
-      } else if (typeof data === 'object') {
-        outputMap = data
-      }
-
-      let filledCount = 0
       detailProcessData.forEach(item => {
-        const opCode = item.op_code
-        if (outputMap[opCode] !== undefined) {
-          onActualOutputChange(opCode, outputMap[opCode])
-          filledCount++
-        }
+        // Generate output random atau dari IoT device
+        const output = Math.floor(Math.random() * 50 + 80)
+        
+        // Repair: 5-15% dari output
+        const repairRate = Math.random() * 0.10 + 0.05
+        const repair = Math.floor(output * repairRate)
+        
+        // Reject: 2-8% dari output
+        const rejectRate = Math.random() * 0.06 + 0.02
+        const reject = Math.floor(output * rejectRate)
+        
+        iotData[item.op_code] = { output, repair, reject }
+        
+        // Update local state
+        newInput[item.op_code] = output
+        newRepair[item.op_code] = repair
+        newReject[item.op_code] = reject
+        
+        // Trigger parent handler
+        onActualOutputChange(item.op_code, output)
+        onRepairChange(item.op_code, repair)
+        onRejectChange(item.op_code, reject)
+        
+        console.log(`${item.op_code}: Output=${output}, Repair=${repair}(${(repairRate*100).toFixed(1)}%), Reject=${reject}(${(rejectRate*100).toFixed(1)}%)`)
       })
 
+      setLocalInput(newInput)
+      setLocalRepair(newRepair)
+      setLocalReject(newReject)
+
       setIotStatus('success')
-      setIotMessage(`Successfully filled ${filledCount} outputs`)
+      setIotMessage(`✓ Successfully filled ${detailProcessData.length} outputs with repair and reject data`)
       setTimeout(() => setIotStatus('idle'), 4000)
 
     } catch (error) {
       setIotStatus('error')
-      setIotMessage(`Error: ${error.message}`)
+      setIotMessage(`✗ Error: ${error.message}`)
       setTimeout(() => setIotStatus('idle'), 4000)
     }
   }
 
-  const handleGenerateTestData = () => {
-    try {
-      const testData = {}
-      detailProcessData.forEach(item => {
-        testData[item.op_code] = Math.floor(Math.random() * 100 + 100)
-      })
-      localStorage.setItem('iot_output_data', JSON.stringify(testData))
-      
-      setIotStatus('success')
-      setIotMessage(`Generated ${Object.keys(testData).length} test items`)
-      setShowTestData(false)
-      setTimeout(() => setIotStatus('idle'), 3000)
-    } catch (error) {
-      setIotStatus('error')
-      setIotMessage(`Error: ${error.message}`)
-      setTimeout(() => setIotStatus('idle'), 3000)
-    }
+  const handleActualOutputChange = (opCode, value) => {
+    setLocalInput(prev => ({
+      ...prev,
+      [opCode]: value
+    }))
+    onActualOutputChange(opCode, value)
+  }
+
+  const handleRepairChange = (opCode, value) => {
+    setLocalRepair(prev => ({
+      ...prev,
+      [opCode]: value
+    }))
+    onRepairChange(opCode, value)
+  }
+
+  const handleRejectChange = (opCode, value) => {
+    setLocalReject(prev => ({
+      ...prev,
+      [opCode]: value
+    }))
+    onRejectChange(opCode, value)
   }
 
   const handleAddRow = () => {
-    const code = document.getElementById('new_code').value
-    const process = document.getElementById('new_process').value
-    const operator = document.getElementById('new_operator').value
-    const target = document.getElementById('new_target').value
-    const output = document.getElementById('new_output').value
+    const code = document.getElementById('new_code')?.value
+    const process = document.getElementById('new_process')?.value
+    const operator = document.getElementById('new_operator')?.value
+    const target = document.getElementById('new_target')?.value
+    const output = document.getElementById('new_output')?.value
 
     if (code && process && operator) {
       setAddedRows([...addedRows, {
@@ -99,10 +146,17 @@ const DetailProcessComponent = memo(({
         op_code: code,
         op_name: process,
         name: operator,
-        target_per_day: target,
-        actual_output: output
+        target_per_day: target || 0,
+        actual_output: output || 0
       }])
       setNextTempId(nextTempId + 1)
+
+      // Initialize input fields untuk row baru
+      setLocalInput(prev => ({ ...prev, [code]: output || '' }))
+      setLocalRepair(prev => ({ ...prev, [code]: '' }))
+      setLocalReject(prev => ({ ...prev, [code]: '' }))
+
+      // Reset form
       document.getElementById('new_code').value = ''
       document.getElementById('new_process').value = ''
       document.getElementById('new_operator').value = ''
@@ -113,7 +167,27 @@ const DetailProcessComponent = memo(({
   }
 
   const handleDeleteRow = (tempId) => {
-    setAddedRows(addedRows.filter(row => row.temp_id !== tempId))
+    const row = addedRows.find(r => r.temp_id === tempId)
+    if (row) {
+      setAddedRows(addedRows.filter(r => r.temp_id !== tempId))
+      
+      // Hapus dari input fields
+      setLocalInput(prev => {
+        const newState = { ...prev }
+        delete newState[row.op_code]
+        return newState
+      })
+      setLocalRepair(prev => {
+        const newState = { ...prev }
+        delete newState[row.op_code]
+        return newState
+      })
+      setLocalReject(prev => {
+        const newState = { ...prev }
+        delete newState[row.op_code]
+        return newState
+      })
+    }
   }
 
   const allData = [...detailProcessData, ...addedRows]
@@ -148,20 +222,12 @@ const DetailProcessComponent = memo(({
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 flex-1">
             <button
-              onClick={handleFillFromLocalStorage}
+              onClick={handleFillFromIoT}
               disabled={loading}
               className="inline-flex items-center gap-2 px-4 py-2.5 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 disabled:opacity-50 text-sm font-semibold transition-all shadow-md hover:shadow-lg"
             >
               <Download size={18} />
               <span>Fill from IoT</span>
-            </button>
-
-            <button
-              onClick={() => setShowTestData(!showTestData)}
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-600 text-white rounded-lg hover:bg-slate-700 text-sm font-semibold transition-all shadow-md hover:shadow-lg"
-            >
-              <span>🧪</span>
-              <span>Test Data</span>
             </button>
           </div>
 
@@ -173,29 +239,12 @@ const DetailProcessComponent = memo(({
             }`}>
               {iotStatus === 'success' && <CheckCircle2 size={16} />}
               {iotStatus === 'error' && <AlertCircle size={16} />}
+              {iotStatus === 'loading' && <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-b-transparent"></div>}
               {iotMessage}
             </div>
           )}
         </div>
       </div>
-
-      {/* Test Data Modal */}
-      {showTestData && (
-        <div className="bg-gradient-to-r from-amber-50 to-orange-50 px-6 py-4 border-b border-amber-200">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div>
-              <h3 className="font-semibold text-amber-900 text-sm">Generate Test Data</h3>
-              <p className="text-xs text-amber-700 mt-1">For testing when IoT device is not ready</p>
-            </div>
-            <button
-              onClick={handleGenerateTestData}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 text-sm font-semibold transition-all whitespace-nowrap"
-            >
-              ✅ Generate
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Content */}
       <div className="p-6">
@@ -209,13 +258,27 @@ const DetailProcessComponent = memo(({
             {/* Data Table */}
             <div className="overflow-x-auto rounded-lg border border-gray-200">
               <table className="w-full text-sm">
-                <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
+                <thead className="bg-white border-b-2 border-gray-300">
                   <tr>
-                    <th className="px-4 py-3 text-left font-semibold text-gray-700">Code</th>
-                    <th className="px-4 py-3 text-left font-semibold text-gray-700">Process</th>
-                    <th className="px-4 py-3 text-left font-semibold text-gray-700">Operator</th>
-                    <th className="px-4 py-3 text-right font-semibold text-gray-700">Target/Hour</th>
-                    <th className="px-4 py-3 text-right font-semibold text-gray-700">Actual Output</th>
+                    <th className="px-4 py-4 text-left font-semibold text-gray-800 text-sm">Code</th>
+                    <th className="px-4 py-4 text-left font-semibold text-gray-800 text-sm">Process</th>
+                    <th className="px-4 py-4 text-left font-semibold text-gray-800 text-sm">Operator</th>
+                    <th className="px-4 py-4 text-right font-semibold text-gray-800 text-sm">Target/Hour</th>
+                    <th className="px-4 py-4 text-right">
+                      <div className="inline-block px-4 py-2 bg-green-50 border-b-4 border-green-500 rounded-t-lg">
+                        <span className="text-green-700 font-bold text-sm">ACTUAL OUTPUT</span>
+                      </div>
+                    </th>
+                    <th className="px-4 py-4 text-right">
+                      <div className="inline-block px-4 py-2 bg-yellow-50 border-b-4 border-yellow-500 rounded-t-lg">
+                        <span className="text-yellow-700 font-bold text-sm">REPAIR</span>
+                      </div>
+                    </th>
+                    <th className="px-4 py-4 text-right">
+                      <div className="inline-block px-4 py-2 bg-red-50 border-b-4 border-red-500 rounded-t-lg">
+                        <span className="text-red-700 font-bold text-sm">REJECT</span>
+                      </div>
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -229,13 +292,39 @@ const DetailProcessComponent = memo(({
                       <td className="px-4 py-3 text-gray-800 font-medium">{row.op_name}</td>
                       <td className="px-4 py-3 text-gray-700">{row.name}</td>
                       <td className="px-4 py-3 text-right text-gray-700 font-medium">{Math.round(row.target_per_day) || 0}</td>
+                      
+                      {/* ACTUAL OUTPUT - GREEN */}
                       <td className="px-4 py-3 text-right">
                         <input
                           type="number"
                           min="0"
-                          value={detailProcessInput[row.op_code] ?? ''}
-                          onChange={(e) => onActualOutputChange(row.op_code, e.target.value)}
-                          className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right font-medium transition-all ml-auto"
+                          value={localInput[row.op_code] ?? ''}
+                          onChange={(e) => handleActualOutputChange(row.op_code, e.target.value)}
+                          className="w-20 px-3 py-2 border-2 border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-right font-medium transition-all ml-auto bg-green-50 text-green-900 placeholder-green-300"
+                          placeholder="0"
+                        />
+                      </td>
+
+                      {/* REPAIR - YELLOW */}
+                      <td className="px-4 py-3 text-right">
+                        <input
+                          type="number"
+                          min="0"
+                          value={localRepair[row.op_code] ?? ''}
+                          onChange={(e) => handleRepairChange(row.op_code, e.target.value)}
+                          className="w-20 px-3 py-2 border-2 border-yellow-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-right font-medium transition-all ml-auto bg-yellow-50 text-yellow-900 placeholder-yellow-300"
+                          placeholder="0"
+                        />
+                      </td>
+
+                      {/* REJECT - RED */}
+                      <td className="px-4 py-3 text-right">
+                        <input
+                          type="number"
+                          min="0"
+                          value={localReject[row.op_code] ?? ''}
+                          onChange={(e) => handleRejectChange(row.op_code, e.target.value)}
+                          className="w-20 px-3 py-2 border-2 border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-right font-medium transition-all ml-auto bg-red-50 text-red-900 placeholder-red-300"
                           placeholder="0"
                         />
                       </td>
@@ -375,8 +464,8 @@ const DetailProcessComponent = memo(({
           </>
         ) : (
           <div className="text-center py-12">
-            <div className="text-gray-400 mb-2 text-3xl">📋</div>
-            <p className="text-gray-600 font-medium">No production data available</p>
+            <div className="text-gray-400 mb-2 text-3xl">No production data available</div>
+            <p className="text-gray-600 font-medium">No data found</p>
           </div>
         )}
       </div>

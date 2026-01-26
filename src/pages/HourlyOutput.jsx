@@ -6,7 +6,7 @@ import { useDetailProcess } from '@/hooks/useDetailProcess'
 import { useDetailModal } from '@/hooks/useDetailModal'
 import { useHourlyOutput } from '@/hooks/useHourlyOutput'
 import { useHourValidation } from '@/hooks/useHourValidation'
-import { useHour } from '@/hooks/useHour' // ⭐ NEW: Import useHour hook
+import { useHour } from '@/hooks/useHour'
 import { getJakartaTime } from '@/utils/dateTime'
 
 // Components
@@ -24,22 +24,22 @@ const ITEMS_PER_PAGE = 10
 export default function HourlyOutputPage() {
   const { user } = useAuth()
 
-  //  Custom Hooks
+  // Custom Hooks
   const alert = useAlert()
   const formHook = useFormData(user)
   const detailProcessHook = useDetailProcess(alert.showAlertMessage)
   const detailModalHook = useDetailModal(alert.showAlertMessage)
   const hourValidationHook = useHourValidation()
   const outputHook = useHourlyOutput(user, alert.showAlertMessage, detailProcessHook)
-  const hourHook = useHour() // ⭐ NEW: Use hour hook untuk fetch master data
+  const hourHook = useHour()
 
-  //  UI State
+  // UI State
   const [showForm, setShowForm] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(ITEMS_PER_PAGE)
   const [searchTerm, setSearchTerm] = useState('')
 
-  //  Filter ORC List
+  // Filter ORC List
   useEffect(() => {
     if (formHook.orcSearchTerm.trim() === '') {
       outputHook.setFilteredOrcList(outputHook.orcList)
@@ -53,17 +53,16 @@ export default function HourlyOutputPage() {
     }
   }, [formHook.orcSearchTerm, outputHook.orcList])
 
-  //  Load Initial Data
+  // Load Initial Data
   useEffect(() => {
     const loadData = async () => {
       await outputHook.loadInitialData()
       await hourValidationHook.loadUsedHours()
-      // hourHook sudah auto-load di mount via useEffect di hook
     }
     loadData()
   }, [])
 
-  // ⭐ Handle Form Submit
+  // Handle Form Submit
   const handleFormSubmit = async () => {
     if (formHook.formData.date && formHook.formData.hour) {
       const isUsed = hourValidationHook.isHourUsed(
@@ -90,16 +89,18 @@ export default function HourlyOutputPage() {
     }
   }
 
-  //  Handle Close Form
+  // Handle Close Form
   const handleCloseForm = () => {
     setShowForm(false)
   }
 
-  //  Handle Save Detail Process
+  // Handle Save Detail Process - UPDATED dengan repair dan reject
   const handleSaveDetailProcess = async () => {
     const success = await outputHook.handleSaveDetailProcess(
       detailProcessHook.detailProcessData,
       detailProcessHook.detailProcessInput,
+      detailProcessHook.detailProcessRepair,
+      detailProcessHook.detailProcessReject,
       detailProcessHook.currentHeaderData
     )
     if (success) {
@@ -109,17 +110,17 @@ export default function HourlyOutputPage() {
     }
   }
 
-  //  Handle Detail Click
+  // Handle Detail Click
   const handleDetailClick = async (idOutput) => {
     await detailModalHook.loadDetailData(idOutput)
   }
 
-  //  Handle Update Click
+  // Handle Update Click
   const handleUpdateClick = async (idOutput) => {
     await detailModalHook.loadUpdateData(idOutput)
   }
 
-  //  Handle Save Update
+  // Handle Save Update
   const handleSaveUpdate = async () => {
     const success = await detailModalHook.handleSaveUpdate(() => {
       outputHook.loadInitialData()
@@ -130,7 +131,7 @@ export default function HourlyOutputPage() {
     }
   }
 
-  //  Filter & Paginate Table
+  // Filter & Paginate Table
   const filteredOutputs = outputHook.outputs.filter(output =>
     (output.style?.toLowerCase().includes(searchTerm.toLowerCase())) ||
     (output.date?.includes(searchTerm)) ||
@@ -141,17 +142,17 @@ export default function HourlyOutputPage() {
   const startIndex = (currentPage - 1) * itemsPerPage
   const paginatedOutputs = filteredOutputs.slice(startIndex, startIndex + itemsPerPage)
 
-  //  Breadcrumb Items
+  // Breadcrumb Items
   const breadcrumbItems = [
     { label: 'Hourly Output', href: '/GI-HOL/hourly-output', active: true },
   ]
 
   return (
     <div className="space-y-6 px-6 py-8 bg-gray-50 min-h-screen">
-      {/*  BREADCRUMB */}
+      {/* BREADCRUMB */}
       <BreadCrumb items={breadcrumbItems} />
 
-      {/*  ALERT */}
+      {/* ALERT */}
       {alert.showAlert && (
         <AlertComponent
           type={alert.alertType}
@@ -160,7 +161,7 @@ export default function HourlyOutputPage() {
         />
       )}
 
-      {/*  FORM SECTION */}
+      {/* FORM SECTION */}
       <HourlyOutputForm
         showForm={showForm}
         onToggleForm={setShowForm}
@@ -179,25 +180,29 @@ export default function HourlyOutputPage() {
         loading={outputHook.loading}
         isHourUsed={hourValidationHook.isHourUsed}
         usedHours={hourValidationHook.usedHours}
-        hourOptions={hourHook.getHourOptions()} // ⭐ NEW: Pass hour options
-        hourLoading={hourHook.loading} // ⭐ NEW: Pass loading state
+        hourOptions={hourHook.getHourOptions()}
+        hourLoading={hourHook.loading}
       />
 
-      {/*  DETAIL PROCESS SECTION */}
+      {/* DETAIL PROCESS SECTION - UPDATED dengan repair dan reject */}
       {detailProcessHook.showDetailProcess && (
         <DetailProcessComponent
           detailProcessData={detailProcessHook.detailProcessData}
           detailProcessInput={detailProcessHook.detailProcessInput}
+          detailProcessRepair={detailProcessHook.detailProcessRepair}
+          detailProcessReject={detailProcessHook.detailProcessReject}
           currentHeaderData={detailProcessHook.currentHeaderData}
           loadingDetail={detailProcessHook.loadingDetail}
           loading={outputHook.loading}
           onActualOutputChange={detailProcessHook.handleActualOutputChange}
+          onRepairChange={detailProcessHook.handleRepairChange}
+          onRejectChange={detailProcessHook.handleRejectChange}
           onSaveDetailProcess={handleSaveDetailProcess}
           onCancelDetailProcess={detailProcessHook.handleCancel}
         />
       )}
 
-      {/*  OUTPUT TABLE SECTION */}
+      {/* OUTPUT TABLE SECTION */}
       <div>
         <h3 className="text-lg font-bold text-gray-900 mb-3">Output List</h3>
         <OutputTable
@@ -205,12 +210,11 @@ export default function HourlyOutputPage() {
           loading={outputHook.loading}
           onDetailClick={handleDetailClick}
           onUpdateClick={handleUpdateClick}
-          userIdLine={user?.id_line} 
-          // ⭐ NEW: Pass hourHook untuk format hour info di table
+          userIdLine={user?.id_line}
           hourHook={hourHook}
         />
 
-        {/*  PAGINATION */}
+        {/* PAGINATION */}
         {!outputHook.loading && filteredOutputs.length > 0 && (
           <Pagination
             currentPage={currentPage}
@@ -224,7 +228,7 @@ export default function HourlyOutputPage() {
         )}
       </div>
 
-      {/*  DETAIL MODAL */}
+      {/* DETAIL MODAL */}
       <DetailModal
         isOpen={detailModalHook.showDetailModal}
         data={detailModalHook.detailData}
@@ -232,7 +236,7 @@ export default function HourlyOutputPage() {
         onClose={detailModalHook.closeDetailModal}
       />
 
-      {/*  UPDATE MODAL */}
+      {/* UPDATE MODAL */}
       <UpdateModal
         isOpen={detailModalHook.showUpdateModal}
         data={detailModalHook.updateData}

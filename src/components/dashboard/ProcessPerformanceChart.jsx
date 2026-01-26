@@ -1,4 +1,5 @@
 import { BarChart3, RefreshCw, Clock, TrendingUp, Activity, Filter, AlertTriangle } from 'lucide-react'
+import { useHour } from '@/hooks/useHour'
 import Card from '@/components/ui/Card'
 import StackedBarChart from './StackedBarChart'
 import AllHoursChart from './AllHoursChart'
@@ -17,7 +18,8 @@ function ProcessPerformanceChart({
   orcData = '-',
   styleData = '-'
 }) {
-  // Skeleton Loading Component
+  const { hours, loading: hourLoading, getHourOptions, getHourName } = useHour()
+
   const SkeletonBar = () => (
     <div className="space-y-3 px-2 sm:px-0">
       {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -30,11 +32,9 @@ function ProcessPerformanceChart({
     </div>
   )
 
-  // Enhanced Filter Section
   const FilterSection = () => (
     <div className="mb-6 sm:mb-8 p-4 sm:p-6 bg-gradient-to-r from-slate-50 via-emerald-50 to-slate-50 rounded-xl border border-emerald-200 shadow-sm">
       <style>{`
-        /* ===== FULLSCREEN RESPONSIVE FIX ===== */
         .filter-container {
           display: flex;
           flex-direction: column;
@@ -73,7 +73,6 @@ function ProcessPerformanceChart({
           flex-shrink: 0;
         }
 
-        /* Select Input */
         .filter-select {
           width: 100%;
           padding: clamp(0.5rem, 1.5vw, 0.75rem) clamp(0.75rem, 1.5vw, 1rem);
@@ -106,7 +105,6 @@ function ProcessPerformanceChart({
           border-color: #cbd5e1;
         }
 
-        /* Filter Button */
         .filter-button {
           width: 100%;
           padding: clamp(0.5rem, 1.5vw, 0.75rem) clamp(0.75rem, 2vw, 1.25rem);
@@ -169,10 +167,9 @@ function ProcessPerformanceChart({
           cursor: not-allowed;
         }
 
-        /* Info Cards Row */
         .filter-bottom-row {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
           gap: clamp(0.75rem, 2vw, 1rem);
           border-top: 1px solid #a7f3d0;
           padding-top: clamp(0.75rem, 2vw, 1rem);
@@ -217,7 +214,7 @@ function ProcessPerformanceChart({
         }
 
         .info-card-label {
-          font-size: clamp(0.6rem, 1vw, 0.75rem);
+          font-size: clamp(0.6rem, 0.9vw, 0.7rem);
           font-weight: 700;
           text-transform: uppercase;
           letter-spacing: 0.02em;
@@ -225,55 +222,97 @@ function ProcessPerformanceChart({
         }
 
         .info-card-value {
-          font-size: clamp(1rem, 2.5vw, 1.25rem);
+          font-size: clamp(0.9rem, 2vw, 1.1rem);
           font-weight: 700;
           margin: 0;
           word-break: break-word;
           padding-left: clamp(0.4rem, 1vw, 0.6rem);
         }
 
-        /* Card Variants */
-        .info-card.orc {
-          border-color: #e9d5ff;
+        .info-card.output {
+          border-color: #86efac;
+          background-color: #f0fdf4;
         }
 
-        .info-card.orc .info-card-icon {
-          background-color: #ede9fe;
+        .info-card.output .info-card-icon {
+          background-color: #dcfce7;
         }
 
-        .info-card.orc .info-card-icon svg {
-          color: #a855f7;
+        .info-card.output .info-card-icon svg {
+          color: #16a34a;
         }
 
-        .info-card.orc .info-card-label {
-          color: #64748b;
+        .info-card.output .info-card-label {
+          color: #16a34a;
         }
 
-        .info-card.orc .info-card-value {
-          color: #a855f7;
+        .info-card.output .info-card-value {
+          color: #15803d;
         }
 
-        .info-card.style {
-          border-color: #fed7aa;
+        .info-card.target {
+          border-color: #93c5fd;
+          background-color: #f0f9ff;
         }
 
-        .info-card.style .info-card-icon {
+        .info-card.target .info-card-icon {
+          background-color: #e0f2fe;
+        }
+
+        .info-card.target .info-card-icon svg {
+          color: #0284c7;
+        }
+
+        .info-card.target .info-card-label {
+          color: #0284c7;
+        }
+
+        .info-card.target .info-card-value {
+          color: #075985;
+        }
+
+        .info-card.repair {
+          border-color: #fcd34d;
+          background-color: #fffbeb;
+        }
+
+        .info-card.repair .info-card-icon {
           background-color: #fef3c7;
         }
 
-        .info-card.style .info-card-icon svg {
-          color: #d97706;
+        .info-card.repair .info-card-icon svg {
+          color: #ca8a04;
         }
 
-        .info-card.style .info-card-label {
-          color: #64748b;
+        .info-card.repair .info-card-label {
+          color: #ca8a04;
         }
 
-        .info-card.style .info-card-value {
-          color: #d97706;
+        .info-card.repair .info-card-value {
+          color: #b45309;
         }
 
-        /* ===== FULLSCREEN ADJUSTMENTS ===== */
+        .info-card.reject {
+          border-color: #fca5a5;
+          background-color: #fef2f2;
+        }
+
+        .info-card.reject .info-card-icon {
+          background-color: #fee2e2;
+        }
+
+        .info-card.reject .info-card-icon svg {
+          color: #dc2626;
+        }
+
+        .info-card.reject .info-card-label {
+          color: #dc2626;
+        }
+
+        .info-card.reject .info-card-value {
+          color: #b91c1c;
+        }
+
         .fullscreen-content-wrapper .filter-container {
           gap: 1.5rem;
         }
@@ -305,30 +344,38 @@ function ProcessPerformanceChart({
 
       <div className="filter-container">
         
-        {/* Top Row - Controls */}
         <div className="filter-top-row">
           
-          {/* Hour Selector */}
           <div className="filter-group">
             <label className="filter-label">
               <Clock size={16} strokeWidth={2.5} />
               Select Hour
             </label>
-            <select
-              value={selectedHour}
-              onChange={(e) => setSelectedHour(e.target.value)}
-              disabled={viewAllHours || chartLoading}
-              className="filter-select"
-            >
-              {Array.from({ length: 10 }, (_, i) => i + 1).map((hour) => (
-                <option key={hour} value={hour.toString()}>
-                  Hour {hour}
-                </option>
-              ))}
-            </select>
+            {hourLoading ? (
+              <div className="filter-select flex items-center justify-center gap-2 text-slate-500">
+                <div className="w-3 h-3 bg-slate-400 rounded-full animate-pulse"></div>
+                <span className="text-sm">Loading hours...</span>
+              </div>
+            ) : hours.length === 0 ? (
+              <div className="filter-select flex items-center text-slate-500">
+                No hours available
+              </div>
+            ) : (
+              <select
+                value={selectedHour}
+                onChange={(e) => setSelectedHour(e.target.value)}
+                disabled={viewAllHours || chartLoading}
+                className="filter-select"
+              >
+                {hours.map((hour) => (
+                  <option key={hour.id_hour} value={hour.id_hour.toString()}>
+                    {hour.name} ({hour.start_time} - {hour.end_time})
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
-          {/* View Toggle Button */}
           <div className="filter-group">
             <label className="filter-label">
               <Filter size={16} strokeWidth={2.5} />
@@ -336,16 +383,15 @@ function ProcessPerformanceChart({
             </label>
             <button
               onClick={() => setViewAllHours(!viewAllHours)}
-              disabled={chartLoading}
+              disabled={chartLoading || hourLoading}
               className={`filter-button ${viewAllHours ? 'toggle-all' : 'toggle-single'}`}
             >
               {chartLoading && <RefreshCw size={16} className="animate-spin" strokeWidth={2.5} />}
               {!chartLoading && <TrendingUp size={16} strokeWidth={2.5} />}
-              <span>{viewAllHours ? 'All Hours' : 'Single Hour'}</span>
+              <span>{viewAllHours ? `All ${hours.length} Hours` : 'Single Hour'}</span>
             </button>
           </div>
 
-          {/* Bottleneck Detector Button */}
           {!viewAllHours && processChartData.length > 0 && (
             <div className="filter-group">
               <label className="filter-label opacity-0">Bottleneck</label>
@@ -371,32 +417,67 @@ function ProcessPerformanceChart({
           )}
         </div>
 
-        {/* Bottom Row - Info Cards */}
         {!viewAllHours && processChartData.length > 0 && (
           <div className="filter-bottom-row">
             
-            {/* ORC Card */}
-            <div className="info-card orc">
+            <div className="info-card output">
               <div className="info-card-header">
                 <div className="info-card-icon">
-                  <Filter size={18} strokeWidth={2.5} />
-                </div>
-                <p className="info-card-label">ORC</p>
-              </div>
-              <p className="info-card-value">{orcData}</p>
-            </div>
-
-            {/* Style Card */}
-            <div className="info-card style">
-              <div className="info-card-header">
-                <div className="info-card-icon">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
                   </svg>
                 </div>
-                <p className="info-card-label">Style</p>
+                <p className="info-card-label">Output</p>
               </div>
-              <p className="info-card-value">{styleData}</p>
+              <p className="info-card-value">{processChartData.reduce((sum, item) => sum + (parseInt(item.output) || 0), 0)}</p>
+            </div>
+
+            <div className="info-card target">
+              <div className="info-card-header">
+                <div className="info-card-icon">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10"/>
+                  </svg>
+                </div>
+                <p className="info-card-label">Target</p>
+              </div>
+              <p className="info-card-value">{processChartData.reduce((sum, item) => sum + (Math.round(item.target) || 0), 0)}</p>
+            </div>
+
+            <div className="info-card repair">
+              <div className="info-card-header">
+                <div className="info-card-icon">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
+                </div>
+                <p className="info-card-label">Repair</p>
+              </div>
+              <p className="info-card-value">{processChartData.reduce((sum, item) => sum + (parseInt(item.repair) || 0), 0)}</p>
+            </div>
+
+            <div className="info-card reject">
+              <div className="info-card-header">
+                <div className="info-card-icon">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                  </svg>
+                </div>
+                <p className="info-card-label">Reject</p>
+              </div>
+              <p className="info-card-value">{processChartData.reduce((sum, item) => sum + (parseInt(item.reject) || 0), 0)}</p>
+            </div>
+
+            <div className="info-card" style={{ borderColor: '#c7d2fe', backgroundColor: '#f0f4ff' }}>
+              <div className="info-card-header">
+                <div className="info-card-icon" style={{ backgroundColor: '#e0e7ff' }}>
+                  <Clock size={16} strokeWidth={2.5} style={{ color: '#4f46e5' }} />
+                </div>
+                <p className="info-card-label" style={{ color: '#4f46e5' }}>Hour</p>
+              </div>
+              <p className="info-card-value" style={{ color: '#4f46e5' }}>
+                {getHourName(parseInt(selectedHour))}
+              </p>
             </div>
           </div>
         )}
@@ -407,7 +488,6 @@ function ProcessPerformanceChart({
   return (
     <Card shadow="md" padding="lg" rounded="lg" className="fade-in bg-white">
       
-      {/* Header Section */}
       <div className="flex items-start justify-between mb-6 sm:mb-8 pb-4 border-b-2 border-slate-100">
         <div>
           <div className="flex items-center gap-3 mb-2">
@@ -418,30 +498,28 @@ function ProcessPerformanceChart({
           </div>
           {viewAllHours && (
             <p className="text-sm text-slate-600 ml-11 mt-1">
-              Comparing output across all 10 hours of production
+              Comparing output across all {hours.length} hours of production
             </p>
           )}
         </div>
       </div>
 
-      {/* Filter Section */}
       <FilterSection />
 
-      {/* Chart Section */}
       <div className="relative min-h-96 mt-8">
         {!chartLoading ? (
           <div className="overflow-x-auto pb-4">
             {viewAllHours ? (
               <div className="space-y-4">
                 <div className="text-sm font-semibold text-slate-700 uppercase tracking-wider">
-                  All Hours View
+                  All Hours View ({hours.length} Total)
                 </div>
                 <AllHoursChart data={allHoursData} />
               </div>
             ) : (
               <div className="space-y-4">
                 <div className="text-sm font-semibold text-slate-700 uppercase tracking-wider">
-                  Hour {selectedHour} Details
+                  {getHourName(parseInt(selectedHour))} Details
                 </div>
                 <StackedBarChart data={processChartData} />
               </div>
@@ -457,7 +535,7 @@ function ProcessPerformanceChart({
                   <div className="w-3 h-3 bg-emerald-600 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
                 </div>
                 <p className="text-sm text-slate-600 font-semibold">
-                  {viewAllHours ? 'Loading all hours data...' : 'Loading chart data...'}
+                  {viewAllHours ? `Loading all ${hours.length} hours data...` : `Loading ${getHourName(parseInt(selectedHour))} data...`}
                 </p>
               </div>
             </div>

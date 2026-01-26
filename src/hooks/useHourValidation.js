@@ -84,9 +84,7 @@ export function useHourValidation() {
     return available
   }, [usedHours])
 
-  /**
-   * Reload validation (call saat ada perubahan data)
-   */
+
   const refreshValidation = useCallback(async () => {
     await loadUsedHours()
   }, [loadUsedHours])
@@ -101,9 +99,7 @@ export function useHourValidation() {
   }
 }
 
-// ==========================================
-// 📝 UPDATED useHourlyOutput HOOK
-// ==========================================
+
 
 export function useHourlyOutputV2(user, showAlertMessage, detailHook, hourValidation) {
   const [orcList, setOrcList] = useState([])
@@ -121,7 +117,7 @@ export function useHourlyOutputV2(user, showAlertMessage, detailHook, hourValida
       const outputData = await getHourlyOutputHeader()
       setOutputs(outputData.data || outputData || [])
 
-      // 🆕 Load used hours untuk validasi
+      
       await hourValidation.loadUsedHours()
 
       showAlertMessage('success', 'Data loaded successfully')
@@ -136,22 +132,21 @@ export function useHourlyOutputV2(user, showAlertMessage, detailHook, hourValida
   const handleFormSubmit = useCallback(async (formData, selectedOrc) => {
     const errors = []
 
-    // ✅ Validasi Date
+ 
     if (!formData.date || formData.date.trim() === '') {
       errors.push('* Date is required')
     }
     
-    // ✅ Validasi Hour
+   
     if (!formData.hour || formData.hour.trim() === '' || formData.hour === '0') {
       errors.push('* Hour is required')
     }
     
-    // ✅ Validasi ORC
+   
     if (!selectedOrc) {
       errors.push('* ORC is required')
     }
 
-    // 🆕 Validasi Hour sudah terpakai di hari itu
     if (formData.date && formData.hour) {
       const isUsed = hourValidation.isHourUsed(formData.date, formData.hour)
       if (isUsed) {

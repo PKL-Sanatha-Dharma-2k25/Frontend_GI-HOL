@@ -35,13 +35,12 @@ export function useHourlyOutput(user, showAlertMessage, detailHook) {
   const handleFormSubmit = useCallback(async (formData, selectedOrc) => {
     const errors = []
 
-    // ✅ Validasi yang lebih robust
     // Date validation
     if (!formData.date || formData.date.trim() === '') {
       errors.push('* Date is required')
     }
     
-    // Hour validation - PENTING: cek apakah hour kosong atau "0"
+    // Hour validation
     if (!formData.hour || formData.hour.trim() === '' || formData.hour === '0') {
       errors.push('* Hour is required')
     }
@@ -51,7 +50,7 @@ export function useHourlyOutput(user, showAlertMessage, detailHook) {
       errors.push('* ORC is required')
     }
 
-    // ❌ Jika ada error, tampilkan dan return false
+    // Jika ada error, tampilkan dan return false
     if (errors.length > 0) {
       showAlertMessage('error', 'Please fill in all required fields:', errors)
       return false
@@ -105,7 +104,7 @@ export function useHourlyOutput(user, showAlertMessage, detailHook) {
     }
   }, [user, showAlertMessage, detailHook])
 
-  const handleSaveDetailProcess = useCallback(async (detailData, input, headerData) => {
+  const handleSaveDetailProcess = useCallback(async (detailData, input, repair, reject, headerData) => {
     setLoading(true)
     try {
       const hasInput = Object.values(input).some(val => val > 0)
@@ -122,6 +121,8 @@ export function useHourlyOutput(user, showAlertMessage, detailHook) {
         details: detailData.map(detail => ({
           id_employe: detail.empID,
           output: parseInt(input[detail.op_code]) || 0,
+          repair: parseInt(repair[detail.op_code]) || 0,
+          reject: parseInt(reject[detail.op_code]) || 0,
           operation_name: detail.op_name,
           operation_code: detail.op_code,
           target: Math.round(detail.target_per_day) || 0

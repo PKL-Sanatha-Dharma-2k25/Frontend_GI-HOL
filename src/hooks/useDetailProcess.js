@@ -5,6 +5,8 @@ export function useDetailProcess(showAlertMessage) {
   const [showDetailProcess, setShowDetailProcess] = useState(false)
   const [detailProcessData, setDetailProcessData] = useState([])
   const [detailProcessInput, setDetailProcessInput] = useState({})
+  const [detailProcessRepair, setDetailProcessRepair] = useState({})
+  const [detailProcessReject, setDetailProcessReject] = useState({})
   const [currentHeaderData, setCurrentHeaderData] = useState(null)
   const [loadingDetail, setLoadingDetail] = useState(false)
 
@@ -25,12 +27,18 @@ export function useDetailProcess(showAlertMessage) {
       data = Object.values(uniqueByOpCode)
       setDetailProcessData(data)
       
-      // Initialize dengan kosong, bukan 0
+      // Initialize semua field (actual, repair, reject) dengan kosong
       const initialInput = {}
+      const initialRepair = {}
+      const initialReject = {}
       data.forEach(item => {
         initialInput[item.op_code] = ''
+        initialRepair[item.op_code] = ''
+        initialReject[item.op_code] = ''
       })
       setDetailProcessInput(initialInput)
+      setDetailProcessRepair(initialRepair)
+      setDetailProcessReject(initialReject)
     } catch (error) {
       console.error('Error loading detail:', error)
       showAlertMessage('error', 'Failed to load detail process')
@@ -40,9 +48,24 @@ export function useDetailProcess(showAlertMessage) {
   }
 
   const handleActualOutputChange = useCallback((opCode, value) => {
-    // Keep as empty string if user belum input, jangan convert ke 0
     const numValue = value === '' ? '' : parseInt(value) || 0
     setDetailProcessInput(prev => ({
+      ...prev,
+      [opCode]: numValue
+    }))
+  }, [])
+
+  const handleRepairChange = useCallback((opCode, value) => {
+    const numValue = value === '' ? '' : parseInt(value) || 0
+    setDetailProcessRepair(prev => ({
+      ...prev,
+      [opCode]: numValue
+    }))
+  }, [])
+
+  const handleRejectChange = useCallback((opCode, value) => {
+    const numValue = value === '' ? '' : parseInt(value) || 0
+    setDetailProcessReject(prev => ({
       ...prev,
       [opCode]: numValue
     }))
@@ -52,6 +75,8 @@ export function useDetailProcess(showAlertMessage) {
     setShowDetailProcess(false)
     setDetailProcessData([])
     setDetailProcessInput({})
+    setDetailProcessRepair({})
+    setDetailProcessReject({})
     setCurrentHeaderData(null)
   }, [])
 
@@ -62,11 +87,17 @@ export function useDetailProcess(showAlertMessage) {
     setDetailProcessData,
     detailProcessInput,
     setDetailProcessInput,
+    detailProcessRepair,
+    setDetailProcessRepair,
+    detailProcessReject,
+    setDetailProcessReject,
     currentHeaderData,
     setCurrentHeaderData,
     loadingDetail,
     loadDetailProcess,
     handleActualOutputChange,
+    handleRepairChange,
+    handleRejectChange,
     handleCancel
   }
 }
