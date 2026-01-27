@@ -146,6 +146,7 @@ export default function HourlyOutputPage() {
 
   // Breadcrumb Items
   const breadcrumbItems = [
+    { label: 'Dashboard', href: '/GI-HOL/dashboard', active: false },
     { label: 'Hourly Output', href: '/GI-HOL/hourly-output', active: true },
   ]
 
