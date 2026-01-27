@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from 'react'
 import { Plus, Eye, EyeOff } from 'lucide-react'
-import { useSidebar } from '@/context/SidebarContext'
 import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
 import BreadCrumb from '@/components/common/BreadCrumb'
@@ -10,7 +9,6 @@ import UserTable from '@/components/tables/UserTable'
 import api from '@/services/api'
 
 export default function UserManagement() {
-  const { sidebarHovered } = useSidebar()
   const [users, setUsers] = useState([])
   const [lines, setLines] = useState([])
   const [loading, setLoading] = useState(true)
@@ -25,7 +23,7 @@ export default function UserManagement() {
     username: '',
     email: '',
     password: '',
-    id_role: '4', 
+    id_role: '4',
     id_line: '',
     status: 'Active'
   })
@@ -48,6 +46,7 @@ export default function UserManagement() {
   useEffect(() => {
     loadUsers()
     loadLines()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const loadUsers = async () => {
@@ -66,13 +65,13 @@ export default function UserManagement() {
         usersData = response.data
       }
 
-    
+
       const normalizedUsers = usersData.map(user => ({
         id_user: user.id_user || user.id,
         username: user.username || 'Unknown',
         email: user.email || '',
-        id_role: user.id_role || '4', 
-        role: getRoleLabel(user.id_role), 
+        id_role: user.id_role || '4',
+        role: getRoleLabel(user.id_role),
         id_line: user.id_line || null,
         line_name: user.line_name || user.line?.line_name || '-',
         status: user.status || 'Active',
@@ -92,8 +91,8 @@ export default function UserManagement() {
 
       setShowAlert(true)
       setAlertType('error')
-      
-      
+
+
       const errorMsg = error.response?.data?.message || error.message
       setAlertMessage('Failed to load users: ' + errorMsg)
       setUsers([])
@@ -126,7 +125,7 @@ export default function UserManagement() {
     }
   }
 
-  
+
   const getRoleLabel = (idRole) => {
     const role = roleOptions.find(r => r.value === String(idRole))
     return role ? role.label : 'Unknown'
@@ -141,7 +140,7 @@ export default function UserManagement() {
       username: '',
       email: '',
       password: '',
-      id_role: '4', 
+      id_role: '4',
       id_line: '',
       status: 'Active'
     })
@@ -186,17 +185,17 @@ export default function UserManagement() {
       setSubmitting(true)
 
       if (editingId) {
-       
+
         console.group(' [updateUser]')
         const payload = {
           username: formData.username,
           email: formData.email,
-          id_role: parseInt(formData.id_role), 
+          id_role: parseInt(formData.id_role),
           id_line: formData.id_line ? parseInt(formData.id_line) : null,
           status: formData.status
         }
 
-        
+
         if (formData.password) {
           payload.password = formData.password
         }
@@ -215,7 +214,7 @@ export default function UserManagement() {
         // Reload users
         await loadUsers()
       } else {
-       
+
         console.group(' [createUser]')
         const payload = {
           username: formData.username,
@@ -320,7 +319,7 @@ export default function UserManagement() {
 
       {/*  UserTable Card */}
       <Card shadow="lg" padding="lg" rounded="lg" className="scale-in transition-shadow duration-300">
-        <UserTable 
+        <UserTable
           users={users}
           loading={loading}
           onEdit={handleEdit}

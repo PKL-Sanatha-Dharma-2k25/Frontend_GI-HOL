@@ -3,6 +3,7 @@ import { saveToken, saveUser, getToken, getUser, clearAuth, refreshTokenIfNeeded
 import { getUserProfile } from '@/services/auth'
 import { getUserIdFromToken, isTokenExpired } from '@/utils/jwt'
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext()
 
 export const AuthProvider = ({ children }) => {
@@ -10,7 +11,7 @@ export const AuthProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [loading, setLoading] = useState(true)
   const [sessionWarning, setSessionWarning] = useState(false)
-  const [timeLeftInSeconds, setTimeLeftInSeconds] = useState(0)
+  const [timeLeftInSeconds] = useState(0)
 
   useEffect(() => {
     const token = getToken()
@@ -163,6 +164,7 @@ export const AuthProvider = ({ children }) => {
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
   const context = useContext(AuthContext)
   if (!context) {

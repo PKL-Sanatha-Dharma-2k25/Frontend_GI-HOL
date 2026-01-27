@@ -1,15 +1,15 @@
 import { useState } from 'react';
 
-export default function Navigation({ 
-  items = [], 
-  active = null, 
-  onSelect = () => {},
-  vertical = false 
+export default function Navigation({
+  items = [],
+  active = null,
+  onSelect = () => { },
+  vertical = false
 }) {
   const [hoveredId, setHoveredId] = useState(null);
 
   return (
-    <nav 
+    <nav
       className={`flex gap-6 ${vertical ? 'flex-col' : 'flex-row'} border-b-2 border-gray-200 pb-0 relative animate-navSlideDown`}
       role="tablist"
     >
@@ -19,11 +19,10 @@ export default function Navigation({
           onClick={() => onSelect(item.id)}
           onMouseEnter={() => setHoveredId(item.id)}
           onMouseLeave={() => setHoveredId(null)}
-          className={`relative px-4 py-3 font-semibold transition-all duration-300 text-base whitespace-nowrap group ${
-            active === item.id
+          className={`relative px-4 py-3 font-semibold transition-all duration-300 text-base whitespace-nowrap group ${active === item.id
               ? 'text-blue-600'
               : 'text-gray-600 hover:text-gray-900'
-          }`}
+            }`}
           role="tab"
           aria-selected={active === item.id}
           style={{
@@ -31,20 +30,18 @@ export default function Navigation({
           }}
         >
           {/* Animated Underline */}
-          <span className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-blue-600 rounded-t-lg transition-all duration-300 transform origin-left ${
-            active === item.id 
-              ? 'scale-x-100 opacity-100' 
+          <span className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-blue-600 rounded-t-lg transition-all duration-300 transform origin-left ${active === item.id
+              ? 'scale-x-100 opacity-100'
               : 'scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-50'
-          }`} />
+            }`} />
 
           {/* Text with Smooth Color Transition */}
           <span className="relative z-10 flex items-center gap-2">
             {item.icon && (
-              <span className={`transition-transform duration-300 ${
-                active === item.id || hoveredId === item.id 
-                  ? 'scale-110' 
+              <span className={`transition-transform duration-300 ${active === item.id || hoveredId === item.id
+                  ? 'scale-110'
                   : 'scale-100'
-              }`}>
+                }`}>
                 {item.icon}
               </span>
             )}

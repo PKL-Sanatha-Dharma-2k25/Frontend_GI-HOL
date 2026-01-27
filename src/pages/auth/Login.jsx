@@ -28,7 +28,7 @@ export default function Login() {
 
   useEffect(() => {
     logout();
-  }, []);
+  }, [logout]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -56,10 +56,10 @@ export default function Login() {
     try {
       console.group(' [Login.handleSubmit] START LOGIN');
       console.log('Username:', formData.username);
-      
+
       console.log('STEP 1: Calling loginUser API...');
       const response = await loginUser(formData.username, formData.password);
-      
+
       console.log('STEP 2: Check response format');
       console.log('Response:', response);
       console.log('response.code:', response.code);
@@ -81,7 +81,7 @@ export default function Login() {
 
       console.log('STEP 3: Calling login context...');
       const userData = await login(response, formData.username);
-      
+
       console.log('STEP 4: Login context returned');
       console.log('User data:', userData);
       console.log('User role:', userData.role);
@@ -99,7 +99,7 @@ export default function Login() {
       setShowAlert(true);
       setLoginSuccess(true);
 
-   
+
       console.log(' Redirecting to dashboard');
       setTimeout(() => {
         console.log('→ Redirect to /');
@@ -115,9 +115,9 @@ export default function Login() {
       setIsLoading(false);
       setLoginSuccess(false);
       setAlertType('error');
-      
+
       let errorMessage = 'Login failed';
-      
+
       if (error.response?.status === 401) {
         errorMessage = 'Invalid username or password';
       } else if (error.response?.status === 500) {
@@ -133,7 +133,7 @@ export default function Login() {
       } else {
         errorMessage = error.message || 'Login failed';
       }
-      
+
       setAlertMessage(errorMessage);
       setShowAlert(true);
     }
@@ -151,7 +151,7 @@ export default function Login() {
     <div className="flex h-screen overflow-hidden bg-white">
       {/* SVG Background - Left Side */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <img 
+        <img
           src={hollowedBoxesSvg}
           alt="Background Pattern"
           className="absolute inset-0 w-full h-full object-cover opacity-5 lg:opacity-10"
@@ -170,9 +170,9 @@ export default function Login() {
         <div className="w-full max-w-md bg-white rounded-3xl shadow-lg shadow-blue-200/30 border border-blue-100/50 p-6 md:p-8 flex flex-col h-auto max-h-[90vh]">
           {/* Logo Section */}
           <div className="mb-5 group text-center flex-shrink-0">
-            <img 
-              src={logo} 
-              alt="Company Logo" 
+            <img
+              src={logo}
+              alt="Company Logo"
               className="h-10 md:h-12 w-auto mb-2 group-hover:scale-110 transition-transform duration-500 mx-auto"
             />
             <p className="text-gray-600 text-xs md:text-sm font-medium leading-tight">
@@ -193,7 +193,7 @@ export default function Login() {
           {/* Form Section */}
           <div className="space-y-3 md:space-y-4 flex-grow">
             {/* Username Field */}
-            <div 
+            <div
               className="group"
               onFocus={() => setFocusedField('username')}
               onBlur={() => setFocusedField(null)}
@@ -201,13 +201,12 @@ export default function Login() {
               <label className="block text-xs md:text-sm font-bold text-gray-700 mb-1.5 uppercase tracking-wider">Username</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 md:pl-4 flex items-center pointer-events-none">
-                  <User className={`h-5 w-5 transition-all duration-300 ${
-                    formData.username 
-                      ? 'text-cyan-500 scale-125 animate-bounce' 
-                      : focusedField === 'username' 
-                      ? 'text-blue-600 scale-125' 
-                      : 'text-gray-400'
-                  }`} />
+                  <User className={`h-5 w-5 transition-all duration-300 ${formData.username
+                      ? 'text-cyan-500 scale-125 animate-bounce'
+                      : focusedField === 'username'
+                        ? 'text-blue-600 scale-125'
+                        : 'text-gray-400'
+                    }`} />
                 </div>
                 <div className={`absolute inset-0 rounded-lg transition-all duration-300 ${focusedField === 'username' ? 'bg-gradient-to-r from-blue-400/15 to-cyan-400/15 shadow-lg shadow-blue-300/40' : 'bg-transparent'}`}></div>
                 <input
@@ -217,13 +216,12 @@ export default function Login() {
                   onChange={handleChange}
                   onKeyPress={handleKeyPress}
                   placeholder="Enter your username"
-                  className={`relative block w-full pl-10 md:pl-12 pr-3 md:pr-4 py-2.5 md:py-3 border-2 text-xs md:text-sm rounded-lg bg-white/60 backdrop-blur-md transition-all duration-300 ${
-                    errors.username 
-                      ? 'border-red-400 text-red-700' 
+                  className={`relative block w-full pl-10 md:pl-12 pr-3 md:pr-4 py-2.5 md:py-3 border-2 text-xs md:text-sm rounded-lg bg-white/60 backdrop-blur-md transition-all duration-300 ${errors.username
+                      ? 'border-red-400 text-red-700'
                       : focusedField === 'username'
-                      ? 'border-blue-500 text-blue-900 shadow-lg shadow-blue-200/50'
-                      : 'border-gray-300 text-gray-900 hover:border-gray-400'
-                  } placeholder-gray-500 focus:outline-none`}
+                        ? 'border-blue-500 text-blue-900 shadow-lg shadow-blue-200/50'
+                        : 'border-gray-300 text-gray-900 hover:border-gray-400'
+                    } placeholder-gray-500 focus:outline-none`}
                   disabled={isLoading}
                 />
                 {errors.username && (
@@ -233,7 +231,7 @@ export default function Login() {
             </div>
 
             {/* Password Field */}
-            <div 
+            <div
               className="group"
               onFocus={() => setFocusedField('password')}
               onBlur={() => setFocusedField(null)}
@@ -241,13 +239,12 @@ export default function Login() {
               <label className="block text-xs md:text-sm font-bold text-gray-700 mb-1.5 uppercase tracking-wider">Password</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 md:pl-4 flex items-center pointer-events-none">
-                  <Lock className={`h-5 w-5 transition-all duration-300 ${
-                    formData.password 
-                      ? 'text-cyan-500 scale-125 animate-bounce' 
-                      : focusedField === 'password' 
-                      ? 'text-blue-600 scale-125' 
-                      : 'text-gray-400'
-                  }`} />
+                  <Lock className={`h-5 w-5 transition-all duration-300 ${formData.password
+                      ? 'text-cyan-500 scale-125 animate-bounce'
+                      : focusedField === 'password'
+                        ? 'text-blue-600 scale-125'
+                        : 'text-gray-400'
+                    }`} />
                 </div>
                 <div className={`absolute inset-0 rounded-lg transition-all duration-300 ${focusedField === 'password' ? 'bg-gradient-to-r from-blue-400/15 to-cyan-400/15 shadow-lg shadow-blue-300/40' : 'bg-transparent'}`}></div>
                 <input
@@ -257,13 +254,12 @@ export default function Login() {
                   onChange={handleChange}
                   onKeyPress={handleKeyPress}
                   placeholder="Enter your password"
-                  className={`relative block w-full pl-10 md:pl-12 pr-10 md:pr-12 py-2.5 md:py-3 border-2 text-xs md:text-sm rounded-lg bg-white/60 backdrop-blur-md transition-all duration-300 ${
-                    errors.password 
-                      ? 'border-red-400 text-red-700' 
+                  className={`relative block w-full pl-10 md:pl-12 pr-10 md:pr-12 py-2.5 md:py-3 border-2 text-xs md:text-sm rounded-lg bg-white/60 backdrop-blur-md transition-all duration-300 ${errors.password
+                      ? 'border-red-400 text-red-700'
                       : focusedField === 'password'
-                      ? 'border-blue-500 text-blue-900 shadow-lg shadow-blue-200/50'
-                      : 'border-gray-300 text-gray-900 hover:border-gray-400'
-                  } placeholder-gray-500 focus:outline-none`}
+                        ? 'border-blue-500 text-blue-900 shadow-lg shadow-blue-200/50'
+                        : 'border-gray-300 text-gray-900 hover:border-gray-400'
+                    } placeholder-gray-500 focus:outline-none`}
                   disabled={isLoading}
                 />
                 <button
@@ -288,11 +284,10 @@ export default function Login() {
               type="button"
               onClick={handleSubmit}
               disabled={isLoading || loginSuccess}
-              className={`w-full mt-4 py-2.5 md:py-3 px-4 rounded-lg font-bold text-xs md:text-sm text-white transition-all duration-500 flex items-center justify-center gap-2 md:gap-3 group relative overflow-hidden uppercase tracking-wider ${
-                isLoading || loginSuccess 
-                  ? 'bg-gray-400 cursor-not-allowed' 
+              className={`w-full mt-4 py-2.5 md:py-3 px-4 rounded-lg font-bold text-xs md:text-sm text-white transition-all duration-500 flex items-center justify-center gap-2 md:gap-3 group relative overflow-hidden uppercase tracking-wider ${isLoading || loginSuccess
+                  ? 'bg-gray-400 cursor-not-allowed'
                   : 'bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 hover:from-blue-700 hover:via-blue-600 hover:to-cyan-600 shadow-lg shadow-blue-400/40 hover:shadow-xl hover:shadow-blue-400/60 hover:scale-105 active:scale-95'
-              } focus:outline-none relative z-20`}
+                } focus:outline-none relative z-20`}
             >
               {isLoading ? (
                 <>
@@ -338,7 +333,7 @@ export default function Login() {
           {/* Illustration */}
           <div className="mb-6 lg:mb-8 perspective drop-shadow-lg">
             <div className="w-full h-56 sm:h-64 lg:h-72 flex items-center justify-center relative">
-              <Lottie 
+              <Lottie
                 animationData={monitoringAnimation}
                 loop
                 autoplay
@@ -370,7 +365,7 @@ export default function Login() {
             ].map((feature, idx) => {
               const Icon = feature.icon;
               return (
-                <div 
+                <div
                   key={idx}
                   className="px-3 lg:px-5 py-1.5 lg:py-2.5 rounded-full bg-white/60 border-2 border-blue-300 text-blue-700 text-xs lg:text-sm font-bold backdrop-blur-md hover:border-blue-500 hover:bg-blue-50/80 transition-all duration-300 hover:shadow-lg hover:shadow-blue-200/50 flex items-center gap-1.5 lg:gap-2"
                 >

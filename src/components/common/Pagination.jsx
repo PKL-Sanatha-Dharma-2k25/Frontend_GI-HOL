@@ -1,11 +1,40 @@
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { useState, useCallback } from 'react';
 
-export default function Pagination({ 
-  currentPage = 1, 
-  totalPages = 1, 
-  onPageChange = () => {},
-  onItemsPerPageChange = () => {},
+// PaginationButton component extracted outside to prevent recreation on every render
+const PaginationButton = ({ onClick, disabled, icon: Icon, title, children, isActive = false, className = '', onKeyDown }) => (
+  <button
+    onClick={onClick}
+    disabled={disabled}
+    onKeyDown={onKeyDown}
+    title={title}
+    className={`
+      relative px-3 py-2 rounded-lg font-medium transition-all duration-300 text-sm
+      flex items-center justify-center
+      ${disabled
+        ? 'opacity-30 cursor-not-allowed'
+        : 'hover:shadow-md active:scale-95 cursor-pointer'
+      }
+      ${isActive
+        ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-200'
+        : 'bg-white border border-gray-200 text-gray-700 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50'
+      }
+      ${className}
+    `}
+  >
+    {Icon ? (
+      <Icon size={18} className="transition-transform duration-300" />
+    ) : (
+      children
+    )}
+  </button>
+);
+
+export default function Pagination({
+  currentPage = 1,
+  totalPages = 1,
+  onPageChange = () => { },
+  onItemsPerPageChange = () => { },
   showInfo = true,
   itemsPerPage = 10,
   totalItems = 0
@@ -16,18 +45,18 @@ export default function Pagination({
   const getPageNumbers = useCallback(() => {
     const pages = [];
     const maxPagesToShow = 5;
-    
+
     let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
     let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
-    
+
     if (endPage - startPage < maxPagesToShow - 1) {
       startPage = Math.max(1, endPage - maxPagesToShow + 1);
     }
-    
+
     for (let i = startPage; i <= endPage; i++) {
       pages.push(i);
     }
-    
+
     return pages;
   }, [currentPage, totalPages]);
 
@@ -52,34 +81,6 @@ export default function Pagination({
   const startItem = (currentPage - 1) * itemsPerPage + 1;
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
-  const PaginationButton = ({ onClick, disabled, icon: Icon, title, children, isActive = false, className = '' }) => (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      onKeyDown={handleKeyDown}
-      title={title}
-      className={`
-        relative px-3 py-2 rounded-lg font-medium transition-all duration-300 text-sm
-        flex items-center justify-center
-        ${disabled 
-          ? 'opacity-30 cursor-not-allowed' 
-          : 'hover:shadow-md active:scale-95 cursor-pointer'
-        }
-        ${isActive
-          ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-200'
-          : 'bg-white border border-gray-200 text-gray-700 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50'
-        }
-        ${className}
-      `}
-    >
-      {Icon ? (
-        <Icon size={18} className="transition-transform duration-300" />
-      ) : (
-        children
-      )}
-    </button>
-  );
-
   return (
     <div className="space-y-4">
       {/* Top Info Section */}
@@ -95,7 +96,7 @@ export default function Pagination({
               <span className="mx-2 text-blue-600 font-bold">{totalItems}</span>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-gray-200">
             <label className="text-sm text-gray-700 font-medium whitespace-nowrap">Items per page:</label>
             <select
@@ -116,7 +117,7 @@ export default function Pagination({
 
       {/* Main Pagination Controls */}
       <div className="flex items-center gap-2 flex-wrap bg-white p-4 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-300">
-        
+
         {/* First & Previous Buttons */}
         <div className="flex items-center gap-1">
           <PaginationButton
@@ -124,12 +125,14 @@ export default function Pagination({
             disabled={currentPage === 1}
             icon={ChevronsLeft}
             title="First page"
+            onKeyDown={handleKeyDown}
           />
           <PaginationButton
             onClick={() => onPageChange(Math.max(1, currentPage - 1))}
             disabled={currentPage === 1}
             icon={ChevronLeft}
             title="Previous page"
+            onKeyDown={handleKeyDown}
           />
         </div>
 
@@ -143,6 +146,7 @@ export default function Pagination({
               <PaginationButton
                 onClick={() => onPageChange(1)}
                 className="min-w-[36px]"
+                onKeyDown={handleKeyDown}
               >
                 1
               </PaginationButton>
@@ -158,6 +162,7 @@ export default function Pagination({
               onClick={() => onPageChange(page)}
               isActive={currentPage === page}
               className="min-w-[36px]"
+              onKeyDown={handleKeyDown}
             >
               {page}
             </PaginationButton>
@@ -171,6 +176,7 @@ export default function Pagination({
               <PaginationButton
                 onClick={() => onPageChange(totalPages)}
                 className="min-w-[36px]"
+                onKeyDown={handleKeyDown}
               >
                 {totalPages}
               </PaginationButton>
@@ -188,12 +194,14 @@ export default function Pagination({
             disabled={currentPage === totalPages}
             icon={ChevronRight}
             title="Next page"
+            onKeyDown={handleKeyDown}
           />
           <PaginationButton
             onClick={() => onPageChange(totalPages)}
             disabled={currentPage === totalPages}
             icon={ChevronsRight}
             title="Last page"
+            onKeyDown={handleKeyDown}
           />
         </div>
 

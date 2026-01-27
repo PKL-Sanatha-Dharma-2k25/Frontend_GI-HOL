@@ -34,7 +34,7 @@ function DashboardReport() {
 
   const { chartData: orcLineChartData, lineChartLoading } = useOrcLineChartData(orcData)
 
-  
+
   const handleExport = async (format) => {
     setExporting(true)
     try {
@@ -65,7 +65,7 @@ function DashboardReport() {
 
       const element = document.querySelector('[data-report-content]')
       if (!element) throw new Error('Report content not found')
-      
+
       const opt = {
         margin: 10,
         filename: `Production_Report_${new Date().toISOString().split('T')[0]}.pdf`,
@@ -143,18 +143,20 @@ function DashboardReport() {
     const today = new Date()
     switch (reportDateRange) {
       case 'today':
-        return today.toLocaleDateString('id-ID', { 
-          weekday: 'short', 
-          year: 'numeric', 
-          month: 'short', 
-          day: 'numeric' 
+        return today.toLocaleDateString('id-ID', {
+          weekday: 'short',
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
         })
-      case 'week':
-        const weekAgo = new Date(today.getTime() - 7*24*60*60*1000)
-        return `${weekAgo.toLocaleDateString('id-ID', {month: 'short', day: 'numeric'})} - ${today.toLocaleDateString('id-ID', {month: 'short', day: 'numeric'})}`
-      case 'month':
-        const monthAgo = new Date(today.getTime() - 30*24*60*60*1000)
-        return `${monthAgo.toLocaleDateString('id-ID', {month: 'short', day: 'numeric'})} - ${today.toLocaleDateString('id-ID', {month: 'short', day: 'numeric'})}`
+      case 'week': {
+        const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
+        return `${weekAgo.toLocaleDateString('id-ID', { month: 'short', day: 'numeric' })} - ${today.toLocaleDateString('id-ID', { month: 'short', day: 'numeric' })}`
+      }
+      case 'month': {
+        const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000)
+        return `${monthAgo.toLocaleDateString('id-ID', { month: 'short', day: 'numeric' })} - ${today.toLocaleDateString('id-ID', { month: 'short', day: 'numeric' })}`
+      }
       default:
         return 'Custom Range'
     }
@@ -189,14 +191,14 @@ function DashboardReport() {
       <div className="bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50 min-h-screen pb-20 md:pb-28">
         <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           <div className="space-y-4 sm:space-y-6" data-report-content>
-            
+
             {/* Breadcrumb */}
             <div className="animate-in fade-in slide-in-from-top-2 duration-500">
               <BreadCrumb items={breadcrumbItems} />
             </div>
 
             {/* REPORT HEADER - Premium Design */}
-            <div 
+            <div
               className="relative overflow-hidden rounded-3xl shadow-2xl group"
               style={{
                 backgroundImage: `url(${BgHero})`,
@@ -206,7 +208,7 @@ function DashboardReport() {
             >
               <div className="absolute inset-0 bg-gradient-to-r from-blue-950/70 via-indigo-950/60 to-blue-950/70" />
               <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-blue-950/30" />
-              
+
               <div className="relative z-10 p-6 sm:p-8 lg:p-10">
                 <div className="space-y-6">
                   {/* Title Section */}
@@ -255,11 +257,10 @@ function DashboardReport() {
                       <button
                         key={range}
                         onClick={() => setReportDateRange(range)}
-                        className={`px-3 sm:px-4 py-2 rounded-lg font-bold transition-all text-xs sm:text-sm uppercase whitespace-nowrap ${
-                          reportDateRange === range
+                        className={`px-3 sm:px-4 py-2 rounded-lg font-bold transition-all text-xs sm:text-sm uppercase whitespace-nowrap ${reportDateRange === range
                             ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg scale-105'
                             : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                        }`}
+                          }`}
                       >
                         {range === 'today' && 'Today'}
                         {range === 'week' && 'Week'}
@@ -274,11 +275,10 @@ function DashboardReport() {
                   <button
                     onClick={() => setShowExportMenu(!showExportMenu)}
                     disabled={exporting}
-                    className={`w-full sm:w-auto flex items-center justify-center gap-2 font-bold px-4 sm:px-6 py-2.5 rounded-xl transition-all duration-300 text-white whitespace-nowrap ${
-                      exporting 
-                        ? 'bg-slate-400 cursor-not-allowed' 
+                    className={`w-full sm:w-auto flex items-center justify-center gap-2 font-bold px-4 sm:px-6 py-2.5 rounded-xl transition-all duration-300 text-white whitespace-nowrap ${exporting
+                        ? 'bg-slate-400 cursor-not-allowed'
                         : 'bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 shadow-lg hover:shadow-xl hover:scale-105'
-                    }`}
+                      }`}
                   >
                     {exporting ? (
                       <>
@@ -302,7 +302,7 @@ function DashboardReport() {
                           <X size={18} />
                         </button>
                       </div>
-                      
+
                       {[
                         { format: 'pdf', label: 'Export as PDF', desc: 'Professional document', icon: '📄' },
                         { format: 'excel', label: 'Export as Excel', desc: 'Editable spreadsheet', icon: '📈' },
@@ -337,11 +337,10 @@ function DashboardReport() {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`flex items-center gap-2 px-4 sm:px-6 py-4 font-semibold text-sm transition-all duration-300 whitespace-nowrap relative ${
-                        isActive
+                      className={`flex items-center gap-2 px-4 sm:px-6 py-4 font-semibold text-sm transition-all duration-300 whitespace-nowrap relative ${isActive
                           ? 'text-blue-600'
                           : 'text-slate-600 hover:text-slate-800'
-                      }`}
+                        }`}
                     >
                       <Icon size={18} />
                       <span className="hidden sm:inline">{tab.label}</span>

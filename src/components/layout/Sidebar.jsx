@@ -1,5 +1,5 @@
-import { 
-  LogOut, 
+import {
+  LogOut,
   ChevronDown,
   LayoutDashboard,
   Map,
@@ -20,7 +20,7 @@ import { useSidebar } from '@/context/SidebarContext'
 import logo from '@/assets/logo/logo.png'
 import icon from '@/assets/icons/icon.png'
 
-export default function Sidebar({ 
+export default function Sidebar({
   logoUrl = logo,
   iconUrl = icon
 }) {
@@ -58,7 +58,9 @@ export default function Sidebar({
       '/report/orc-analysis': 'report',
       '/users': 'users'
     }
-    setActiveMenu(pathMenuMap[location.pathname] || 'dashboard')
+    setTimeout(() => {
+      setActiveMenu(pathMenuMap[location.pathname] || 'dashboard')
+    }, 0)
   }, [location.pathname])
 
   const getMenuItems = () => {
@@ -221,28 +223,27 @@ export default function Sidebar({
       <div key={item.id}>
         <button
           onClick={() => handleMenuClick(item)}
-          className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition relative group ${
-            isActive 
-              ? 'bg-blue-50 text-blue-600 font-semibold' 
-              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-          }`}
+          className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition relative group ${isActive
+            ? 'bg-blue-50 text-blue-600 font-semibold'
+            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+            }`}
           title={!isSidebarExpanded ? item.label : ''}
         >
           {isActive && (
             <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600 rounded-r-lg" />
           )}
-          
+
           <div className={`p-2 rounded-lg bg-gradient-to-br ${getIconColor(item.icon)} text-white flex-shrink-0 transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-105'}`}>
             {getIcon(item.icon)}
           </div>
-          
+
           {isSidebarExpanded && (
             <>
               <span className="text-sm font-medium flex-1 text-left transition-opacity duration-300">{item.label}</span>
               {item.submenu?.length > 0 && (
-                <ChevronDown 
-                  size={16} 
-                  className={`flex-shrink-0 transition-transform duration-300 ${expanded ? 'rotate-180' : ''}`} 
+                <ChevronDown
+                  size={16}
+                  className={`flex-shrink-0 transition-transform duration-300 ${expanded ? 'rotate-180' : ''}`}
                 />
               )}
             </>
@@ -290,9 +291,9 @@ export default function Sidebar({
           <div className="px-4 py-6 flex items-center justify-between border-b h-[88px] bg-gradient-to-r from-blue-50 to-transparent">
             <div className="flex-1 h-full flex items-center justify-center">
               {isSidebarExpanded ? (
-                <img 
-                  src={logoUrl} 
-                  alt="Logo" 
+                <img
+                  src={logoUrl}
+                  alt="Logo"
                   className="h-16 w-auto object-contain"
                   onError={(e) => {
                     console.error('Logo failed to load:', logoUrl)
@@ -300,9 +301,9 @@ export default function Sidebar({
                   }}
                 />
               ) : (
-                <img 
-                  src={iconUrl} 
-                  alt="Icon" 
+                <img
+                  src={iconUrl}
+                  alt="Icon"
                   className="h-10 w-10 object-contain"
                   onError={(e) => {
                     console.error('Icon failed to load:', iconUrl)
@@ -319,13 +320,13 @@ export default function Sidebar({
                 title={sidebarPinned ? 'Unlock Sidebar' : 'Lock Sidebar'}
               >
                 {sidebarPinned ? (
-                  <Lock 
-                    size={18} 
+                  <Lock
+                    size={18}
                     className="text-gray-600 transition-transform duration-300 group-hover:scale-110"
                   />
                 ) : (
-                  <LockOpen 
-                    size={18} 
+                  <LockOpen
+                    size={18}
                     className="text-gray-400 transition-transform duration-300 group-hover:scale-110"
                   />
                 )}
@@ -368,7 +369,7 @@ export default function Sidebar({
                     )}
                   </div>
                 )}
-                
+
                 <div className="space-y-1">
                   {items.map(item => (
                     <MenuItem key={item.id} item={item} isSidebarExpanded={isSidebarExpanded} />
@@ -395,9 +396,9 @@ export default function Sidebar({
 
       {/* 📱 MOBILE HEADER */}
       <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-100 shadow-sm z-50 flex items-center justify-between px-4">
-        <img 
-          src={iconUrl} 
-          alt="Logo" 
+        <img
+          src={iconUrl}
+          alt="Logo"
           className="h-8 w-8 object-contain"
           onError={(e) => {
             console.error('Mobile logo failed:', iconUrl)
@@ -422,17 +423,16 @@ export default function Sidebar({
 
       {/* 📱 MOBILE OVERLAY */}
       {mobileMenuOpen && (
-        <div 
+        <div
           className="md:hidden fixed inset-0 bg-black/50 z-30 top-16"
           onClick={() => setMobileMenuOpen(false)}
         />
       )}
 
       {/* 📱 MOBILE SIDEBAR */}
-      <div 
-        className={`md:hidden fixed top-16 left-0 h-[calc(100vh-64px)] w-72 max-w-[90vw] bg-white shadow-lg z-30 transition-transform duration-300 overflow-y-auto ${
-          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+      <div
+        className={`md:hidden fixed top-16 left-0 h-[calc(100vh-64px)] w-72 max-w-[90vw] bg-white shadow-lg z-30 transition-transform duration-300 overflow-y-auto ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
       >
         <div className="px-4 py-4 border-b sticky top-0 bg-white">
           <input
@@ -457,11 +457,10 @@ export default function Sidebar({
                     <div key={item.id}>
                       <button
                         onClick={() => handleMenuClick(item)}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition relative ${
-                          isActive 
-                            ? 'bg-blue-50 text-blue-600 font-semibold' 
-                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                        }`}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition relative ${isActive
+                          ? 'bg-blue-50 text-blue-600 font-semibold'
+                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                          }`}
                       >
                         {isActive && (
                           <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600 rounded-r-lg" />
@@ -471,9 +470,9 @@ export default function Sidebar({
                         </div>
                         <span className="text-sm font-medium flex-1 text-left">{item.label}</span>
                         {item.submenu?.length > 0 && (
-                          <ChevronDown 
-                            size={16} 
-                            className={`flex-shrink-0 transition-transform duration-300 ${expanded ? 'rotate-180' : ''}`} 
+                          <ChevronDown
+                            size={16}
+                            className={`flex-shrink-0 transition-transform duration-300 ${expanded ? 'rotate-180' : ''}`}
                           />
                         )}
                       </button>

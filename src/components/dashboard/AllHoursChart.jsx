@@ -3,9 +3,11 @@ import { useState, useEffect } from 'react'
 
 function AllHoursChart({ data = {} }) {
   const [mounted, setMounted] = useState(false)
-  
+
   useEffect(() => {
-    setMounted(true)
+    // Add a small delay to ensure the initial state is rendered and to avoid synchronous setState warning
+    const timer = setTimeout(() => setMounted(true), 50)
+    return () => clearTimeout(timer)
   }, [])
 
   const chartColors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#6366f1']
@@ -59,7 +61,7 @@ function AllHoursChart({ data = {} }) {
 
   const renderOperationChart = (opCode, index) => {
     const hoursOutputData = []
-    
+
     for (let hour = 1; hour <= 10; hour++) {
       const hourData = data[hour]
       if (Array.isArray(hourData)) {
@@ -78,8 +80,8 @@ function AllHoursChart({ data = {} }) {
     if (hoursOutputData.length === 0) return null
 
     return (
-      <div 
-        key={opCode} 
+      <div
+        key={opCode}
         className="bg-gradient-to-br from-white to-slate-50/50 rounded-xl p-4 border border-slate-200/60 hover:border-blue-300/60 hover:shadow-lg transition-all duration-300"
         style={{
           opacity: mounted ? 1 : 0,
@@ -91,7 +93,7 @@ function AllHoursChart({ data = {} }) {
           <span className="text-sm font-bold text-blue-600">{opCode}</span>
           <span className="text-xs text-slate-500 ml-2">{hoursOutputData[0]?.name || ''}</span>
         </div>
-        
+
         <div className="space-y-2.5">
           {hoursOutputData.map((d, dataIdx) => {
             const outputWidth = d.output * pixelsPerUnit
@@ -102,12 +104,12 @@ function AllHoursChart({ data = {} }) {
                 <div className="w-12 text-xs font-semibold text-slate-600 flex-shrink-0">
                   H{d.hour}
                 </div>
-                
+
                 <div className="flex-1 relative group min-h-6 flex items-center">
                   {d.output > 0 && (
                     <div
                       className="h-5 rounded-lg flex items-center justify-center relative hover:shadow-md transition-all duration-300 cursor-pointer"
-                      style={{ 
+                      style={{
                         width: mounted ? Math.max(outputWidth, 20) + 'px' : '0px',
                         background: `linear-gradient(135deg, ${chartColors[d.hour - 1]}f0, ${chartColors[d.hour - 1]})`,
                         transitionDelay: `${index * 0.04 + dataIdx * 0.05}s`,
@@ -127,7 +129,7 @@ function AllHoursChart({ data = {} }) {
                       )}
                     </div>
                   )}
-                  
+
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-slate-900 text-white text-xs rounded-lg shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 p-2.5 whitespace-nowrap">
                     <div className="font-semibold mb-1 text-blue-300">Hour {d.hour}</div>
                     <div className="text-slate-200">Output: <span className="font-bold text-white">{d.output}</span></div>
@@ -159,8 +161,8 @@ function AllHoursChart({ data = {} }) {
         <h3 className="text-sm font-semibold text-slate-700 mb-3">Hour Legend</h3>
         <div className="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-3">
           {Array.from({ length: 10 }, (_, i) => i + 1).map((hour, idx) => (
-            <div 
-              key={hour} 
+            <div
+              key={hour}
               className="flex items-center gap-2 p-1.5 rounded-md hover:bg-white/70 transition-colors duration-200"
               style={{
                 opacity: mounted ? 1 : 0,
@@ -168,8 +170,8 @@ function AllHoursChart({ data = {} }) {
                 transition: `all 0.3s ease-out ${idx * 0.03}s`
               }}
             >
-              <div 
-                className="w-3 h-3 rounded-sm flex-shrink-0 shadow-sm" 
+              <div
+                className="w-3 h-3 rounded-sm flex-shrink-0 shadow-sm"
                 style={{ backgroundColor: chartColors[hour - 1] }}
               ></div>
               <span className="text-xs text-slate-700 font-medium">H{hour}</span>

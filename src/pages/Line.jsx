@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from 'react'
 import { Eye } from 'lucide-react'
-import { useSidebar } from '@/context/SidebarContext'
 import Card from '@/components/ui/Card'
 import BreadCrumb from '@/components/common/BreadCrumb'
 import Alert from '@/components/ui/Alert'
@@ -10,7 +9,6 @@ import Pagination from '@/components/common/Pagination'
 import api from '@/services/api'
 
 export default function Line() {
-  const { sidebarHovered } = useSidebar()
   const [lines, setLines] = useState([])
   const [loading, setLoading] = useState(true)
   const [showAlert, setShowAlert] = useState(false)
@@ -18,14 +16,14 @@ export default function Line() {
   const [alertMessage, setAlertMessage] = useState('')
   const [selectedLine, setSelectedLine] = useState(null)
   const [showViewModal, setShowViewModal] = useState(false)
-  
+
   // =============================
   // PAGINATION & FILTER STATES
   // =============================
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(10)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'asc' })
+  const [searchTerm] = useState('')
+  const [sortConfig] = useState({ key: 'name', direction: 'asc' })
 
   const breadcrumbItems = [
     { label: 'Line', href: '/line', active: true }
@@ -40,9 +38,9 @@ export default function Line() {
     try {
       setLoading(true)
       const response = await api.get('/auth/getline')
-      
+
       console.log(' [Line] API Response:', response.data)
-      
+
       if (!response.data || !response.data.data) {
         throw new Error('Invalid response structure from API')
       }
@@ -77,7 +75,7 @@ export default function Line() {
   // FILTER & SORT LOGIC
   // =============================
   const filteredLines = lines
-    .filter(line => 
+    .filter(line =>
       line.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       line.zone.toLowerCase().includes(searchTerm.toLowerCase()) ||
       line.description.toLowerCase().includes(searchTerm.toLowerCase())
@@ -85,7 +83,7 @@ export default function Line() {
     .sort((a, b) => {
       const aValue = a[sortConfig.key]
       const bValue = b[sortConfig.key]
-      
+
       if (aValue < bValue) {
         return sortConfig.direction === 'asc' ? -1 : 1
       }
@@ -166,19 +164,6 @@ export default function Line() {
     setCurrentPage(1)
   }
 
-  const handleSearch = (value) => {
-    setSearchTerm(value)
-    setCurrentPage(1)
-  }
-
-  const handleSort = (key) => {
-    setSortConfig(prev => ({
-      key,
-      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
-    }))
-    setCurrentPage(1)
-  }
-
   //  Modal Component - View dengan animasi
   const ViewModal = () => (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 fade-in">
@@ -192,8 +177,8 @@ export default function Line() {
               View line details and information
             </p>
           </div>
-          <button 
-            onClick={handleCloseModal} 
+          <button
+            onClick={handleCloseModal}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200 ml-4"
             title="Close modal"
           >
@@ -305,7 +290,7 @@ export default function Line() {
 
       {/* DataTable Card */}
       <Card shadow="lg" padding="lg" rounded="lg" className="scal-in transition-shadow duration-300">
-        <DataTable 
+        <DataTable
           columns={tableColumns}
           data={paginatedLines}
           striped={true}

@@ -7,7 +7,6 @@ import { useDetailModal } from '@/hooks/useDetailModal'
 import { useHourlyOutput } from '@/hooks/useHourlyOutput'
 import { useHourValidation } from '@/hooks/useHourValidation'
 import { useHour } from '@/hooks/useHour'
-import { getJakartaTime } from '@/utils/dateTime'
 
 // Components
 import BreadCrumb from '@/components/common/BreadCrumb'
@@ -37,7 +36,6 @@ export default function HourlyOutputPage() {
   const [showForm, setShowForm] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(ITEMS_PER_PAGE)
-  const [searchTerm, setSearchTerm] = useState('')
 
   // Filter ORC List
   useEffect(() => {
@@ -51,7 +49,7 @@ export default function HourlyOutputPage() {
       )
       outputHook.setFilteredOrcList(filtered)
     }
-  }, [formHook.orcSearchTerm, outputHook.orcList])
+  }, [formHook.orcSearchTerm, outputHook.orcList, outputHook])
 
   // Load Initial Data
   useEffect(() => {
@@ -60,7 +58,7 @@ export default function HourlyOutputPage() {
       await hourValidationHook.loadUsedHours()
     }
     loadData()
-  }, [])
+  }, [outputHook, hourValidationHook])
 
   // Handle Form Submit
   const handleFormSubmit = async () => {
@@ -131,12 +129,8 @@ export default function HourlyOutputPage() {
     }
   }
 
-  // Filter & Paginate Table
-  const filteredOutputs = outputHook.outputs.filter(output =>
-    (output.style?.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (output.date?.includes(searchTerm)) ||
-    (output.orc?.toLowerCase().includes(searchTerm.toLowerCase()))
-  )
+  // Get all outputs (no filtering needed since there's no search UI)
+  const filteredOutputs = outputHook.outputs
 
   const totalPages = Math.ceil(filteredOutputs.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
