@@ -14,27 +14,30 @@ export function useDetailProcess(showAlertMessage) {
     setLoadingDetail(true)
     try {
       const detailData = await getDetailOutputByStyle(style, idLine)
-      
+
       let data = detailData.data || detailData || []
-      
+
       const uniqueByOpCode = {}
       data.forEach(item => {
         if (!uniqueByOpCode[item.op_code]) {
           uniqueByOpCode[item.op_code] = item
         }
       })
-      
+
       data = Object.values(uniqueByOpCode)
       setDetailProcessData(data)
-      
-      // Initialize semua field (actual, repair, reject) dengan kosong
+
+
+
       const initialInput = {}
       const initialRepair = {}
       const initialReject = {}
+      const initialDowntime = {}
       data.forEach(item => {
         initialInput[item.op_code] = ''
         initialRepair[item.op_code] = ''
         initialReject[item.op_code] = ''
+        initialDowntime[item.op_code] = '-'
       })
       setDetailProcessInput(initialInput)
       setDetailProcessRepair(initialRepair)

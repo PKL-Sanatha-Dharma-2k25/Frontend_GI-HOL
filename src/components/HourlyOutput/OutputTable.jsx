@@ -19,18 +19,34 @@ export default function OutputTable({
   useEffect(() => {
     if (!data || data.length === 0 || !userIdLine) return
 
+    let isMounted = true
+
     const prefetchAllIdOutputs = async () => {
       setPrefetchLoading(true)
       console.log('🚀 [Prefetch] Starting prefetch for all styles...')
-      
+
       const newCache = { ...idOutputCache }
-      const styles = [...new Set(data.map(row => row.style))]
-      
+      const styles = [...new Set(data.filter(row => row.style).map(row => row.style))]
+
+      if (styles.length === 0) {
+        setPrefetchLoading(false)
+        return
+      }
+
       console.log(`📋 [Prefetch] Found ${styles.length} unique styles`)
 
-      const promises = styles.map(style =>
+      // Only fetch styles that aren't already in the cache
+      const uniqueNewStyles = styles.filter(style => !newCache[style])
+
+      if (uniqueNewStyles.length === 0) {
+        setPrefetchLoading(false)
+        return
+      }
+
+      const promises = uniqueNewStyles.map(style =>
         getDetailOutputByStyle(style, userIdLine)
           .then(response => {
+            if (!isMounted) return
             const details = response.data || response
             if (Array.isArray(details) && details.length > 0) {
               newCache[style] = details[0].id_output
@@ -38,18 +54,28 @@ export default function OutputTable({
             }
           })
           .catch(error => {
+            if (!isMounted) return
             console.warn(`⚠️ [Prefetch] Error fetching ${style}:`, error)
             newCache[style] = null
           })
       )
 
       await Promise.all(promises)
-      setIdOutputCache(newCache)
-      setPrefetchLoading(false)
-      console.log('✅ [Prefetch] All styles prefetched!')
+
+      if (isMounted) {
+        setIdOutputCache(prev => ({ ...prev, ...newCache }))
+        setPrefetchLoading(false)
+        console.log('✅ [Prefetch] All styles prefetched!')
+      }
     }
 
     prefetchAllIdOutputs()
+
+    return () => {
+      isMounted = false
+    }
+    // We want to run this when data changes or userIdLine changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, userIdLine])
 
   const getIdOutputFromCache = (style) => {
@@ -63,30 +89,30 @@ export default function OutputTable({
 
   const handleDetailClick = (row) => {
     console.log('👁️ [handleDetailClick] Clicked row:', row)
-    
+
     let idOutput = row.id_output || getIdOutputFromCache(row.style)
-    
+
     if (!idOutput) {
       console.error('❌ Cannot find id_output')
       alert('❌ Error: Cannot load detail. Missing ID.')
       return
     }
-    
+
     console.log(`✅ [handleDetailClick] Calling onDetailClick with id: ${idOutput}`)
     onDetailClick(idOutput)
   }
 
   const handleUpdateClick = (row) => {
     console.log('✏️ [handleUpdateClick] Clicked row:', row)
-    
+
     let idOutput = row.id_output || getIdOutputFromCache(row.style)
-    
+
     if (!idOutput) {
       console.error('❌ Cannot find id_output')
       alert('❌ Error: Cannot update. Missing ID.')
       return
     }
-    
+
     console.log(`✅ [handleUpdateClick] Calling onUpdateClick with id: ${idOutput}`)
     onUpdateClick(idOutput)
   }
@@ -95,11 +121,10 @@ export default function OutputTable({
   const StatusBadge = ({ status }) => {
     const isPending = status === 1 || status === '1'
     return (
-      <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold ${
-        isPending
+      <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold ${isPending
           ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200'
           : 'bg-amber-100 text-amber-700 ring-1 ring-amber-200'
-      }`}>
+        }`}>
         {isPending ? (
           <CheckCircle2 size={14} className="text-emerald-600" />
         ) : (
@@ -120,25 +145,23 @@ export default function OutputTable({
         <button
           onClick={() => handleDetailClick(row)}
           disabled={!isReady}
-          className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg font-medium text-xs transition-all duration-200 ${
-            isReady
+          className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg font-medium text-xs transition-all duration-200 ${isReady
               ? 'bg-blue-50 text-blue-700 hover:bg-blue-100 hover:shadow-md active:scale-95 cursor-pointer border border-blue-200'
               : 'bg-slate-50 text-slate-400 cursor-not-allowed opacity-60 border border-slate-200'
-          }`}
+            }`}
           title={isReady ? 'View detail' : 'Loading...'}
         >
           <Eye size={16} strokeWidth={2.5} />
           <span>Detail</span>
         </button>
-        
+
         <button
           onClick={() => handleUpdateClick(row)}
           disabled={!isReady}
-          className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg font-medium text-xs transition-all duration-200 ${
-            isReady
+          className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg font-medium text-xs transition-all duration-200 ${isReady
               ? 'bg-orange-50 text-orange-700 hover:bg-orange-100 hover:shadow-md active:scale-95 cursor-pointer border border-orange-200'
               : 'bg-slate-50 text-slate-400 cursor-not-allowed opacity-60 border border-slate-200'
-          }`}
+            }`}
           title={isReady ? 'Update' : 'Loading...'}
         >
           <Edit size={16} strokeWidth={2.5} />
@@ -189,7 +212,7 @@ export default function OutputTable({
           </div>
         </div>
       )}
-      
+
       {/* ✨ IMPROVED: Table wrapper dengan shadow */}
       <div className="rounded-lg border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
         <DataTable

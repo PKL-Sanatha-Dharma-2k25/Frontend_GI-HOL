@@ -28,7 +28,7 @@ export default function Login() {
 
   useEffect(() => {
     logout();
-  }, [logout]);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -202,10 +202,10 @@ export default function Login() {
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 md:pl-4 flex items-center pointer-events-none">
                   <User className={`h-5 w-5 transition-all duration-300 ${formData.username
-                      ? 'text-cyan-500 scale-125 animate-bounce'
-                      : focusedField === 'username'
-                        ? 'text-blue-600 scale-125'
-                        : 'text-gray-400'
+                    ? 'text-cyan-500 scale-125 animate-bounce'
+                    : focusedField === 'username'
+                      ? 'text-blue-600 scale-125'
+                      : 'text-gray-400'
                     }`} />
                 </div>
                 <div className={`absolute inset-0 rounded-lg transition-all duration-300 ${focusedField === 'username' ? 'bg-gradient-to-r from-blue-400/15 to-cyan-400/15 shadow-lg shadow-blue-300/40' : 'bg-transparent'}`}></div>
@@ -217,10 +217,10 @@ export default function Login() {
                   onKeyPress={handleKeyPress}
                   placeholder="Enter your username"
                   className={`relative block w-full pl-10 md:pl-12 pr-3 md:pr-4 py-2.5 md:py-3 border-2 text-xs md:text-sm rounded-lg bg-white/60 backdrop-blur-md transition-all duration-300 ${errors.username
-                      ? 'border-red-400 text-red-700'
-                      : focusedField === 'username'
-                        ? 'border-blue-500 text-blue-900 shadow-lg shadow-blue-200/50'
-                        : 'border-gray-300 text-gray-900 hover:border-gray-400'
+                    ? 'border-red-400 text-red-700'
+                    : focusedField === 'username'
+                      ? 'border-blue-500 text-blue-900 shadow-lg shadow-blue-200/50'
+                      : 'border-gray-300 text-gray-900 hover:border-gray-400'
                     } placeholder-gray-500 focus:outline-none`}
                   disabled={isLoading}
                 />
@@ -240,10 +240,10 @@ export default function Login() {
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 md:pl-4 flex items-center pointer-events-none">
                   <Lock className={`h-5 w-5 transition-all duration-300 ${formData.password
-                      ? 'text-cyan-500 scale-125 animate-bounce'
-                      : focusedField === 'password'
-                        ? 'text-blue-600 scale-125'
-                        : 'text-gray-400'
+                    ? 'text-cyan-500 scale-125 animate-bounce'
+                    : focusedField === 'password'
+                      ? 'text-blue-600 scale-125'
+                      : 'text-gray-400'
                     }`} />
                 </div>
                 <div className={`absolute inset-0 rounded-lg transition-all duration-300 ${focusedField === 'password' ? 'bg-gradient-to-r from-blue-400/15 to-cyan-400/15 shadow-lg shadow-blue-300/40' : 'bg-transparent'}`}></div>
@@ -255,10 +255,10 @@ export default function Login() {
                   onKeyPress={handleKeyPress}
                   placeholder="Enter your password"
                   className={`relative block w-full pl-10 md:pl-12 pr-10 md:pr-12 py-2.5 md:py-3 border-2 text-xs md:text-sm rounded-lg bg-white/60 backdrop-blur-md transition-all duration-300 ${errors.password
-                      ? 'border-red-400 text-red-700'
-                      : focusedField === 'password'
-                        ? 'border-blue-500 text-blue-900 shadow-lg shadow-blue-200/50'
-                        : 'border-gray-300 text-gray-900 hover:border-gray-400'
+                    ? 'border-red-400 text-red-700'
+                    : focusedField === 'password'
+                      ? 'border-blue-500 text-blue-900 shadow-lg shadow-blue-200/50'
+                      : 'border-gray-300 text-gray-900 hover:border-gray-400'
                     } placeholder-gray-500 focus:outline-none`}
                   disabled={isLoading}
                 />
@@ -285,8 +285,8 @@ export default function Login() {
               onClick={handleSubmit}
               disabled={isLoading || loginSuccess}
               className={`w-full mt-4 py-2.5 md:py-3 px-4 rounded-lg font-bold text-xs md:text-sm text-white transition-all duration-500 flex items-center justify-center gap-2 md:gap-3 group relative overflow-hidden uppercase tracking-wider ${isLoading || loginSuccess
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 hover:from-blue-700 hover:via-blue-600 hover:to-cyan-600 shadow-lg shadow-blue-400/40 hover:shadow-xl hover:shadow-blue-400/60 hover:scale-105 active:scale-95'
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 hover:from-blue-700 hover:via-blue-600 hover:to-cyan-600 shadow-lg shadow-blue-400/40 hover:shadow-xl hover:shadow-blue-400/60 hover:scale-105 active:scale-95'
                 } focus:outline-none relative z-20`}
             >
               {isLoading ? (

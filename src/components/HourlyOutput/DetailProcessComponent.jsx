@@ -13,11 +13,11 @@ const DetailProcessComponent = memo(({
   currentHeaderData = { orc: 'ORC-01', style: 'Style-A', date: '2024-01-12', hour: '08' },
   loadingDetail = false,
   loading = false,
-  onActualOutputChange = () => {},
-  onRepairChange = () => {},
-  onRejectChange = () => {},
-  onSaveDetailProcess = () => {},
-  onCancelDetailProcess = () => {}
+  onActualOutputChange = () => { },
+  onRepairChange = () => { },
+  onRejectChange = () => { },
+  onSaveDetailProcess = () => { },
+  onCancelDetailProcess = () => { }
 }) => {
   const [addedRows, setAddedRows] = useState([])
   const [nextTempId, setNextTempId] = useState(1)
@@ -25,73 +25,67 @@ const DetailProcessComponent = memo(({
   const [iotStatus, setIotStatus] = useState('idle')
   const [iotMessage, setIotMessage] = useState('')
 
-  // Initialize detailProcessInput, detailProcessRepair, detailProcessReject jika kosong
+
   const [localInput, setLocalInput] = useState(detailProcessInput)
   const [localRepair, setLocalRepair] = useState(detailProcessRepair)
   const [localReject, setLocalReject] = useState(detailProcessReject)
 
-  // Update local state ketika props berubah
   useEffect(() => {
-    setLocalInput(Object.keys(detailProcessInput).length > 0 ? detailProcessInput : {})
-    setLocalRepair(Object.keys(detailProcessRepair).length > 0 ? detailProcessRepair : {})
-    setLocalReject(Object.keys(detailProcessReject).length > 0 ? detailProcessReject : {})
+    const timeoutId = setTimeout(() => {
+      setLocalInput(prev => {
+        const newVal = Object.keys(detailProcessInput).length > 0 ? detailProcessInput : {}
+        return JSON.stringify(prev) === JSON.stringify(newVal) ? prev : newVal
+      })
+      setLocalRepair(prev => {
+        const newVal = Object.keys(detailProcessRepair).length > 0 ? detailProcessRepair : {}
+        return JSON.stringify(prev) === JSON.stringify(newVal) ? prev : newVal
+      })
+      setLocalReject(prev => {
+        const newVal = Object.keys(detailProcessReject).length > 0 ? detailProcessReject : {}
+        return JSON.stringify(prev) === JSON.stringify(newVal) ? prev : newVal
+      })
+    }, 0)
+    return () => clearTimeout(timeoutId)
   }, [detailProcessInput, detailProcessRepair, detailProcessReject])
 
-  // Initialize empty objects untuk setiap op_code
-  useEffect(() => {
-    if (detailProcessData.length > 0) {
-      const initialInput = {}
-      const initialRepair = {}
-      const initialReject = {}
 
-      detailProcessData.forEach(item => {
-        initialInput[item.op_code] = localInput[item.op_code] ?? ''
-        initialRepair[item.op_code] = localRepair[item.op_code] ?? ''
-        initialReject[item.op_code] = localReject[item.op_code] ?? ''
-      })
 
-      setLocalInput(initialInput)
-      setLocalRepair(initialRepair)
-      setLocalReject(initialReject)
-    }
-  }, [detailProcessData])
+  const handleSaveWrapper = () => {
+    onSaveDetailProcess()
+  }
 
   const handleFillFromIoT = () => {
     setIotStatus('loading')
     setIotMessage('Reading from IoT device...')
-    
+
     try {
-      // Simulasi atau bisa di-replace dengan API call ke IoT device
       const iotData = {}
       const newInput = { ...localInput }
       const newRepair = { ...localRepair }
       const newReject = { ...localReject }
 
-      detailProcessData.forEach(item => {
-        // Generate output random atau dari IoT device
+      allData.forEach(item => {
         const output = Math.floor(Math.random() * 50 + 80)
-        
+
         // Repair: 5-15% dari output
         const repairRate = Math.random() * 0.10 + 0.05
         const repair = Math.floor(output * repairRate)
-        
+
         // Reject: 2-8% dari output
         const rejectRate = Math.random() * 0.06 + 0.02
         const reject = Math.floor(output * rejectRate)
-        
+
         iotData[item.op_code] = { output, repair, reject }
-        
-        // Update local state
+
         newInput[item.op_code] = output
         newRepair[item.op_code] = repair
         newReject[item.op_code] = reject
-        
-        // Trigger parent handler
+
         onActualOutputChange(item.op_code, output)
         onRepairChange(item.op_code, repair)
         onRejectChange(item.op_code, reject)
-        
-        console.log(`${item.op_code}: Output=${output}, Repair=${repair}(${(repairRate*100).toFixed(1)}%), Reject=${reject}(${(rejectRate*100).toFixed(1)}%)`)
+
+        console.log(`${item.op_code}: Output=${output}, Repair=${repair}(${(repairRate * 100).toFixed(1)}%), Reject=${reject}(${(rejectRate * 100).toFixed(1)}%)`)
       })
 
       setLocalInput(newInput)
@@ -99,12 +93,13 @@ const DetailProcessComponent = memo(({
       setLocalReject(newReject)
 
       setIotStatus('success')
-      setIotMessage(`✓ Successfully filled ${detailProcessData.length} outputs with repair and reject data`)
+      setIotMessage('Data fetched from IoT!')
       setTimeout(() => setIotStatus('idle'), 4000)
 
-    } catch (error) {
+    } catch (err) {
+      console.error('IoT Error:', err)
       setIotStatus('error')
-      setIotMessage(`✗ Error: ${error.message}`)
+      setIotMessage('Failed to fetch IoT data')
       setTimeout(() => setIotStatus('idle'), 4000)
     }
   }
@@ -151,7 +146,6 @@ const DetailProcessComponent = memo(({
       }])
       setNextTempId(nextTempId + 1)
 
-      // Initialize input fields untuk row baru
       setLocalInput(prev => ({ ...prev, [code]: output || '' }))
       setLocalRepair(prev => ({ ...prev, [code]: '' }))
       setLocalReject(prev => ({ ...prev, [code]: '' }))
@@ -170,8 +164,7 @@ const DetailProcessComponent = memo(({
     const row = addedRows.find(r => r.temp_id === tempId)
     if (row) {
       setAddedRows(addedRows.filter(r => r.temp_id !== tempId))
-      
-      // Hapus dari input fields
+
       setLocalInput(prev => {
         const newState = { ...prev }
         delete newState[row.op_code]
@@ -194,7 +187,6 @@ const DetailProcessComponent = memo(({
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
-      {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-5">
         <h2 className="text-xl font-bold text-white">Production Details</h2>
         <div className="flex flex-wrap gap-4 mt-3 text-sm text-blue-100">
@@ -217,7 +209,6 @@ const DetailProcessComponent = memo(({
         </div>
       </div>
 
-      {/* IoT Section */}
       <div className="bg-gradient-to-r from-cyan-50 via-blue-50 to-blue-50 px-6 py-4 border-b border-cyan-200">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 flex-1">
@@ -232,11 +223,10 @@ const DetailProcessComponent = memo(({
           </div>
 
           {iotStatus !== 'idle' && (
-            <div className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold ${
-              iotStatus === 'success' ? 'bg-emerald-100 text-emerald-700' :
+            <div className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold ${iotStatus === 'success' ? 'bg-emerald-100 text-emerald-700' :
               iotStatus === 'error' ? 'bg-rose-100 text-rose-700' :
-              'bg-blue-100 text-blue-700'
-            }`}>
+                'bg-blue-100 text-blue-700'
+              }`}>
               {iotStatus === 'success' && <CheckCircle2 size={16} />}
               {iotStatus === 'error' && <AlertCircle size={16} />}
               {iotStatus === 'loading' && <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-b-transparent"></div>}
@@ -246,7 +236,6 @@ const DetailProcessComponent = memo(({
         </div>
       </div>
 
-      {/* Content */}
       <div className="p-6">
         {loadingDetail ? (
           <div className="flex items-center justify-center py-12">
@@ -255,7 +244,6 @@ const DetailProcessComponent = memo(({
           </div>
         ) : allData.length > 0 ? (
           <>
-            {/* Data Table */}
             <div className="overflow-x-auto rounded-lg border border-gray-200">
               <table className="w-full text-sm">
                 <thead className="bg-white border-b-2 border-gray-300">
@@ -292,7 +280,7 @@ const DetailProcessComponent = memo(({
                       <td className="px-4 py-3 text-gray-800 font-medium">{row.op_name}</td>
                       <td className="px-4 py-3 text-gray-700">{row.name}</td>
                       <td className="px-4 py-3 text-right text-gray-700 font-medium">{Math.round(row.target_per_day) || 0}</td>
-                      
+
                       {/* ACTUAL OUTPUT - GREEN */}
                       <td className="px-4 py-3 text-right">
                         <input
@@ -334,7 +322,6 @@ const DetailProcessComponent = memo(({
               </table>
             </div>
 
-            {/* Add Data Section */}
             <div className="mt-6">
               <button
                 onClick={() => setShowAddForm(!showAddForm)}
@@ -416,7 +403,6 @@ const DetailProcessComponent = memo(({
               )}
             </div>
 
-            {/* Added Rows */}
             {addedRows.length > 0 && (
               <div className="mt-6 p-5 bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl">
                 <h3 className="text-sm font-bold text-blue-900 mb-3">Added Entries ({addedRows.length})</h3>
@@ -443,7 +429,6 @@ const DetailProcessComponent = memo(({
               </div>
             )}
 
-            {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row justify-end gap-3 mt-8">
               <button
                 onClick={onCancelDetailProcess}
@@ -453,7 +438,7 @@ const DetailProcessComponent = memo(({
                 Cancel
               </button>
               <button
-                onClick={onSaveDetailProcess}
+                onClick={handleSaveWrapper}
                 disabled={loading}
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-semibold hover:from-green-700 hover:to-emerald-700 disabled:opacity-50 transition-all shadow-lg"
               >

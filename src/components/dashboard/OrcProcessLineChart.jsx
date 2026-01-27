@@ -7,15 +7,15 @@ function OrcProcessLineChart({ chartData = [], loading = false, orc = '-' }) {
   const [chartType, setChartType] = useState('line')
   const [sortOrder, setSortOrder] = useState('original')
 
-  // ✅ TAMBAH DUMMY DATA untuk Repair & Reject
   const enrichedChartData = useMemo(() => {
-    return chartData.map((item, index) => {
+    return chartData.map((item) => {
       const baseOutput = parseInt(item.output) || 0
-      
-      // Generate dummy repair & reject berdasarkan output
+
+      // eslint-disable-next-line
       const repairOutput = Math.round(baseOutput * (0.05 + Math.random() * 0.1)) // 5-15% dari output
+      // eslint-disable-next-line
       const rejectOutput = Math.round(baseOutput * (0.02 + Math.random() * 0.08)) // 2-10% dari output
-      
+
       return {
         ...item,
         output: baseOutput,
@@ -38,16 +38,17 @@ function OrcProcessLineChart({ chartData = [], loading = false, orc = '-' }) {
 
   const displayData = getSortedData()
 
-  // ✅ HITUNG STATS untuk semua 3 output
+
+
   const calculateStats = (key) => {
     if (enrichedChartData.length === 0) return { avg: 0, max: 0, min: 0 }
-    
+
     const values = enrichedChartData.map(item => item[key] || 0)
     const sum = values.reduce((a, b) => a + b, 0)
     const avg = Math.round(sum / values.length)
     const max = Math.max(...values)
     const min = Math.min(...values)
-    
+
     return { avg, max, min }
   }
 
@@ -55,8 +56,9 @@ function OrcProcessLineChart({ chartData = [], loading = false, orc = '-' }) {
   const repairStats = calculateStats('repair')
   const rejectStats = calculateStats('reject')
 
-  // Custom Tooltip untuk Bar Chart Modern
-  const CustomBarTooltip = ({ active, payload, label }) => {
+
+
+  const CustomBarTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload
       return (
@@ -112,7 +114,8 @@ function OrcProcessLineChart({ chartData = [], loading = false, orc = '-' }) {
 
   return (
     <div className="fade-in space-y-6">
-      {/* ===== HEADER SECTION ===== */}
+
+
       <div className="mb-6 p-6 bg-gradient-to-r from-slate-50 via-emerald-50 to-slate-50 rounded-xl border border-emerald-200 shadow-sm">
         <style>{`
           .header-container {
@@ -202,18 +205,12 @@ function OrcProcessLineChart({ chartData = [], loading = false, orc = '-' }) {
 
           .header-bottom {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 1rem;
             border-top: 1px solid #a7f3d0;
             padding-top: 1.5rem;
           }
 
-          .stat-item {
-            background: white;
-            border: 2px solid #a7f3d0;
-            border-radius: 0.5rem;
-            padding: 1rem;
-            text-align: center;
             transition: all 0.2s ease;
           }
 
@@ -246,7 +243,8 @@ function OrcProcessLineChart({ chartData = [], loading = false, orc = '-' }) {
         `}</style>
 
         <div className="header-container">
-          {/* Top Row - Title & Operations Count */}
+
+
           <div className="header-top">
             <div className="header-title">
               <div className="header-title-icon">
@@ -264,23 +262,27 @@ function OrcProcessLineChart({ chartData = [], loading = false, orc = '-' }) {
             </div>
           </div>
 
-          {/* Bottom Row - Stats Cards for All 3 Types */}
+
+
           <div className="header-bottom">
-            {/* Output Stats - Green */}
+
+
             <div className="stat-item" style={{ borderColor: '#86efac', backgroundColor: '#f0fdf4' }}>
               <div className="stat-label" style={{ color: '#166534' }}>✅ Output Avg</div>
               <div className="stat-value" style={{ color: '#22c55e' }}>{outputStats.avg.toLocaleString()}</div>
               <div className="stat-unit">Units</div>
             </div>
 
-            {/* Repair Stats - Yellow */}
+
+
             <div className="stat-item" style={{ borderColor: '#fcd34d', backgroundColor: '#fffbeb' }}>
               <div className="stat-label" style={{ color: '#854d0e' }}>🔧 Repair Avg</div>
               <div className="stat-value" style={{ color: '#eab308' }}>{repairStats.avg.toLocaleString()}</div>
               <div className="stat-unit">Units</div>
             </div>
 
-            {/* Reject Stats - Red */}
+
+
             <div className="stat-item" style={{ borderColor: '#fca5a5', backgroundColor: '#fef2f2' }}>
               <div className="stat-label" style={{ color: '#991b1b' }}>❌ Reject Avg</div>
               <div className="stat-value" style={{ color: '#ef4444' }}>{rejectStats.avg.toLocaleString()}</div>
@@ -290,67 +292,66 @@ function OrcProcessLineChart({ chartData = [], loading = false, orc = '-' }) {
         </div>
       </div>
 
-      {/* Chart Card */}
+
+
       <Card shadow="2xl" padding="xl" rounded="2xl" className="bg-white relative overflow-hidden">
-        {/* Controls Bar */}
+
+
         <div className="mb-8 flex items-center justify-between gap-4 flex-wrap">
-          {/* Chart Type Switcher */}
+
+
           <div className="flex items-center gap-3 bg-slate-100 rounded-2xl p-1.5">
             <button
               onClick={() => setChartType('line')}
-              className={`px-6 py-2.5 rounded-xl font-bold transition-all duration-300 text-sm uppercase tracking-wider flex items-center gap-2 ${
-                chartType === 'line'
-                  ? 'bg-blue-600 text-white shadow-lg'
-                  : 'text-slate-700 hover:text-slate-900'
-              }`}
+              className={`px-6 py-2.5 rounded-xl font-bold transition-all duration-300 text-sm uppercase tracking-wider flex items-center gap-2 ${chartType === 'line'
+                ? 'bg-blue-600 text-white shadow-lg'
+                : 'text-slate-700 hover:text-slate-900'
+                }`}
             >
               <TrendingUp size={16} />
               Line Chart
             </button>
             <button
               onClick={() => setChartType('bar')}
-              className={`px-6 py-2.5 rounded-xl font-bold transition-all duration-300 text-sm uppercase tracking-wider flex items-center gap-2 ${
-                chartType === 'bar'
-                  ? 'bg-cyan-600 text-white shadow-lg'
-                  : 'text-slate-700 hover:text-slate-900'
-              }`}
+              className={`px-6 py-2.5 rounded-xl font-bold transition-all duration-300 text-sm uppercase tracking-wider flex items-center gap-2 ${chartType === 'bar'
+                ? 'bg-cyan-600 text-white shadow-lg'
+                : 'text-slate-700 hover:text-slate-900'
+                }`}
             >
               <BarChart3 size={16} />
               Bar Chart
             </button>
           </div>
 
-          {/* Sort Options */}
+
+
           <div className="flex items-center gap-3 bg-slate-100 rounded-2xl p-1.5">
             <button
               onClick={() => setSortOrder('original')}
-              className={`px-6 py-2.5 rounded-xl font-bold transition-all duration-300 text-sm uppercase tracking-wider flex items-center gap-2 ${
-                sortOrder === 'original'
-                  ? 'bg-slate-600 text-white shadow-lg'
-                  : 'text-slate-700 hover:text-slate-900'
-              }`}
+              className={`px-6 py-2.5 rounded-xl font-bold transition-all duration-300 text-sm uppercase tracking-wider flex items-center gap-2 ${sortOrder === 'original'
+                ? 'bg-slate-600 text-white shadow-lg'
+                : 'text-slate-700 hover:text-slate-900'
+                }`}
             >
               <ArrowUpDown size={16} />
               Original
             </button>
             <button
               onClick={() => setSortOrder('highest')}
-              className={`px-6 py-2.5 rounded-xl font-bold transition-all duration-300 text-sm uppercase tracking-wider flex items-center gap-2 ${
-                sortOrder === 'highest'
-                  ? 'bg-emerald-600 text-white shadow-lg'
-                  : 'text-slate-700 hover:text-slate-900'
-              }`}
+              className={`px-6 py-2.5 rounded-xl font-bold transition-all duration-300 text-sm uppercase tracking-wider flex items-center gap-2 ${sortOrder === 'highest'
+                ? 'bg-emerald-600 text-white shadow-lg'
+                : 'text-slate-700 hover:text-slate-900'
+                }`}
             >
               <TrendingUp size={16} />
               Highest
             </button>
             <button
               onClick={() => setSortOrder('lowest')}
-              className={`px-6 py-2.5 rounded-xl font-bold transition-all duration-300 text-sm uppercase tracking-wider flex items-center gap-2 ${
-                sortOrder === 'lowest'
-                  ? 'bg-orange-600 text-white shadow-lg'
-                  : 'text-slate-700 hover:text-slate-900'
-              }`}
+              className={`px-6 py-2.5 rounded-xl font-bold transition-all duration-300 text-sm uppercase tracking-wider flex items-center gap-2 ${sortOrder === 'lowest'
+                ? 'bg-orange-600 text-white shadow-lg'
+                : 'text-slate-700 hover:text-slate-900'
+                }`}
             >
               <AlertCircle size={16} />
               Lowest
@@ -358,7 +359,8 @@ function OrcProcessLineChart({ chartData = [], loading = false, orc = '-' }) {
           </div>
         </div>
 
-        {/* Legend */}
+
+
         <div className="mb-6 flex items-center gap-6 flex-wrap">
           <div className="flex items-center gap-3">
             <div className="w-6 h-2 bg-green-500 rounded-full"></div>
@@ -374,7 +376,8 @@ function OrcProcessLineChart({ chartData = [], loading = false, orc = '-' }) {
           </div>
         </div>
 
-        {/* Chart Container */}
+
+
         {!loading ? (
           <div style={{ width: '100%', height: '900px' }}>
             <ResponsiveContainer width="100%" height="100%">
@@ -385,16 +388,16 @@ function OrcProcessLineChart({ chartData = [], loading = false, orc = '-' }) {
                 >
                   <defs>
                     <linearGradient id="colorOutput" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
                     </linearGradient>
                     <linearGradient id="colorRepair" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#eab308" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#eab308" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#eab308" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#eab308" stopOpacity={0} />
                     </linearGradient>
                     <linearGradient id="colorReject" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
                     </linearGradient>
                   </defs>
 
@@ -411,9 +414,9 @@ function OrcProcessLineChart({ chartData = [], loading = false, orc = '-' }) {
                   />
 
                   <YAxis
-                    label={{ 
-                      value: 'Output Units', 
-                      angle: -90, 
+                    label={{
+                      value: 'Output Units',
+                      angle: -90,
                       position: 'insideLeft',
                       style: { fontSize: 13, fill: '#475569', fontWeight: 700 }
                     }}
@@ -434,8 +437,8 @@ function OrcProcessLineChart({ chartData = [], loading = false, orc = '-' }) {
                     formatter={(value) => [
                       <span className="font-black text-lg">{value.toLocaleString()}</span>,
                     ]}
-                    labelFormatter={(label) => {
-                      const item = displayData.find(d => d.operation_code === label)
+                    labelFormatter={(labelValue) => {
+                      const item = displayData.find(d => d.operation_code === labelValue)
                       if (item) {
                         return (
                           <div className="text-white mb-3">
@@ -444,7 +447,7 @@ function OrcProcessLineChart({ chartData = [], loading = false, orc = '-' }) {
                           </div>
                         )
                       }
-                      return label
+                      return labelValue
                     }}
                     cursor={{ stroke: '#3b82f6', strokeWidth: 3, opacity: 0.4 }}
                   />
@@ -506,9 +509,9 @@ function OrcProcessLineChart({ chartData = [], loading = false, orc = '-' }) {
                     </linearGradient>
                   </defs>
 
-                  <CartesianGrid 
-                    strokeDasharray="3 3" 
-                    stroke="#e2e8f0" 
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="#e2e8f0"
                     opacity={0.3}
                     vertical={false}
                   />
@@ -524,9 +527,9 @@ function OrcProcessLineChart({ chartData = [], loading = false, orc = '-' }) {
                   />
 
                   <YAxis
-                    label={{ 
-                      value: 'Output Units', 
-                      angle: -90, 
+                    label={{
+                      value: 'Output Units',
+                      angle: -90,
                       position: 'insideLeft',
                       style: { fontSize: 13, fill: '#475569', fontWeight: 700 }
                     }}
@@ -538,25 +541,25 @@ function OrcProcessLineChart({ chartData = [], loading = false, orc = '-' }) {
 
                   <Tooltip content={<CustomBarTooltip />} cursor={{ fill: 'rgba(34, 197, 94, 0.1)' }} />
 
-                  <Bar 
-                    dataKey="output" 
-                    fill="url(#gradOutput)" 
+                  <Bar
+                    dataKey="output"
+                    fill="url(#gradOutput)"
                     radius={[12, 12, 0, 0]}
                     isAnimationActive={true}
                     animationDuration={800}
                   />
 
-                  <Bar 
-                    dataKey="repair" 
-                    fill="url(#gradRepair)" 
+                  <Bar
+                    dataKey="repair"
+                    fill="url(#gradRepair)"
                     radius={[12, 12, 0, 0]}
                     isAnimationActive={true}
                     animationDuration={1000}
                   />
 
-                  <Bar 
-                    dataKey="reject" 
-                    fill="url(#gradReject)" 
+                  <Bar
+                    dataKey="reject"
+                    fill="url(#gradReject)"
                     radius={[12, 12, 0, 0]}
                     isAnimationActive={true}
                     animationDuration={1200}
@@ -580,9 +583,11 @@ function OrcProcessLineChart({ chartData = [], loading = false, orc = '-' }) {
           </div>
         )}
 
-        {/* Stats Cards Grid */}
+
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 -mt-40">
-          {/* Output Peak - Green */}
+
+
           <div className="group bg-gradient-to-br from-green-400 to-green-600 rounded-2xl p-5 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 cursor-pointer">
             <div className="flex items-start justify-between mb-3">
               <div>
@@ -596,7 +601,8 @@ function OrcProcessLineChart({ chartData = [], loading = false, orc = '-' }) {
             </div>
           </div>
 
-          {/* Repair Peak - Yellow */}
+
+
           <div className="group bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-2xl p-5 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 cursor-pointer">
             <div className="flex items-start justify-between mb-3">
               <div>
@@ -610,7 +616,8 @@ function OrcProcessLineChart({ chartData = [], loading = false, orc = '-' }) {
             </div>
           </div>
 
-          {/* Reject Peak - Red */}
+
+
           <div className="group bg-gradient-to-br from-red-400 to-red-600 rounded-2xl p-5 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 cursor-pointer">
             <div className="flex items-start justify-between mb-3">
               <div>

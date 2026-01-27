@@ -3,10 +3,10 @@ import { useState } from 'react'
 import BreadCrumb from '@/components/common/BreadCrumb'
 import DashboardStats from '@/components/dashboard/DashboardStats'
 import ProcessPerformanceChart from '@/components/dashboard/ProcessPerformanceChart'
-import DailySummaryPerformance from '@/components/dashboard/DailySummaryPerformance'
 import ProcessDetailsTable from '@/components/dashboard/ProcessDetailsTable'
 import BottleneckDetector from '@/components/dashboard/BottleneckDetector'
 import OrcProcessLineChart from '@/components/dashboard/OrcProcessLineChart'
+import OperatorLeaderboard from '@/components/dashboard/OperatorLeaderboard'
 import { FullscreenLayout, FullscreenToggleButton } from '@/components/fullscreen/FullscreenMode'
 import { useDashboardData } from '@/hooks/useDashboardData'
 import { useOrcLineChartData } from '@/hooks/useOrcLineChartData'
@@ -56,7 +56,7 @@ function Dashboard() {
 
       {/* Dashboard Header with Fullscreen Toggle - INSIDE Stats Card Now */}
       {/*  Dashboard Stats - With Real Background Image */}
-      <div 
+      <div
         className="relative overflow-hidden rounded-2xl shadow-xl"
         style={{
           backgroundImage: `url(${BgHero})`,
@@ -67,16 +67,16 @@ function Dashboard() {
       >
         {/* Dark Overlay - Untuk readability */}
         <div className="absolute inset-0 bg-black/35" />
-        
+
         {/* Color Gradient Overlay - Green & Blue tone */}
         <div className="absolute inset-0 bg-gradient-to-r from-emerald-900/40 via-blue-900/30 to-teal-900/40" />
-        
+
         {/* Header dengan Fullscreen Button */}
         <div className="relative z-10 flex justify-between items-center p-6 border-b border-white/20">
           <h2 className="text-xl font-bold text-white">Dashboard Overview</h2>
           <FullscreenToggleButton />
         </div>
-        
+
         {/* Content - Stats Cards dengan all-time data */}
         <div className="relative z-10 p-10 sm:p-12">
           <DashboardStats
@@ -125,27 +125,29 @@ function Dashboard() {
         </div>
       )}
 
-      {/* Daily Summary Performance */}
-      <DailySummaryPerformance
-        processChartData={processChartData}
-        allHoursData={allHoursData}
-        viewAllHours={viewAllHours}
-        chartLoading={chartLoading}
-      />
+      {/* Main Bottom Section: Table & Analytics Side-by-Side */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Left/Main Column: Table */}
+        <div className="lg:col-span-3 space-y-6">
+          {!viewAllHours && (
+            <ProcessDetailsTable
+              data={processChartData}
+              loading={chartLoading}
+            />
+          )}
+        </div>
 
-      {/* Process Details Table */}
-      {!viewAllHours && (
-        <ProcessDetailsTable
-          data={processChartData}
-          loading={chartLoading}
-        />
-      )}
+        {/* Right/Side Column: Analytics */}
+        <div className="lg:col-span-1 space-y-6">
+          <OperatorLeaderboard />
+        </div>
+      </div>
     </div>
   )
 
   return (
     <FullscreenLayout>
-      <div className="px-responsive py-responsive relative z-0">
+      <div className="px-responsive pt-responsive pb-24 relative z-0">
         {dashboardContent}
       </div>
     </FullscreenLayout>

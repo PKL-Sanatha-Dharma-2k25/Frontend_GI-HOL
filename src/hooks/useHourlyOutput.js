@@ -1,9 +1,9 @@
 import { useState, useCallback } from 'react'
-import { 
-  getOrcSewing, 
+import {
+  getOrcSewing,
   getHourlyOutputHeader,
   storeHourlyOutput,
-  storeDetailOutput 
+  storeDetailOutput
 } from '@/services/apiService'
 import { getFullJakartaDateTime } from '@/utils/dateTime'
 
@@ -13,7 +13,7 @@ export function useHourlyOutput(user, showAlertMessage, detailHook) {
   const [outputs, setOutputs] = useState([])
   const [loading, setLoading] = useState(false)
 
-  const loadInitialData = async () => {
+  const loadInitialData = useCallback(async () => {
     setLoading(true)
     try {
       const orcData = await getOrcSewing()
@@ -30,7 +30,7 @@ export function useHourlyOutput(user, showAlertMessage, detailHook) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [showAlertMessage])
 
   const handleFormSubmit = useCallback(async (formData, selectedOrc) => {
     const errors = []
@@ -39,12 +39,12 @@ export function useHourlyOutput(user, showAlertMessage, detailHook) {
     if (!formData.date || formData.date.trim() === '') {
       errors.push('* Date is required')
     }
-    
+
     // Hour validation
     if (!formData.hour || formData.hour.trim() === '' || formData.hour === '0') {
       errors.push('* Hour is required')
     }
-    
+
     // ORC validation
     if (!selectedOrc) {
       errors.push('* ORC is required')
@@ -60,7 +60,7 @@ export function useHourlyOutput(user, showAlertMessage, detailHook) {
     try {
       const idLine = user?.id_line || 59
       const fullDateTime = getFullJakartaDateTime()
-      
+
       const payload = {
         date: formData.date,
         hour: parseInt(formData.hour),
@@ -71,8 +71,8 @@ export function useHourlyOutput(user, showAlertMessage, detailHook) {
         status: 0
       }
 
-      console.log(' [handleFormSubmit] Payload:', JSON.stringify(payload, null, 2))
-      console.log(' Frontend time:', fullDateTime)
+
+
 
       const response = await storeHourlyOutput(payload)
       const headerId = response.data?.id_output || response.id_output
@@ -129,7 +129,8 @@ export function useHourlyOutput(user, showAlertMessage, detailHook) {
         }))
       }
 
-      console.log('💾 [handleSaveDetailProcess] Final Payload:', JSON.stringify(detailPayload, null, 2))
+
+
 
       await storeDetailOutput(detailPayload)
       showAlertMessage('success', 'Detail output saved successfully')
@@ -146,7 +147,7 @@ export function useHourlyOutput(user, showAlertMessage, detailHook) {
     } finally {
       setLoading(false)
     }
-  }, [showAlertMessage, detailHook])
+  }, [showAlertMessage, detailHook, loadInitialData])
 
   return {
     orcList,

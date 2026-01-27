@@ -8,7 +8,7 @@ export default function DetailModal({ isOpen, data, loading, onClose }) {
 
   console.log('👁️ [DetailModal] data:', data)
 
- 
+
   const stats = data?.reduce((acc, item) => {
     acc.totalOutput += parseInt(item.output) || 0
     acc.totalTarget += parseInt(item.target) || 0
@@ -16,8 +16,8 @@ export default function DetailModal({ isOpen, data, loading, onClose }) {
     return acc
   }, { totalOutput: 0, totalTarget: 0, totalOperations: 0 }) || { totalOutput: 0, totalTarget: 0, totalOperations: 0 }
 
-  const achievementPercentage = stats.totalTarget > 0 
-    ? Math.round((stats.totalOutput / stats.totalTarget) * 100) 
+  const achievementPercentage = stats.totalTarget > 0
+    ? Math.round((stats.totalOutput / stats.totalTarget) * 100)
     : 0
 
   return (
@@ -39,7 +39,7 @@ export default function DetailModal({ isOpen, data, loading, onClose }) {
       `}</style>
 
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col modal-content">
-        
+
         {/* Header - Improved with gradient */}
         <div className="bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-600 px-6 py-5 border-b border-blue-600/20 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -63,7 +63,7 @@ export default function DetailModal({ isOpen, data, loading, onClose }) {
         {/* Stats Bar - NEW */}
         {data && data.length > 0 && !loading && (
           <div className="bg-gradient-to-r from-blue-50 to-cyan-50 px-6 py-4 border-b border-blue-200 grid grid-cols-4 gap-4">
-            
+
             {/* Operations Count */}
             <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-blue-200/50 hover:border-blue-400 transition-colors">
               <div className="p-2.5 bg-blue-100 rounded-lg">
@@ -99,30 +99,28 @@ export default function DetailModal({ isOpen, data, loading, onClose }) {
 
             {/* Achievement */}
             <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-purple-200/50 hover:border-purple-400 transition-colors">
-              <div className={`p-2.5 rounded-lg ${
-                achievementPercentage >= 100 
-                  ? 'bg-emerald-100' 
-                  : achievementPercentage >= 80 
-                  ? 'bg-amber-100' 
+              <div className={`p-2.5 rounded-lg ${achievementPercentage >= 100
+                ? 'bg-emerald-100'
+                : achievementPercentage >= 80
+                  ? 'bg-amber-100'
                   : 'bg-red-100'
-              }`}>
+                }`}>
                 <BarChart3 size={20} className={
-                  achievementPercentage >= 100 
-                    ? 'text-emerald-600' 
-                    : achievementPercentage >= 80 
-                    ? 'text-amber-600' 
-                    : 'text-red-600'
+                  achievementPercentage >= 100
+                    ? 'text-emerald-600'
+                    : achievementPercentage >= 80
+                      ? 'text-amber-600'
+                      : 'text-red-600'
                 } />
               </div>
               <div>
                 <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Achievement</p>
-                <p className={`text-xl font-bold ${
-                  achievementPercentage >= 100 
-                    ? 'text-emerald-600' 
-                    : achievementPercentage >= 80 
-                    ? 'text-amber-600' 
+                <p className={`text-xl font-bold ${achievementPercentage >= 100
+                  ? 'text-emerald-600'
+                  : achievementPercentage >= 80
+                    ? 'text-amber-600'
                     : 'text-red-600'
-                }`}>{achievementPercentage}%</p>
+                  }`}>{achievementPercentage}%</p>
               </div>
             </div>
 
@@ -165,9 +163,8 @@ export default function DetailModal({ isOpen, data, loading, onClose }) {
                         key={idx}
                         onMouseEnter={() => setHoveredRow(idx)}
                         onMouseLeave={() => setHoveredRow(null)}
-                        className={`border-b border-gray-200 transition-all duration-200 ${
-                          hoveredRow === idx ? 'bg-blue-50' : 'hover:bg-gray-50'
-                        }`}
+                        className={`border-b border-gray-200 transition-all duration-200 ${hoveredRow === idx ? 'bg-blue-50' : 'hover:bg-gray-50'
+                          }`}
                       >
                         <td className="px-4 py-3">
                           <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-blue-100 text-blue-700 text-xs font-bold">
@@ -189,11 +186,10 @@ export default function DetailModal({ isOpen, data, loading, onClose }) {
                           </span>
                         </td>
                         <td className="px-4 py-3 text-center">
-                          <div className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold ${
-                            variance >= 0
-                              ? 'bg-emerald-100 text-emerald-700'
-                              : 'bg-red-100 text-red-700'
-                          }`}>
+                          <div className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold ${variance >= 0
+                            ? 'bg-emerald-100 text-emerald-700'
+                            : 'bg-red-100 text-red-700'
+                            }`}>
                             {variance >= 0 ? '+' : ''}{variance}
                             <span className="text-xs opacity-75">({variancePercentage > 0 ? '+' : ''}{variancePercentage}%)</span>
                           </div>

@@ -1,24 +1,28 @@
+import { useState, useCallback } from 'react'
+import {
+  getHourlyOutputHeader,
+  getOrcSewing,
+  storeHourlyOutput,
+  storeDetailOutput
+} from '@/services/apiService'
+import { getFullJakartaDateTime } from '@/utils/dateTime'
 
-import { useState, useEffect, useCallback } from 'react'
-import { getHourlyOutputHeader } from '@/services/apiService'
-import { getJakartaTime } from '@/utils/dateTime'
 
 
- 
 export function useHourValidation() {
   const [usedHours, setUsedHours] = useState({})
   const [loadingValidation, setLoadingValidation] = useState(false)
 
-  
+
   const loadUsedHours = useCallback(async () => {
     setLoadingValidation(true)
     try {
       console.log(' [useHourValidation] Loading used hours from backend...')
-      
+
       // Ambil semua output header dari database
       const response = await getHourlyOutputHeader()
       const allOutputs = response.data || response || []
-      
+
       console.log(' [useHourValidation] All outputs:', allOutputs)
 
       // Group by date dan ambil semua jam yang sudah ada
@@ -52,13 +56,13 @@ export function useHourValidation() {
    */
   const isHourUsed = useCallback((date, hour) => {
     if (!date || hour === '' || hour === null) return false
-    
+
     const hoursForDate = usedHours[date] || []
     const hourNum = parseInt(hour)
-    
+
     const used = hoursForDate.includes(hourNum)
-    console.log(` [isHourUsed] date=${date}, hour=${hour}, used=${used}`)
-    
+    console.log(` [isHourUsed] date = ${date}, hour = ${hour}, used = ${used} `)
+
     return used
   }, [usedHours])
 
@@ -71,8 +75,8 @@ export function useHourValidation() {
     const HOURS = Array.from({ length: 10 }, (_, i) => i + 1) // [1, 2, 3, ..., 10]
     const usedHoursForDate = usedHours[date] || []
     const available = HOURS.filter(h => !usedHoursForDate.includes(h))
-    
-    console.log(` [getAvailableHours] date=${date}, available hours:`, available)
+
+    console.log(` [getAvailableHours] date = ${date}, available hours: `, available)
     return available
   }, [usedHours])
 
@@ -109,7 +113,7 @@ export function useHourlyOutputV2(user, showAlertMessage, detailHook, hourValida
       const outputData = await getHourlyOutputHeader()
       setOutputs(outputData.data || outputData || [])
 
-      
+
       await hourValidation.loadUsedHours()
 
       showAlertMessage('success', 'Data loaded successfully')
@@ -124,17 +128,17 @@ export function useHourlyOutputV2(user, showAlertMessage, detailHook, hourValida
   const handleFormSubmit = useCallback(async (formData, selectedOrc) => {
     const errors = []
 
- 
+
     if (!formData.date || formData.date.trim() === '') {
       errors.push('* Date is required')
     }
-    
-   
+
+
     if (!formData.hour || formData.hour.trim() === '' || formData.hour === '0') {
       errors.push('* Hour is required')
     }
-    
-   
+
+
     if (!selectedOrc) {
       errors.push('* ORC is required')
     }
@@ -142,7 +146,7 @@ export function useHourlyOutputV2(user, showAlertMessage, detailHook, hourValida
     if (formData.date && formData.hour) {
       const isUsed = hourValidation.isHourUsed(formData.date, formData.hour)
       if (isUsed) {
-        errors.push(`* Hour ${formData.hour} already used on ${formData.date}`)
+        errors.push(`* Hour ${formData.hour} already used on ${formData.date} `)
       }
     }
 
@@ -155,7 +159,7 @@ export function useHourlyOutputV2(user, showAlertMessage, detailHook, hourValida
     try {
       const idLine = user?.id_line || 59
       const fullDateTime = getFullJakartaDateTime()
-      
+
       const payload = {
         date: formData.date,
         hour: parseInt(formData.hour),
@@ -227,11 +231,11 @@ export function useHourlyOutputV2(user, showAlertMessage, detailHook, hourValida
       showAlertMessage('success', 'Detail output saved successfully')
 
       detailHook.handleCancel()
-      
+
       //  Reload data dan refresh validation
       await loadInitialData()
       await hourValidation.refreshValidation()
-      
+
       window.scrollTo({ top: 0, behavior: 'smooth' })
 
       return true
@@ -242,7 +246,7 @@ export function useHourlyOutputV2(user, showAlertMessage, detailHook, hourValida
     } finally {
       setLoading(false)
     }
-  }, [showAlertMessage, detailHook, hourValidation])
+  }, [showAlertMessage, detailHook, hourValidation, loadInitialData])
 
   return {
     orcList,

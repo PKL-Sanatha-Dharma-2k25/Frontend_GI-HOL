@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { useAlert } from '@/hooks/useAlert'
 import { useFormData } from '@/hooks/useFormData'
@@ -39,17 +39,20 @@ export default function HourlyOutputPage() {
 
   // Filter ORC List
   useEffect(() => {
+    const orcList = outputHook.orcList
+    const setFilteredOrcList = outputHook.setFilteredOrcList
+
     if (formHook.orcSearchTerm.trim() === '') {
-      outputHook.setFilteredOrcList(outputHook.orcList)
+      setFilteredOrcList(orcList)
     } else {
-      const filtered = outputHook.orcList.filter(orc =>
+      const filtered = orcList.filter(orc =>
         orc.orc.toLowerCase().includes(formHook.orcSearchTerm.toLowerCase()) ||
         orc.style.toLowerCase().includes(formHook.orcSearchTerm.toLowerCase()) ||
         orc.buyer.toLowerCase().includes(formHook.orcSearchTerm.toLowerCase())
       )
-      outputHook.setFilteredOrcList(filtered)
+      setFilteredOrcList(filtered)
     }
-  }, [formHook.orcSearchTerm, outputHook.orcList, outputHook])
+  }, [formHook.orcSearchTerm, outputHook.orcList, outputHook.setFilteredOrcList])
 
   // Load Initial Data
   useEffect(() => {
@@ -58,7 +61,9 @@ export default function HourlyOutputPage() {
       await hourValidationHook.loadUsedHours()
     }
     loadData()
-  }, [outputHook, hourValidationHook])
+    // Run only once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Handle Form Submit
   const handleFormSubmit = async () => {
@@ -133,8 +138,11 @@ export default function HourlyOutputPage() {
   const filteredOutputs = outputHook.outputs
 
   const totalPages = Math.ceil(filteredOutputs.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const paginatedOutputs = filteredOutputs.slice(startIndex, startIndex + itemsPerPage)
+
+  const paginatedOutputs = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage
+    return filteredOutputs.slice(startIndex, startIndex + itemsPerPage)
+  }, [filteredOutputs, currentPage, itemsPerPage])
 
   // Breadcrumb Items
   const breadcrumbItems = [

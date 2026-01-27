@@ -14,9 +14,9 @@ export const getCSRFToken = async () => {
 export const login = async (username, password) => {
   try {
     await getCSRFToken()
-    const response = await api.post('/auth/login', { 
-      username, 
-      password 
+    const response = await api.post('/auth/login', {
+      username,
+      password
     })
     return response.data
   } catch (error) {
@@ -122,9 +122,9 @@ export const getHour = async () => {
 export const getHourlyOutput = async (style = null, idLine = null) => {
   try {
     const params = {}
-    
+
     console.log(' [getHourlyOutput] Parameters:', { style, idLine })
-    
+
     if (idLine) {
       params.id_line = idLine
       console.log(' Using id_line:', idLine)
@@ -135,7 +135,7 @@ export const getHourlyOutput = async (style = null, idLine = null) => {
       params.style = ''
       console.log(' Using empty style as fallback')
     }
-    
+
     console.log(' [getHourlyOutput] Final params sent:', params)
     const response = await api.get('/auth/getopthourlyoutput', { params })
     console.log(' [getHourlyOutput] Success response:', response.data)
@@ -161,23 +161,23 @@ export const getHourlyOutputHeader = async () => {
 export const getDetailOutputByStyle = async (style, idLine) => {
   try {
     console.log(' [getDetailOutputByStyle] Fetching detail...', { style, idLine })
-    const params = { style, id_lane: idLine }
+    const params = { style, id_line: idLine }
     console.log(' [getDetailOutputByStyle] Calling endpoint: /auth/getdetailoptob')
     console.log(' [getDetailOutputByStyle] Params:', params)
     const response = await api.get('/auth/getdetailoptob', { params })
     console.log(' [getDetailOutputByStyle] Success response:', response.data)
-    
+
     if (response.data?.data?.length === 0) {
       console.error(' [getDetailOutputByStyle] No detail data found!')
       console.error('   Style:', style)
       console.error('   ID Lane:', idLine)
-      
+
       throw new Error(
         `ORC ini tidak punya data detail untuk style "${style}". ` +
         `Silakan hubungi admin untuk setup data.`
       )
     }
-    
+
     return response.data
   } catch (error) {
     console.error(' Get detail output error:', error.message)
@@ -265,37 +265,37 @@ export const updateDetailOutput = async (data) => {
 export const getBarChartDash = async (idLine, hour) => {
   try {
     console.log(' [getBarChartDash] Fetching bar chart data...', { idLine, hour })
-    
+
     // Validasi input
     if (!idLine || !hour) {
       throw new Error('id_line dan hour harus diisi')
     }
-    
+
     const params = {
       hour: parseInt(hour)
     }
-  
+
     console.log(' [getBarChartDash] Final params sent:', params)
-    
+
     const response = await api.get('/auth/getbarchartdash', { params })
     console.log(' [getBarChartDash] Real API response:', response.data)
-    
+
     let orcValue = '-'
     let styleValue = '-'
-    
+
     if (response.data?.data && Array.isArray(response.data.data) && response.data.data.length > 0) {
       const firstItem = response.data.data[0]
       orcValue = firstItem.orc || firstItem.orc_sewing || '-'
       styleValue = firstItem.style || firstItem.style_orc || '-'
       console.log(' [getBarChartDash] Extracted ORC:', orcValue, 'Style:', styleValue)
     }
-    
+
     if (response.data?.data && Array.isArray(response.data.data)) {
       const grouped = {}
-      
+
       response.data.data.forEach(item => {
         const key = `${item.operation_code}|${item.operation_name}`
-        
+
         if (!grouped[key]) {
           grouped[key] = {
             operation_code: item.operation_code,
@@ -308,17 +308,17 @@ export const getBarChartDash = async (idLine, hour) => {
             style: styleValue
           }
         }
-        
+
         grouped[key].output += parseInt(item.output) || 0
         grouped[key].repair += parseInt(item.repair) || 0
         grouped[key].reject += parseInt(item.reject) || 0
         grouped[key].target += parseInt(item.target) || 0
       })
-      
+
       const transformedData = Object.values(grouped)
-      
+
       console.log(' [getBarChartDash] Transformed data with ORC & Style:', transformedData)
-      
+
       return {
         success: true,
         data: transformedData,
@@ -326,7 +326,7 @@ export const getBarChartDash = async (idLine, hour) => {
         style: styleValue
       }
     }
-    
+
     return {
       success: true,
       data: response.data?.data || [],
@@ -346,62 +346,62 @@ export const getBarChartDash = async (idLine, hour) => {
 export const getOutputAllDash = async (idLine) => {
   try {
     console.log(' [getOutputAllDash] Fetching total output all-time...', { idLine })
-    
+
     if (!idLine) {
       throw new Error('id_line harus diisi')
     }
-    
+
     const params = {
       id_line: idLine
     }
-    
+
     console.log(' [getOutputAllDash] Final params sent:', params)
     const response = await api.get('/auth/getoutputalldash', { params })
     console.log(' [getOutputAllDash] Success response:', response.data)
-    
+
     if (response.data?.data && Array.isArray(response.data.data)) {
       const firstItem = response.data.data[0]
       console.log(' [getOutputAllDash] Raw data item:', firstItem)
       console.log(' [getOutputAllDash] Available keys:', Object.keys(firstItem || {}))
       console.log(' [getOutputAllDash] Full item content:', JSON.stringify(firstItem, null, 2))
     }
-    
+
     if (response.data?.data && Array.isArray(response.data.data)) {
       let totalOutput = 0
       let totalTarget = 0
-      
+
       response.data.data.forEach((item, idx) => {
         const output = parseInt(
-          item.total_output ?? 
-          item.output ?? 
-          item.jumlah_output ?? 
-          item.qty_output ?? 
+          item.total_output ??
+          item.output ??
+          item.jumlah_output ??
+          item.qty_output ??
           0
         ) || 0
-        
+
         const target = parseInt(
-          item.total_target ?? 
-          item.target ?? 
-          item.target_output ?? 
-          item.jumlah_target ?? 
-          item.qty_target ?? 
+          item.total_target ??
+          item.target ??
+          item.target_output ??
+          item.jumlah_target ??
+          item.qty_target ??
           0
         ) || 0
-        
+
         console.log(` [getOutputAllDash] Item ${idx}: output=${output}, target=${target}`)
-        
+
         totalOutput += output
         totalTarget += target
       })
-      
+
       const efficiency = totalTarget > 0 ? Math.round((totalOutput / totalTarget) * 100) : 0
-      
+
       console.log(' [getOutputAllDash] Calculated stats:', {
         totalOutput,
         totalTarget,
         efficiency
       })
-      
+
       return {
         success: true,
         totalOutput,
@@ -410,7 +410,7 @@ export const getOutputAllDash = async (idLine) => {
         rawData: response.data.data
       }
     }
-    
+
     return {
       success: true,
       totalOutput: 0,
@@ -465,17 +465,17 @@ export const healthCheck = async () => {
 export const getOrcProcessAllReports = async (orc) => {
   try {
     console.log(' [getOrcProcessAllReports] Fetching ORC reports...', { orc })
-    
+
     if (!orc) {
       throw new Error('ORC parameter is required')
     }
-    
+
     const params = { orc }
     console.log(' [getOrcProcessAllReports] Params:', params)
-    
+
     const response = await api.get('/auth/getOrcProcessAllReports', { params })
     console.log(' [getOrcProcessAllReports] Success response:', response.data)
-    
+
     return response.data
   } catch (error) {
     console.error(' Get ORC process reports error:', error)
