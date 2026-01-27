@@ -1,7 +1,6 @@
 import { Trophy, Medal, Award, TrendingUp, User } from 'lucide-react'
 
 const OperatorLeaderboard = ({ data = [] }) => {
-    // Dummy data jika tidak ada data yang dilempar
     const defaultData = [
         { id: 1, name: 'Siti Aminah', efficiency: 98, totalOutput: 450, rank: 1 },
         { id: 2, name: 'Budi Santoso', efficiency: 95, totalOutput: 435, rank: 2 },
@@ -33,7 +32,6 @@ const OperatorLeaderboard = ({ data = [] }) => {
 
     return (
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100 h-full flex flex-col">
-            {/* Header */}
             <div className="bg-gradient-to-r from-indigo-600 to-blue-700 p-5">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -54,7 +52,6 @@ const OperatorLeaderboard = ({ data = [] }) => {
                 </div>
             </div>
 
-            {/* Content */}
             <div className="p-4 flex-1 overflow-y-auto">
                 <div className="space-y-4">
                     {displayData.map((op) => (
@@ -62,12 +59,10 @@ const OperatorLeaderboard = ({ data = [] }) => {
                             key={op.id}
                             className="group relative flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-all duration-300 border border-transparent hover:border-slate-200"
                         >
-                            {/* Rank Position */}
                             <div className="w-8 flex justify-center">
                                 {getRankIcon(op.rank)}
                             </div>
 
-                            {/* Avatar */}
                             <div className="relative">
                                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center border-2 border-white shadow-sm overflow-hidden">
                                     <User className="w-6 h-6 text-slate-400" />
@@ -77,7 +72,6 @@ const OperatorLeaderboard = ({ data = [] }) => {
                                 )}
                             </div>
 
-                            {/* Name and Stats */}
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-end justify-between mb-1.5">
                                     <h4 className="font-bold text-slate-800 truncate text-sm sm:text-base">
@@ -91,7 +85,6 @@ const OperatorLeaderboard = ({ data = [] }) => {
                                     </span>
                                 </div>
 
-                                {/* Progress Bar Container */}
                                 <div className="relative pt-1">
                                     <div className="overflow-hidden h-2 text-xs flex rounded bg-slate-100 border border-slate-50">
                                         <div
@@ -110,7 +103,6 @@ const OperatorLeaderboard = ({ data = [] }) => {
                 </div>
             </div>
 
-            {/* Footer */}
             <div className="p-4 border-t border-slate-100 bg-slate-50/50">
                 <button className="w-full py-2.5 text-sm font-bold text-indigo-600 hover:text-indigo-700 hover:bg-white rounded-xl transition-all duration-200 border border-transparent hover:border-indigo-100 shadow-sm">
                     View All Operators

@@ -43,7 +43,8 @@ export default function Sidebar({
     return null
   })()
 
-  console.log('🎯 [Sidebar] Role detected:', role, '(raw:', rawRole, ')')
+
+
 
   useEffect(() => {
     const pathMenuMap = {
@@ -65,7 +66,8 @@ export default function Sidebar({
 
   const getMenuItems = () => {
     if (role === 'supervisor') {
-      console.log('📌 Building SUPERVISOR menu')
+
+
       return [
         {
           id: 'dashboard',
@@ -95,7 +97,8 @@ export default function Sidebar({
     }
 
     if (role === 'admin') {
-      console.log('📌 Building ADMIN menu')
+
+
       return [
         { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', path: '/dashboard', submenu: [], section: 'main' },
         { id: 'line', label: 'Line', icon: 'line', path: '/line', submenu: [], section: 'production' },
@@ -117,7 +120,8 @@ export default function Sidebar({
     }
 
     if (role === 'superadmin') {
-      console.log('📌 Building SUPERADMIN menu')
+
+
       return [
         { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', path: '/dashboard', submenu: [], section: 'main' },
         { id: 'line', label: 'Line', icon: 'line', path: '/line', submenu: [], section: 'production' },
@@ -138,7 +142,7 @@ export default function Sidebar({
       ]
     }
 
-    console.log('📌 Building DEFAULT menu')
+
     return [
       {
         id: 'dashboard',
@@ -208,7 +212,8 @@ export default function Sidebar({
   }
 
   const handleLogout = () => {
-    console.log('🚪 [Sidebar] Logout clicked')
+
+
     logout()
     navigate('/login', { replace: true })
   }
@@ -269,7 +274,7 @@ export default function Sidebar({
 
   return (
     <>
-      {/* 🖥️ DESKTOP SIDEBAR */}
+
       <div className="hidden md:block">
         <div
           className="fixed left-0 top-0 h-full w-1 z-20 hover:w-20 transition-all duration-300 cursor-pointer"
@@ -394,7 +399,7 @@ export default function Sidebar({
         <div className={`transition-all duration-300 ${isSidebarExpanded ? 'w-72' : 'w-20'}`} />
       </div>
 
-      {/* 📱 MOBILE HEADER */}
+
       <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-100 shadow-sm z-50 flex items-center justify-between px-4">
         <img
           src={iconUrl}
@@ -407,7 +412,8 @@ export default function Sidebar({
         />
         <button
           onClick={() => {
-            console.log('📱 Mobile menu button clicked, mobileMenuOpen:', !mobileMenuOpen)
+
+
             setMobileMenuOpen(!mobileMenuOpen)
           }}
           className="p-2 hover:bg-gray-100 rounded-lg transition flex-shrink-0"
@@ -421,7 +427,7 @@ export default function Sidebar({
         </button>
       </div>
 
-      {/* 📱 MOBILE OVERLAY */}
+
       {mobileMenuOpen && (
         <div
           className="md:hidden fixed inset-0 bg-black/50 z-30 top-16"
@@ -429,7 +435,7 @@ export default function Sidebar({
         />
       )}
 
-      {/* 📱 MOBILE SIDEBAR */}
+
       <div
         className={`md:hidden fixed top-16 left-0 h-[calc(100vh-64px)] w-72 max-w-[90vw] bg-white shadow-lg z-30 transition-transform duration-300 overflow-y-auto ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
