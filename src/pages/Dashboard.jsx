@@ -12,9 +12,11 @@ import { useDashboardData } from '@/hooks/useDashboardData'
 import { useOrcLineChartData } from '@/hooks/useOrcLineChartData'
 import BgHero from '@/assets/images/Picture1.png'
 
-function Dashboard() {
+const Dashboard = () => {
   const { user, loading } = useAuth()
   const [showBottleneck, setShowBottleneck] = useState(false)
+  const [showBalance, setShowBalance] = useState(false)
+
   const {
     selectedHour,
     setSelectedHour,
@@ -36,8 +38,8 @@ function Dashboard() {
     return (
       <div className="flex items-center justify-center min-h-screen bg-white">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 font-medium">Loading dashboard...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+          <p className="text-slate-600 font-medium">Loading production dashboard...</p>
         </div>
       </div>
     )
@@ -54,8 +56,7 @@ function Dashboard() {
         <BreadCrumb items={breadcrumbItems} />
       </div>
 
-      {/* Dashboard Header with Fullscreen Toggle - INSIDE Stats Card Now */}
-      {/*  Dashboard Stats - With Real Background Image */}
+      {/* Stats Summary section */}
       <div
         className="relative overflow-hidden rounded-2xl shadow-xl"
         style={{
@@ -65,19 +66,14 @@ function Dashboard() {
           backgroundAttachment: 'fixed'
         }}
       >
-        {/* Dark Overlay - Untuk readability */}
         <div className="absolute inset-0 bg-black/35" />
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-900/40 via-slate-900/30 to-teal-900/40" />
 
-        {/* Color Gradient Overlay - Green & Blue tone */}
-        <div className="absolute inset-0 bg-gradient-to-r from-emerald-900/40 via-blue-900/30 to-teal-900/40" />
-
-        {/* Header dengan Fullscreen Button */}
         <div className="relative z-10 flex justify-between items-center p-6 border-b border-white/20">
-          <h2 className="text-xl font-bold text-white">Dashboard Overview</h2>
+          <h2 className="text-xl font-bold text-white tracking-tight">Dashboard Overview</h2>
           <FullscreenToggleButton />
         </div>
 
-        {/* Content - Stats Cards dengan all-time data */}
         <div className="relative z-10 p-10 sm:p-12">
           <DashboardStats
             statsData={statsData}
@@ -86,19 +82,16 @@ function Dashboard() {
             allHoursData={allHoursData}
             viewAllHours={viewAllHours}
             selectedHour={selectedHour}
-            user={user}
           />
         </div>
       </div>
 
-      {/*  BOTTLENECK DETECTOR */}
       {showBottleneck && !viewAllHours && processChartData.length > 0 && (
         <div id="bottleneck-section" className="relative z-0">
           <BottleneckDetector data={processChartData} />
         </div>
       )}
 
-      {/* Process Performance Chart - Main chart view */}
       <ProcessPerformanceChart
         selectedHour={selectedHour}
         setSelectedHour={setSelectedHour}
@@ -110,11 +103,12 @@ function Dashboard() {
         user={user}
         showBottleneck={showBottleneck}
         setShowBottleneck={setShowBottleneck}
+        showBalance={showBalance}
+        setShowBalance={setShowBalance}
         orcData={orcData}
         styleData={styleData}
       />
 
-      {/*  ORC PROCESS LINE CHART -*/}
       {!viewAllHours && orcData !== '-' && (
         <div id="orc-line-chart-section" className="relative z-0">
           <OrcProcessLineChart
@@ -125,9 +119,7 @@ function Dashboard() {
         </div>
       )}
 
-      {/* Main Bottom Section: Table & Analytics Side-by-Side */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Left/Main Column: Table */}
         <div className="lg:col-span-3 space-y-6">
           {!viewAllHours && (
             <ProcessDetailsTable
@@ -137,7 +129,6 @@ function Dashboard() {
           )}
         </div>
 
-        {/* Right/Side Column: Analytics */}
         <div className="lg:col-span-1 space-y-6">
           <OperatorLeaderboard />
         </div>

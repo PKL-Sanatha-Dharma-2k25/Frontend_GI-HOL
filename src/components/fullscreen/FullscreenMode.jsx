@@ -17,8 +17,8 @@ export function FullscreenLayout({ children }) {
   const screenWidth = window.innerWidth
   let baseScale = 1
 
-  if (screenWidth >= 3840) baseScale = 2.2
-  else if (screenWidth >= 2560) baseScale = 1.8
+  if (screenWidth >= 3840) baseScale = 2.5
+  else if (screenWidth >= 2560) baseScale = 2
   else if (screenWidth >= 1920) baseScale = 1.5
   else if (screenWidth >= 1366) baseScale = 1.2
   else baseScale = 1

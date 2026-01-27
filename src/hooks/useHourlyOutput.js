@@ -5,7 +5,7 @@ import {
   storeHourlyOutput,
   storeDetailOutput
 } from '@/services/apiService'
-import { getFullJakartaDateTime } from '@/utils/dateTime'
+import { getFullJakartaDateTime, getJakartaTime } from '@/utils/dateTime'
 
 export function useHourlyOutput(user, showAlertMessage, detailHook) {
   const [orcList, setOrcList] = useState([])
@@ -22,8 +22,6 @@ export function useHourlyOutput(user, showAlertMessage, detailHook) {
 
       const outputData = await getHourlyOutputHeader()
       setOutputs(outputData.data || outputData || [])
-
-      showAlertMessage('success', 'Data loaded successfully')
     } catch (error) {
       console.error('Error loading data:', error)
       showAlertMessage('error', 'Failed to load data')
@@ -35,9 +33,11 @@ export function useHourlyOutput(user, showAlertMessage, detailHook) {
   const handleFormSubmit = useCallback(async (formData, selectedOrc) => {
     const errors = []
 
-    // Date validation
+    const today = getJakartaTime().date
     if (!formData.date || formData.date.trim() === '') {
       errors.push('* Date is required')
+    } else if (formData.date > today) {
+      errors.push('* Cannot submit output for future date')
     }
 
     // Hour validation
@@ -115,18 +115,36 @@ export function useHourlyOutput(user, showAlertMessage, detailHook) {
       }
 
       const firstDetail = detailData[0]
+      const excessiveOutputs = []
       const detailPayload = {
         id_output: headerData.id_output,
         id_operation_breakdown: firstDetail.idob,
-        details: detailData.map(detail => ({
-          id_employe: detail.empID,
-          output: parseInt(input[detail.op_code]) || 0,
-          repair: parseInt(repair[detail.op_code]) || 0,
-          reject: parseInt(reject[detail.op_code]) || 0,
-          operation_name: detail.op_name,
-          operation_code: detail.op_code,
-          target: Math.round(detail.target_per_day) || 0
-        }))
+        details: detailData.map(detail => {
+          const out = parseInt(input[detail.op_code]) || 0
+          const target = Math.round(detail.target_per_day) || 0
+
+          if (target > 0 && out > target * 3) {
+            excessiveOutputs.push(`${detail.op_code} (${out} vs target ${target})`)
+          }
+
+          return {
+            id_employe: detail.empID,
+            output: out,
+            repair: parseInt(repair[detail.op_code]) || 0,
+            reject: parseInt(reject[detail.op_code]) || 0,
+            operation_name: detail.op_name,
+            operation_code: detail.op_code,
+            target: target
+          }
+        })
+      }
+
+      if (excessiveOutputs.length > 0) {
+        const confirmMsg = `Suspiciously high output detected for:\n${excessiveOutputs.join('\n')}\n\nAre you sure you want to save this?`
+        if (!window.confirm(confirmMsg)) {
+          setLoading(false)
+          return false
+        }
       }
 
 

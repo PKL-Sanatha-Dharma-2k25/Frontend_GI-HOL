@@ -19,21 +19,16 @@ export default function OutputTable({
     let isMounted = true
 
     const prefetchAllIdOutputs = async () => {
-      setPrefetchLoading(true)
-      const newCache = { ...idOutputCache }
       const styles = [...new Set(data.filter(row => row.style).map(row => row.style))]
+      if (styles.length === 0) return
 
-      if (styles.length === 0) {
-        setPrefetchLoading(false)
-        return
-      }
+      // Use functional update to check against latest cache without being dependent on it
+      const uniqueNewStyles = styles.filter(style => !(style in idOutputCache))
 
-      const uniqueNewStyles = styles.filter(style => !newCache[style])
+      if (uniqueNewStyles.length === 0) return
 
-      if (uniqueNewStyles.length === 0) {
-        setPrefetchLoading(false)
-        return
-      }
+      setPrefetchLoading(true)
+      const newCache = {}
 
       const promises = uniqueNewStyles.map(style =>
         getDetailOutputByStyle(style, userIdLine)
@@ -42,6 +37,8 @@ export default function OutputTable({
             const details = response.data || response
             if (Array.isArray(details) && details.length > 0) {
               newCache[style] = details[0].id_output
+            } else {
+              newCache[style] = null
             }
           })
           .catch(() => {

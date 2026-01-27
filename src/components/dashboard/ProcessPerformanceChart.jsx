@@ -1,8 +1,9 @@
-import { BarChart3, RefreshCw, Clock, TrendingUp, Activity, Filter, AlertTriangle } from 'lucide-react'
+import { BarChart3, RefreshCw, Clock, TrendingUp, Activity, Filter, AlertTriangle, Disc } from 'lucide-react'
 import { useHour } from '@/hooks/useHour'
 import Card from '@/components/ui/Card'
 import StackedBarChart from './StackedBarChart'
 import AllHoursChart from './AllHoursChart'
+import LineBalanceVisualizer from './LineBalanceVisualizer'
 
 const SkeletonBar = () => (
   <div className="space-y-3 px-2 sm:px-0">
@@ -27,6 +28,8 @@ const FilterSection = ({
   processChartData,
   showBottleneck,
   setShowBottleneck,
+  showBalance,
+  setShowBalance,
   getHourName
 }) => (
   <div className="mb-6 sm:mb-8 p-4 sm:p-6 bg-gradient-to-r from-slate-50 via-emerald-50 to-slate-50 rounded-xl border border-emerald-200 shadow-sm">
@@ -156,6 +159,17 @@ const FilterSection = ({
       .filter-button.bottleneck:hover:not(:disabled) {
         background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
         box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+      }
+
+      .filter-button.balance {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        color: white;
+        border-color: #4f46e5;
+      }
+
+      .filter-button.balance:hover:not(:disabled) {
+        background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+        box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
       }
 
       .filter-button:disabled {
@@ -411,6 +425,30 @@ const FilterSection = ({
             </button>
           </div>
         )}
+
+        {!viewAllHours && processChartData.length > 0 && (
+          <div className="filter-group">
+            <label className="filter-label opacity-0">Balance</label>
+            <button
+              onClick={() => {
+                setShowBalance(!showBalance)
+                setTimeout(() => {
+                  if (!showBalance) {
+                    document.getElementById('balance-section')?.scrollIntoView({
+                      behavior: 'smooth',
+                      block: 'start'
+                    })
+                  }
+                }, 100)
+              }}
+              disabled={chartLoading}
+              className="filter-button balance"
+            >
+              <Disc size={16} strokeWidth={2.5} />
+              <span>{showBalance ? 'Hide Radar' : 'View Balance Radar'}</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {!viewAllHours && processChartData.length > 0 && (
@@ -481,7 +519,7 @@ const FilterSection = ({
   </div>
 )
 
-function ProcessPerformanceChart({
+const ProcessPerformanceChart = ({
   selectedHour,
   setSelectedHour,
   viewAllHours,
@@ -489,9 +527,14 @@ function ProcessPerformanceChart({
   processChartData,
   allHoursData,
   chartLoading,
+  user,
   showBottleneck,
-  setShowBottleneck
-}) {
+  setShowBottleneck,
+  showBalance,
+  setShowBalance,
+  orcData,
+  styleData
+}) => {
   const { hours, loading: hourLoading, getHourName } = useHour()
 
   return (
@@ -524,6 +567,8 @@ function ProcessPerformanceChart({
         processChartData={processChartData}
         showBottleneck={showBottleneck}
         setShowBottleneck={setShowBottleneck}
+        showBalance={showBalance}
+        setShowBalance={setShowBalance}
         getHourName={getHourName}
       />
 
@@ -536,6 +581,13 @@ function ProcessPerformanceChart({
                   All Hours View ({hours.length} Total)
                 </div>
                 <AllHoursChart data={allHoursData} />
+              </div>
+            ) : showBalance ? (
+              <div className="space-y-4">
+                <div className="text-sm font-semibold text-indigo-700 uppercase tracking-wider">
+                  {getHourName(parseInt(selectedHour))} - Balance Radar
+                </div>
+                <LineBalanceVisualizer data={processChartData} isEmbedded={true} />
               </div>
             ) : (
               <div className="space-y-4">

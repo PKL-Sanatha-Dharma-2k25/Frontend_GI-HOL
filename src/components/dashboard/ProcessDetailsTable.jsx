@@ -33,14 +33,12 @@ function ProcessDetailsTable({ data = [], loading = false }) {
       label: 'Achievement',
       width: '20%',
       render: (value, row) => {
-
         const percentage = row.target > 0 ? Math.round((row.output / row.target) * 100) : 0
-        
-        const statusColor = 
-          percentage >= 100 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 
-          percentage >= 80 ? 'bg-amber-50 text-amber-700 border border-amber-200' : 
-          'bg-rose-50 text-rose-700 border border-rose-200'
-        
+        const statusColor =
+          percentage >= 100 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+            percentage >= 80 ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+              'bg-rose-50 text-rose-700 border border-rose-200'
+
         return (
           <span className={`inline-block px-3 py-1 rounded-md text-xs font-semibold ${statusColor}`}>
             {percentage}%
@@ -64,32 +62,14 @@ function ProcessDetailsTable({ data = [], loading = false }) {
       <DataTable
         columns={processColumns}
         data={data}
-        striped={true}
-        hover={true}
         loading={loading}
-        emptyMessage="No process data available"
-        sortable={false}
-        searchable={true}
         itemsPerPage={10}
+        emptyMessage="No process data available for this hour"
+        hover={true}
+        striped={true}
       />
-
-      <style>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .fade-in {
-          animation: fadeIn 0.3s ease-out;
-        }
-      `}</style>
     </Card>
   )
 }
+
 export default ProcessDetailsTable

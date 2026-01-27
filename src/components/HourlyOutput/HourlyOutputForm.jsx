@@ -1,4 +1,5 @@
-import { Plus, ChevronRight, AlertCircle, Check, X, Clock } from 'lucide-react'
+import { Plus, ChevronRight, AlertCircle, Check, X, Clock, Calendar } from 'lucide-react'
+import { getJakartaTime } from '@/utils/dateTime'
 
 export default function HourlyOutputForm({
   showForm = true,
@@ -21,11 +22,14 @@ export default function HourlyOutputForm({
   hourOptions = [],
   hourLoading = false,
 }) {
+  const today = getJakartaTime().date
+  const isFutureDate = formData.date > today
   const selectedHourUsed = formData.hour && isHourUsed(formData.date, formData.hour)
 
   const isFormValid =
     formData.date &&
     formData.date.trim() !== '' &&
+    !isFutureDate &&
     formData.hour &&
     formData.hour.trim() !== '' &&
     selectedOrc &&
@@ -54,6 +58,18 @@ export default function HourlyOutputForm({
       return hourOption ? hourOption.label.split('(')[0].trim() : `H-${hourId}`
     })
   }
+
+  const checkSequenceGap = () => {
+    if (!formData.hour || !usedHoursForDate) return false
+    const currentIdx = hourOptions.findIndex(h => String(h.value) === String(formData.hour))
+    if (currentIdx <= 0) return false
+
+    // Check if the hour immediately before this one is missing
+    const prevHour = hourOptions[currentIdx - 1]
+    return !usedHoursForDate.includes(prevHour.value)
+  }
+
+  const hasSequenceGap = checkSequenceGap()
 
   const formSteps = [
     { label: 'ORC', valid: !!selectedOrc },
@@ -166,10 +182,12 @@ export default function HourlyOutputForm({
               <input
                 type="date"
                 value={formData.date}
+                max={today}
                 onChange={(e) => setFormData({ ...formData, date: e.target.value, hour: '' })}
-                className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 text-sm font-medium h-11 transition-all ${!formData.date ? 'border-red-400 bg-red-50 focus:ring-red-300' : 'border-emerald-500 bg-emerald-50 focus:ring-emerald-200'
+                className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 text-sm font-medium h-11 transition-all ${!formData.date || isFutureDate ? 'border-red-400 bg-red-50 focus:ring-red-300' : 'border-emerald-500 bg-emerald-50 focus:ring-emerald-200'
                   }`}
               />
+              {isFutureDate && <p className="mt-2 text-[10px] font-bold text-red-600">Cannot select future date</p>}
               {formData.date && getFormattedUsedHours().length > 0 && (
                 <div className="mt-3 flex flex-wrap gap-1">
                   {getFormattedUsedHours().map((h, i) => (
@@ -198,6 +216,14 @@ export default function HourlyOutputForm({
                 </select>
               )}
               {selectedHourUsed && <p className="mt-2 text-[10px] font-bold text-orange-600">{getSelectedHourInfo()} is already used on this date</p>}
+              {!selectedHourUsed && hasSequenceGap && (
+                <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded flex gap-2 items-start">
+                  <AlertCircle size={14} className="text-amber-600 mt-0.5" />
+                  <p className="text-[10px] font-medium text-amber-700 leading-tight">
+                    <span className="font-bold">Sequence warning:</span> Previous hour data missing for this ORC.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
