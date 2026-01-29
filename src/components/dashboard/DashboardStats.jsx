@@ -87,17 +87,19 @@ export default function DashboardStats({
       }
     ]
 
-    if (topStation) {
-      stats.push({
-        label: 'Top Station',
-        value: topStation.operation_code,
-        icon: <BarChart3 size={24} className="text-indigo-600" />,
-        color: 'indigo',
-        trend: Math.round((topStation.output / (topStation.target || 1)) * 100) || 0,
-        title: 'Best Performer',
-        tooltip: `Current top performing station is ${topStation.operation_name} with ${topStation.output} output.`
-      })
-    }
+    const displayStation = topStation || { operation_code: '-', output: 0, target: 1, operation_name: '-' }
+
+    stats.push({
+      label: 'Top Station',
+      value: displayStation.operation_code,
+      icon: <BarChart3 size={24} className="text-indigo-600" />,
+      color: 'indigo',
+      trend: Math.round((displayStation.output / (displayStation.target || 1)) * 100) || 0,
+      title: 'Best Performer',
+      tooltip: topStation
+        ? `Current top performing station is ${displayStation.operation_name} with ${displayStation.output} output.`
+        : 'Belum ada data output'
+    })
 
     return stats
   }

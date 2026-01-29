@@ -25,6 +25,8 @@ export function useDetailProcess(showAlertMessage) {
       })
 
       data = Object.values(uniqueByOpCode)
+
+
       setDetailProcessData(data)
 
 

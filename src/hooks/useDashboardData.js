@@ -10,7 +10,6 @@ export function useDashboardData(userId) {
   const [orcData, setOrcData] = useState('-')
   const [styleData, setStyleData] = useState('-')
 
-  // Stats data (all-time)
   const [statsData, setStatsData] = useState({
     totalOutput: 0,
     totalTarget: 0,
@@ -20,61 +19,12 @@ export function useDashboardData(userId) {
   })
   const [statsLoading, setStatsLoading] = useState(false)
 
-  // Fetch stats data (all-time)
+
   useEffect(() => {
-    if (!userId) {
-      console.warn('User ID tidak tersedia')
-      return
-    }
+    if (!userId) return
 
-    const fetchStatsData = async () => {
-      setStatsLoading(true)
-      try {
-        const response = await getOutputAllDash(userId)
-
-        if (response?.success) {
-          setStatsData({
-            totalOutput: response.totalOutput,
-            totalTarget: response.totalTarget,
-            totalRepair: response.totalRepair || 0,
-            totalReject: response.totalReject || 0,
-            efficiency: response.efficiency
-          })
-        } else {
-          setStatsData({
-            totalOutput: 0,
-            totalTarget: 0,
-            totalRepair: 0,
-            totalReject: 0,
-            efficiency: 0
-          })
-        }
-      } catch (error) {
-        console.error('Error fetching stats data:', error)
-        setStatsData({
-          totalOutput: 0,
-          totalTarget: 0,
-          totalRepair: 0,
-          totalReject: 0,
-          efficiency: 0
-        })
-      } finally {
-        setStatsLoading(false)
-      }
-    }
-
-    fetchStatsData()
-  }, [userId])
-
-  // Fetch chart data
-  useEffect(() => {
-    if (!userId) {
-      console.warn('User ID tidak tersedia')
-      return
-    }
-
-    const fetchChartData = async () => {
-      setChartLoading(true)
+    const fetchChartData = async (isAutoRefresh = false) => {
+      if (!isAutoRefresh) setChartLoading(true)
       try {
         if (viewAllHours) {
           const promises = Array.from({ length: 10 }, (_, i) =>
@@ -133,16 +83,46 @@ export function useDashboardData(userId) {
         }
       } catch (error) {
         console.error('Error fetching chart data:', error)
-        setProcessChartData([])
-        setAllHoursData({})
-        setOrcData('-')
-        setStyleData('-')
+        if (!isAutoRefresh) {
+          setProcessChartData([])
+          setAllHoursData({})
+          setOrcData('-')
+          setStyleData('-')
+        }
       } finally {
-        setChartLoading(false)
+        if (!isAutoRefresh) setChartLoading(false)
+      }
+    }
+
+    const fetchStatsData = async (isAutoRefresh = false) => {
+      if (!isAutoRefresh) setStatsLoading(true)
+      try {
+        const response = await getOutputAllDash(userId)
+        if (response?.success) {
+          setStatsData({
+            totalOutput: response.totalOutput,
+            totalTarget: response.totalTarget,
+            totalRepair: response.totalRepair || 0,
+            totalReject: response.totalReject || 0,
+            efficiency: response.efficiency
+          })
+        }
+      } catch (error) {
+        console.error('Error fetching stats data:', error)
+      } finally {
+        if (!isAutoRefresh) setStatsLoading(false)
       }
     }
 
     fetchChartData()
+    fetchStatsData()
+
+    const interval = setInterval(() => {
+      fetchChartData(true)
+      fetchStatsData(true)
+    }, 30000)
+
+    return () => clearInterval(interval)
   }, [userId, selectedHour, viewAllHours])
 
   return {

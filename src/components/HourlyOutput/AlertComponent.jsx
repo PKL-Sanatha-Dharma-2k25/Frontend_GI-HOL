@@ -6,9 +6,14 @@ export default function AlertComponent({
   message = '',
   details = [],
   onClose = () => { },
+  onConfirm = () => { },
+  onCancel = () => { },
   autoClose = true,
   autoCloseDuration = 5000,
-  isOpen = true
+  isOpen = true,
+  isConfirm = false,
+  confirmText = 'OK',
+  cancelText = 'Cancel'
 }) {
   const [isVisible, setIsVisible] = useState(isOpen)
 
@@ -68,10 +73,36 @@ export default function AlertComponent({
           )}
         </div>
 
-        <div className={`border-t-2 px-8 py-4 flex gap-3 ${isSuccess ? 'border-emerald-200' : 'border-rose-200'}`}>
-          <button onClick={handleClose} className={`flex-1 px-4 py-2.5 rounded-lg font-bold text-sm transition-all text-white ${isSuccess ? 'bg-emerald-600 hover:bg-emerald-700 active:scale-95' : 'bg-rose-600 hover:bg-rose-700 active:scale-95'}`}>
-            {isSuccess ? 'Continue' : 'Try Again'}
-          </button>
+        <div className={`border-t-2 px-8 py-4 flex gap-3 ${isSuccess ? 'border-emerald-200' : 'border-rose-200'} ${isConfirm ? 'bg-gray-50' : ''}`}>
+          {isConfirm ? (
+            <>
+              <button
+                onClick={() => {
+                  onCancel()
+                  handleClose()
+                }}
+                className="flex-1 px-4 py-2.5 rounded-lg font-bold text-sm border-2 border-gray-200 text-gray-600 hover:bg-gray-100 active:scale-95 transition-all"
+              >
+                {cancelText}
+              </button>
+              <button
+                onClick={() => {
+                  onConfirm()
+                  handleClose()
+                }}
+                className={`flex-1 px-4 py-2.5 rounded-lg font-bold text-sm transition-all text-white shadow-lg ${isSuccess ? 'bg-emerald-600 hover:bg-emerald-700 active:scale-95 shadow-emerald-200' : 'bg-rose-600 hover:bg-rose-700 active:scale-95 shadow-rose-200'}`}
+              >
+                {confirmText}
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={handleClose}
+              className={`flex-1 px-4 py-2.5 rounded-lg font-bold text-sm transition-all text-white ${isSuccess ? 'bg-emerald-600 hover:bg-emerald-700 active:scale-95' : 'bg-rose-600 hover:bg-rose-700 active:scale-95'}`}
+            >
+              {isSuccess ? 'Continue' : 'Try Again'}
+            </button>
+          )}
         </div>
       </div>
 

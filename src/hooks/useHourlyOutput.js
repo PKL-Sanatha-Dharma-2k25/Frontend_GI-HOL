@@ -7,7 +7,8 @@ import {
 } from '@/services/apiService'
 import { getFullJakartaDateTime, getJakartaTime } from '@/utils/dateTime'
 
-export function useHourlyOutput(user, showAlertMessage, detailHook) {
+export function useHourlyOutput(user, alert, detailHook) {
+  const { showAlertMessage, showConfirm } = alert
   const [orcList, setOrcList] = useState([])
   const [filteredOrcList, setFilteredOrcList] = useState([])
   const [outputs, setOutputs] = useState([])
@@ -116,10 +117,24 @@ export function useHourlyOutput(user, showAlertMessage, detailHook) {
 
       const firstDetail = detailData[0]
       const excessiveOutputs = []
-      const detailPayload = {
-        id_output: headerData.id_output,
-        id_operation_breakdown: firstDetail.idob,
-        details: detailData.map(detail => {
+      const skippedOperations = []
+
+      // Filter and map details, excluding operations without employee
+      const validDetails = detailData
+        .filter(detail => {
+          // Skip if no employee assigned
+          if (!detail.empID || detail.empID === null || detail.empID === 0) {
+            const out = parseInt(input[detail.op_code]) || 0
+            // Only warn if there's actual output for this operation
+            if (out > 0) {
+              skippedOperations.push(`${detail.op_code} - ${detail.op_name} (no employee assigned)`)
+            }
+            console.warn(`⚠️ Skipping ${detail.op_code} - No employee assigned`)
+            return false
+          }
+          return true
+        })
+        .map(detail => {
           const out = parseInt(input[detail.op_code]) || 0
           const target = Math.round(detail.target_per_day) || 0
 
@@ -134,19 +149,41 @@ export function useHourlyOutput(user, showAlertMessage, detailHook) {
             reject: parseInt(reject[detail.op_code]) || 0,
             operation_name: detail.op_name,
             operation_code: detail.op_code,
-            target: target
+            target: Math.round(detail.target_per_day) || 0
           }
         })
+
+      const detailPayload = {
+        id_output: headerData.id_output,
+        id_operation_breakdown: firstDetail.idob,
+        details: validDetails
       }
 
+
       if (excessiveOutputs.length > 0) {
-        const confirmMsg = `Suspiciously high output detected for:\n${excessiveOutputs.join('\n')}\n\nAre you sure you want to save this?`
-        if (!window.confirm(confirmMsg)) {
+        const confirm = await showConfirm(
+          'Suspiciously high output detected',
+          excessiveOutputs
+        )
+        if (!confirm) {
           setLoading(false)
           return false
         }
       }
 
+      // Warn about skipped operations
+      if (skippedOperations.length > 0) {
+        const confirm = await showConfirm(
+          'The following operations were skipped (no employee assigned)',
+          skippedOperations
+        )
+        if (!confirm) {
+          setLoading(false)
+          return false
+        }
+      }
+
+      console.log('📦 Sending payload with', validDetails.length, 'operations (skipped:', detailData.length - validDetails.length, ')')
 
 
 
@@ -165,7 +202,7 @@ export function useHourlyOutput(user, showAlertMessage, detailHook) {
     } finally {
       setLoading(false)
     }
-  }, [showAlertMessage, detailHook, loadInitialData])
+  }, [showAlertMessage, showConfirm, detailHook, loadInitialData])
 
   return {
     orcList,

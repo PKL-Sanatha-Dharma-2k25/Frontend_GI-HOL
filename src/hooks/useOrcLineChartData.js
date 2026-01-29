@@ -2,27 +2,45 @@ import { useState, useEffect } from 'react'
 import { getOrcProcessAllReports } from '@/services/apiService'
 
 function transformLineChartData(rawData) {
-  
+
   if (!Array.isArray(rawData) || rawData.length === 0) {
     return []
   }
 
   return rawData
     .map(item => {
-      const output = parseInt(item.output) || 0
-      const target = parseInt(item.target) || 0
+      const output = parseInt(
+        item.output ??
+        item.total_output ??
+        item.jumlah_output ??
+        0
+      ) || 0
+
+      const target = parseInt(
+        item.target ??
+        item.total_target ??
+        item.target_output ??
+        item.target_per_day ??
+        item.qty_target ??
+        0
+      ) || 0
+
       const efficiency = target > 0 ? ((output / target) * 100).toFixed(1) : 0
-      
-      // Determine status
+
       let status = 'normal'
       if (efficiency >= 100) status = 'exceeding'
       else if (efficiency < 80) status = 'critical'
-      
+
+      const repair = parseInt(item.repair || item.qty_repair || 0) || 0
+      const reject = parseInt(item.reject || item.qty_reject || 0) || 0
+
       return {
         operation_code: item.operation_code || 'Unknown',
         operation_name: item.operation_name || item.operation_code || 'Unknown',
         output: output,
         target: target,
+        repair: repair,
+        reject: reject,
         efficiency: parseFloat(efficiency),
         status: status,
         orc: item.orc
@@ -50,31 +68,37 @@ export function useOrcLineChartData(orc) {
       return
     }
 
-    const fetchLineChartData = async () => {
-      setLineChartLoading(true)
+    const fetchLineChartData = async (isAutoRefresh = false) => {
+      if (!isAutoRefresh) setLineChartLoading(true)
       setError(null)
       try {
         const response = await getOrcProcessAllReports(orc)
-        
+
         if (response?.success && response?.data) {
-          // Transform data dari API untuk line chart
           const transformedData = transformLineChartData(response.data)
-          console.log('✅ Line chart data transformed:', transformedData)
           setChartData(transformedData)
         } else {
-          setChartData([])
+          if (!isAutoRefresh) setChartData([])
           setError('No data available')
         }
       } catch (err) {
         console.error('❌ Error fetching line chart data:', err)
-        setError(err.message)
-        setChartData([])
+        if (!isAutoRefresh) {
+          setError(err.message)
+          setChartData([])
+        }
       } finally {
-        setLineChartLoading(false)
+        if (!isAutoRefresh) setLineChartLoading(false)
       }
     }
 
     fetchLineChartData()
+
+    const interval = setInterval(() => {
+      fetchLineChartData(true)
+    }, 30000)
+
+    return () => clearInterval(interval)
   }, [orc])
 
   return {

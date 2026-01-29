@@ -31,7 +31,6 @@ const Dashboard = () => {
     statsLoading
   } = useDashboardData(user?.id_line)
 
-  // NEW: Hook untuk line chart
   const { chartData: orcLineChartData, lineChartLoading } = useOrcLineChartData(orcData)
 
   if (loading) {
@@ -51,12 +50,10 @@ const Dashboard = () => {
 
   const dashboardContent = (
     <div className="space-y-6 relative z-0">
-      {/* Breadcrumb */}
       <div className="slide-in-down">
         <BreadCrumb items={breadcrumbItems} />
       </div>
 
-      {/* Stats Summary section */}
       <div
         className="relative overflow-hidden rounded-2xl shadow-xl"
         style={{
@@ -70,7 +67,16 @@ const Dashboard = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-emerald-900/40 via-slate-900/30 to-teal-900/40" />
 
         <div className="relative z-10 flex justify-between items-center p-6 border-b border-white/20">
-          <h2 className="text-xl font-bold text-white tracking-tight">Dashboard Overview</h2>
+          <div className="flex items-center gap-4">
+            <h2 className="text-xl font-bold text-white tracking-tight">Dashboard Overview</h2>
+            <div className="flex items-center gap-2 bg-emerald-500/20 px-3 py-1 rounded-full border border-emerald-500/50">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Live</span>
+            </div>
+          </div>
           <FullscreenToggleButton />
         </div>
 

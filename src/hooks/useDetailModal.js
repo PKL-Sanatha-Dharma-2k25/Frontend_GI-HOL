@@ -14,7 +14,7 @@ export function useDetailModal(showAlertMessage) {
   const normalizeData = (rawData) => {
     return rawData.map(item => ({
       id_detail_opt: item.id_detail_opt,
-      id_employe: item.id_employe,
+      id_employe: item.id_employe || item.id_employee,
       operation_code: item.operation_code || item.op_code,
       operation_name: item.operation_name || item.op_name,
       op_code: item.operation_code || item.op_code,
@@ -22,7 +22,7 @@ export function useDetailModal(showAlertMessage) {
       name: item.name,
       output: item.output || 0,
       target: item.target || 0,
-      empID: item.empID || item.id_employe
+      empID: item.empID || item.id_employe || item.id_employee
     }))
   }
 
@@ -30,16 +30,13 @@ export function useDetailModal(showAlertMessage) {
   const loadDetailData = useCallback(async (idOutput) => {
     setLoadingModal(true)
     try {
-      console.log('[loadDetailData] Loading with idOutput:', idOutput)
       const response = await getDetailFromDetailOpt(idOutput)
-      
+
       let data = response.data || response || []
-      console.log('[loadDetailData] Raw data:', data)
-      
+
       // Normalize structure
       const normalizedData = normalizeData(data)
-      console.log(' [loadDetailData] Normalized data:', normalizedData)
-      
+
       setDetailData(normalizedData)
       setCurrentModalData({ idOutput, type: 'detail' })
       setShowDetailModal(true)
@@ -56,25 +53,21 @@ export function useDetailModal(showAlertMessage) {
   const loadUpdateData = useCallback(async (idOutput) => {
     setLoadingModal(true)
     try {
-      console.log('[loadUpdateData] Loading with idOutput:', idOutput)
       const response = await getUpdateFromDetailOpt(idOutput)
-      
+
       let data = response.data || response || []
-      console.log('✏️ [loadUpdateData] Raw data:', data)
-      
+
       // Normalize structure
       const normalizedData = normalizeData(data)
-      console.log('[loadUpdateData] Normalized data:', normalizedData)
-      
+
       // Initialize input dengan data yang sudah ada
       const initialInput = {}
       normalizedData.forEach(item => {
         const opCode = item.operation_code || item.op_code
         initialInput[opCode] = item.output || 0
       })
-      
-      console.log('✏️ [loadUpdateData] Initial input:', initialInput)
-      
+
+
       setUpdateData(normalizedData)
       setUpdateInput(initialInput)
       setCurrentModalData({ idOutput, type: 'update' })
@@ -120,16 +113,15 @@ export function useDetailModal(showAlertMessage) {
         }))
       }
 
-      console.log(' [handleSaveUpdate] Payload:', JSON.stringify(updatePayload, null, 2))
 
       await updateDetailOutput(updatePayload)
       showAlertMessage('success', 'Detail output updated successfully')
-      
+
       setShowUpdateModal(false)
       setUpdateData([])
       setUpdateInput({})
       setCurrentModalData(null)
-      
+
       if (onSuccess) onSuccess()
       return true
     } catch (error) {

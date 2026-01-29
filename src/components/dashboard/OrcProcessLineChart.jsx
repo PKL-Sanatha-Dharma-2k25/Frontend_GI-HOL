@@ -3,6 +3,28 @@ import Card from '@/components/ui/Card'
 import { TrendingUp, Zap, Target, AlertCircle, ArrowUpDown, BarChart3 } from 'lucide-react'
 import { useState, useMemo } from 'react'
 
+const CustomBarTooltip = ({ active, payload }) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload
+    return (
+      <div className="bg-slate-900 border-2 border-blue-500 rounded-lg p-4 shadow-2xl">
+        <p className="text-white font-bold mb-1">{data.operation_code}</p>
+        <p className="text-xs text-slate-300 mb-3">{data.operation_name}</p>
+        <p className="text-sm font-bold text-green-400">
+          Output: {data.output?.toLocaleString() || 0}
+        </p>
+        <p className="text-sm font-bold text-yellow-400">
+          Repair: {data.repair?.toLocaleString() || 0}
+        </p>
+        <p className="text-sm font-bold text-red-400">
+          Reject: {data.reject?.toLocaleString() || 0}
+        </p>
+      </div>
+    )
+  }
+  return null
+}
+
 function OrcProcessLineChart({ chartData = [], loading = false, orc = '-' }) {
   const [chartType, setChartType] = useState('line')
   const [sortOrder, setSortOrder] = useState('original')
@@ -10,11 +32,8 @@ function OrcProcessLineChart({ chartData = [], loading = false, orc = '-' }) {
   const enrichedChartData = useMemo(() => {
     return chartData.map((item) => {
       const baseOutput = parseInt(item.output) || 0
-
-      // eslint-disable-next-line
-      const repairOutput = Math.round(baseOutput * (0.05 + Math.random() * 0.1)) // 5-15% dari output
-      // eslint-disable-next-line
-      const rejectOutput = Math.round(baseOutput * (0.02 + Math.random() * 0.08)) // 2-10% dari output
+      const repairOutput = parseInt(item.repair) || 0
+      const rejectOutput = parseInt(item.reject) || 0
 
       return {
         ...item,
@@ -38,8 +57,6 @@ function OrcProcessLineChart({ chartData = [], loading = false, orc = '-' }) {
 
   const displayData = getSortedData()
 
-
-
   const calculateStats = (key) => {
     if (enrichedChartData.length === 0) return { avg: 0, max: 0, min: 0 }
 
@@ -55,30 +72,6 @@ function OrcProcessLineChart({ chartData = [], loading = false, orc = '-' }) {
   const outputStats = calculateStats('output')
   const repairStats = calculateStats('repair')
   const rejectStats = calculateStats('reject')
-
-
-
-  const CustomBarTooltip = ({ active, payload }) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload
-      return (
-        <div className="bg-slate-900 border-2 border-blue-500 rounded-lg p-4 shadow-2xl">
-          <p className="text-white font-bold mb-1">{data.operation_code}</p>
-          <p className="text-xs text-slate-300 mb-3">{data.operation_name}</p>
-          <p className="text-sm font-bold text-green-400">
-            Output: {data.output?.toLocaleString() || 0}
-          </p>
-          <p className="text-sm font-bold text-yellow-400">
-            Repair: {data.repair?.toLocaleString() || 0}
-          </p>
-          <p className="text-sm font-bold text-red-400">
-            Reject: {data.reject?.toLocaleString() || 0}
-          </p>
-        </div>
-      )
-    }
-    return null
-  }
 
   if (!enrichedChartData || enrichedChartData.length === 0) {
     return (
@@ -368,11 +361,11 @@ function OrcProcessLineChart({ chartData = [], loading = false, orc = '-' }) {
           </div>
           <div className="flex items-center gap-3">
             <div className="w-6 h-2 bg-yellow-500 rounded-full"></div>
-            <span className="text-sm font-bold text-slate-700">Repair (Dummy)</span>
+            <span className="text-sm font-bold text-slate-700">Repair</span>
           </div>
           <div className="flex items-center gap-3">
             <div className="w-6 h-2 bg-red-500 rounded-full"></div>
-            <span className="text-sm font-bold text-slate-700">Reject (Dummy)</span>
+            <span className="text-sm font-bold text-slate-700">Reject</span>
           </div>
         </div>
 

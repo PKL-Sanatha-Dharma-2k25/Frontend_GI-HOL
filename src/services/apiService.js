@@ -200,12 +200,38 @@ export const storeHourlyOutput = async (data) => {
 
 export const storeDetailOutput = async (data) => {
   try {
-    console.log(' [storeDetailOutput] Saving detail output data:', data)
+    console.log('💾 [storeDetailOutput] Saving detail output data...')
+    console.log('💾 Payload:', JSON.stringify(data, null, 2))
+    console.log('💾 Details count:', data.details?.length)
+
+    // Validate payload before sending
+    if (!data.id_output) {
+      console.error('❌ Missing id_output in payload')
+    }
+    if (!data.id_operation_breakdown) {
+      console.error('❌ Missing id_operation_breakdown in payload')
+    }
+    if (!data.details || data.details.length === 0) {
+      console.error('❌ Missing or empty details array')
+    }
+
     const response = await api.post('/auth/insertdetailopt', data)
-    console.log('[storeDetailOutput] Success response:', response.data)
+    console.log('✅ [storeDetailOutput] Success response:', response.data)
     return response.data
   } catch (error) {
-    console.error(' Store detail output error:', error)
+    console.error('❌ Store detail output error:', error)
+    console.error('❌ Error response:', error.response?.data)
+    console.error('❌ Error status:', error.response?.status)
+    console.error('❌ Error message:', error.message)
+
+    // Log validation errors if available
+    if (error.response?.data?.errors) {
+      console.error('❌ Validation errors:', error.response.data.errors)
+    }
+    if (error.response?.data?.message) {
+      console.error('❌ Backend message:', error.response.data.message)
+    }
+
     throw error
   }
 }
@@ -275,10 +301,8 @@ export const getBarChartDash = async (idLine, hour) => {
       hour: parseInt(hour)
     }
 
-    console.log(' [getBarChartDash] Final params sent:', params)
 
     const response = await api.get('/auth/getbarchartdash', { params })
-    console.log(' [getBarChartDash] Real API response:', response.data)
 
     let orcValue = '-'
     let styleValue = '-'
@@ -287,7 +311,6 @@ export const getBarChartDash = async (idLine, hour) => {
       const firstItem = response.data.data[0]
       orcValue = firstItem.orc || firstItem.orc_sewing || '-'
       styleValue = firstItem.style || firstItem.style_orc || '-'
-      console.log(' [getBarChartDash] Extracted ORC:', orcValue, 'Style:', styleValue)
     }
 
     if (response.data?.data && Array.isArray(response.data.data)) {
@@ -309,15 +332,22 @@ export const getBarChartDash = async (idLine, hour) => {
           }
         }
 
-        grouped[key].output += parseInt(item.output) || 0
-        grouped[key].repair += parseInt(item.repair) || 0
-        grouped[key].reject += parseInt(item.reject) || 0
-        grouped[key].target += parseInt(item.target) || 0
+        grouped[key].output += parseInt(item.output || item.total_output || 0) || 0
+        grouped[key].repair += parseInt(item.repair || item.qty_repair || 0) || 0
+        grouped[key].reject += parseInt(item.reject || item.qty_reject || 0) || 0
+        grouped[key].target += parseInt(
+          item.total_target ??
+          item.target ??
+          item.target_output ??
+          item.target_per_day ??
+          item.jumlah_target ??
+          item.qty_target ??
+          0
+        ) || 0
       })
 
       const transformedData = Object.values(grouped)
 
-      console.log(' [getBarChartDash] Transformed data with ORC & Style:', transformedData)
 
       return {
         success: true,
@@ -345,7 +375,6 @@ export const getBarChartDash = async (idLine, hour) => {
 
 export const getOutputAllDash = async (idLine) => {
   try {
-    console.log(' [getOutputAllDash] Fetching total output all-time...', { idLine })
 
     if (!idLine) {
       throw new Error('id_line harus diisi')
@@ -355,22 +384,16 @@ export const getOutputAllDash = async (idLine) => {
       id_line: idLine
     }
 
-    console.log(' [getOutputAllDash] Final params sent:', params)
     const response = await api.get('/auth/getoutputalldash', { params })
-    console.log(' [getOutputAllDash] Success response:', response.data)
 
-    if (response.data?.data && Array.isArray(response.data.data)) {
-      const firstItem = response.data.data[0]
-      console.log(' [getOutputAllDash] Raw data item:', firstItem)
-      console.log(' [getOutputAllDash] Available keys:', Object.keys(firstItem || {}))
-      console.log(' [getOutputAllDash] Full item content:', JSON.stringify(firstItem, null, 2))
-    }
 
     if (response.data?.data && Array.isArray(response.data.data)) {
       let totalOutput = 0
       let totalTarget = 0
+      let totalRepair = 0
+      let totalReject = 0
 
-      response.data.data.forEach((item, idx) => {
+      response.data.data.forEach((item) => {
         const output = parseInt(
           item.total_output ??
           item.output ??
@@ -383,29 +406,29 @@ export const getOutputAllDash = async (idLine) => {
           item.total_target ??
           item.target ??
           item.target_output ??
+          item.target_per_day ??
           item.jumlah_target ??
           item.qty_target ??
           0
         ) || 0
 
-        console.log(` [getOutputAllDash] Item ${idx}: output=${output}, target=${target}`)
+        const repair = parseInt(item.repair || item.qty_repair || item.total_repair || 0) || 0
+        const reject = parseInt(item.reject || item.qty_reject || item.total_reject || 0) || 0
 
         totalOutput += output
         totalTarget += target
+        totalRepair += repair
+        totalReject += reject
       })
 
       const efficiency = totalTarget > 0 ? Math.round((totalOutput / totalTarget) * 100) : 0
-
-      console.log(' [getOutputAllDash] Calculated stats:', {
-        totalOutput,
-        totalTarget,
-        efficiency
-      })
 
       return {
         success: true,
         totalOutput,
         totalTarget,
+        totalRepair,
+        totalReject,
         efficiency,
         rawData: response.data.data
       }
@@ -464,21 +487,44 @@ export const healthCheck = async () => {
 
 export const getOrcProcessAllReports = async (orc) => {
   try {
-    console.log(' [getOrcProcessAllReports] Fetching ORC reports...', { orc })
 
     if (!orc) {
       throw new Error('ORC parameter is required')
     }
 
     const params = { orc }
-    console.log(' [getOrcProcessAllReports] Params:', params)
 
     const response = await api.get('/auth/getOrcProcessAllReports', { params })
-    console.log(' [getOrcProcessAllReports] Success response:', response.data)
 
     return response.data
   } catch (error) {
     console.error(' Get ORC process reports error:', error)
+    throw error
+  }
+}
+
+// ========================================
+// IOT SYNCHRONIZATION FUNCTIONS
+// ========================================
+
+export const getSyncIoTData = async (style, idLine) => {
+  try {
+
+    if (!style || !idLine) {
+      throw new Error('Style and id_line are required')
+    }
+
+    const params = {
+      style,
+      id_line: idLine
+    }
+
+
+    const response = await api.get('/auth/singkronisasiiot', { params })
+
+    return response.data
+  } catch (error) {
+    console.error('❌ Get IoT sync data error:', error)
     throw error
   }
 }

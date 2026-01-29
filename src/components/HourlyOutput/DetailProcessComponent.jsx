@@ -1,5 +1,6 @@
 import { memo, useState, useEffect } from 'react'
 import { Save, Plus, Trash2, ChevronDown, Download, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { getSyncIoTData } from '@/services/apiService'
 
 const DetailProcessComponent = memo(({
   detailProcessData = [
@@ -24,6 +25,7 @@ const DetailProcessComponent = memo(({
   const [showAddForm, setShowAddForm] = useState(false)
   const [iotStatus, setIotStatus] = useState('idle')
   const [iotMessage, setIotMessage] = useState('')
+  const [deviceIds, setDeviceIds] = useState({})
 
 
   const [localInput, setLocalInput] = useState(detailProcessInput)
@@ -54,53 +56,84 @@ const DetailProcessComponent = memo(({
     onSaveDetailProcess()
   }
 
-  const handleFillFromIoT = () => {
+  const handleFillFromIoT = async () => {
     setIotStatus('loading')
-    setIotMessage('Reading from IoT device...')
+    setIotMessage('Reading from IoT devices...')
 
     try {
-      const iotData = {}
+      // Validate required data
+      if (!currentHeaderData?.style || !currentHeaderData?.id_line) {
+        throw new Error('Style and Line information are required')
+      }
+
+      console.log('🔌 Fetching IoT data for:', {
+        style: currentHeaderData.style,
+        id_line: currentHeaderData.id_line
+      })
+
+      // Call real API endpoint
+      const response = await getSyncIoTData(
+        currentHeaderData.style,
+        currentHeaderData.id_line
+      )
+
+      if (!response?.data || response.data.length === 0) {
+        throw new Error('No IoT data available for this style and line')
+      }
+
+      console.log('🔌 IoT data received:', response.data)
+
       const newInput = { ...localInput }
       const newRepair = { ...localRepair }
       const newReject = { ...localReject }
+      const newDeviceIds = { ...deviceIds }
 
-      allData.forEach(item => {
-        const output = Math.floor(Math.random() * 50 + 80)
+      let matchedCount = 0
 
-        // Repair: 5-15% dari output
-        const repairRate = Math.random() * 0.10 + 0.05
-        const repair = Math.floor(output * repairRate)
+      // Map IoT data to operations by op_code
+      response.data.forEach(iotItem => {
+        const opCode = iotItem.op_code
 
-        // Reject: 2-8% dari output
-        const rejectRate = Math.random() * 0.06 + 0.02
-        const reject = Math.floor(output * rejectRate)
+        // Find matching operation in our data
+        const matchingOp = allData.find(item => item.op_code === opCode)
 
-        iotData[item.op_code] = { output, repair, reject }
+        if (matchingOp) {
+          const output = parseInt(iotItem.output) || 0
+          const repair = parseInt(iotItem.repair) || 0
+          const reject = parseInt(iotItem.reject) || 0
+          const deviceId = iotItem.device_id || iotItem.name || '-'
 
-        newInput[item.op_code] = output
-        newRepair[item.op_code] = repair
-        newReject[item.op_code] = reject
+          newInput[opCode] = output
+          newRepair[opCode] = repair
+          newReject[opCode] = reject
+          newDeviceIds[opCode] = deviceId
 
-        onActualOutputChange(item.op_code, output)
-        onRepairChange(item.op_code, repair)
-        onRejectChange(item.op_code, reject)
+          onActualOutputChange(opCode, output)
+          onRepairChange(opCode, repair)
+          onRejectChange(opCode, reject)
 
-        console.log(`${item.op_code}: Output=${output}, Repair=${repair}(${(repairRate * 100).toFixed(1)}%), Reject=${reject}(${(rejectRate * 100).toFixed(1)}%)`)
+          matchedCount++
+
+          console.log(`✅ ${opCode}: Output=${output}, Repair=${repair}, Reject=${reject} (Device: ${deviceId} - ${iotItem.name})`)
+        } else {
+          console.log(`⚠️ IoT device ${iotItem.op_code} (${iotItem.name}) not found in current operations`)
+        }
       })
 
       setLocalInput(newInput)
       setLocalRepair(newRepair)
       setLocalReject(newReject)
+      setDeviceIds(newDeviceIds)
 
       setIotStatus('success')
-      setIotMessage('Data fetched from IoT!')
-      setTimeout(() => setIotStatus('idle'), 4000)
+      setIotMessage(`✓ Loaded data from ${matchedCount} IoT devices`)
+      setTimeout(() => setIotStatus('idle'), 5000)
 
     } catch (err) {
-      console.error('IoT Error:', err)
+      console.error('❌ IoT Error:', err)
       setIotStatus('error')
-      setIotMessage('Failed to fetch IoT data')
-      setTimeout(() => setIotStatus('idle'), 4000)
+      setIotMessage(err.message || 'Failed to fetch IoT data')
+      setTimeout(() => setIotStatus('idle'), 5000)
     }
   }
 
@@ -251,6 +284,11 @@ const DetailProcessComponent = memo(({
                     <th className="px-4 py-4 text-left font-semibold text-gray-800 text-sm">Code</th>
                     <th className="px-4 py-4 text-left font-semibold text-gray-800 text-sm">Process</th>
                     <th className="px-4 py-4 text-left font-semibold text-gray-800 text-sm">Operator</th>
+                    <th className="px-4 py-4 text-center font-semibold text-gray-800 text-sm">
+                      <div className="inline-block px-3 py-1 bg-purple-50 border border-purple-300 rounded-lg">
+                        <span className="text-purple-700 font-bold text-xs">DEVICE ID</span>
+                      </div>
+                    </th>
                     <th className="px-4 py-4 text-right font-semibold text-gray-800 text-sm">Target/Hour</th>
                     <th className="px-4 py-4 text-right">
                       <div className="inline-block px-4 py-2 bg-green-50 border-b-4 border-green-500 rounded-t-lg">
@@ -279,6 +317,18 @@ const DetailProcessComponent = memo(({
                       </td>
                       <td className="px-4 py-3 text-gray-800 font-medium">{row.op_name}</td>
                       <td className="px-4 py-3 text-gray-700">{row.name}</td>
+                      <td className="px-4 py-3 text-center">
+                        {deviceIds[row.op_code] ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 rounded-md text-xs font-semibold border border-purple-300">
+                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
+                            </svg>
+                            {deviceIds[row.op_code]}
+                          </span>
+                        ) : (
+                          <span className="text-gray-400 text-xs">-</span>
+                        )}
+                      </td>
                       <td className="px-4 py-3 text-right text-gray-700 font-medium">{Math.round(row.target_per_day) || 0}</td>
 
                       {/* ACTUAL OUTPUT - GREEN */}

@@ -9,7 +9,7 @@ export default function StackedBarChart({ data = [] }) {
 
 
 
-  const maxTarget = Math.max(...data.map(item => {
+  const maxTarget = Math.max(1, ...data.map(item => {
     return Math.max(0, parseInt(item.target) || 0)
   }))
 
@@ -26,6 +26,14 @@ export default function StackedBarChart({ data = [] }) {
           <div className="w-3 h-3 bg-blue-500 rounded"></div>
           <span className="text-gray-700 font-medium text-xs sm:text-sm">Target</span>
         </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 bg-yellow-400 rounded"></div>
+          <span className="text-gray-700 font-medium text-xs sm:text-sm">Repair</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 bg-red-500 rounded"></div>
+          <span className="text-gray-700 font-medium text-xs sm:text-sm">Reject</span>
+        </div>
       </div>
 
 
@@ -34,6 +42,8 @@ export default function StackedBarChart({ data = [] }) {
         {data.map((item, idx) => {
           const output = Math.max(0, parseInt(item.output) || 0)
           const target = Math.max(0, parseInt(item.target) || 0)
+          const repair = Math.max(0, parseInt(item.repair) || 0)
+          const reject = Math.max(0, parseInt(item.reject) || 0)
 
 
 
@@ -103,21 +113,32 @@ export default function StackedBarChart({ data = [] }) {
                       <div className="h-px bg-gradient-to-r from-transparent via-gray-600 to-transparent"></div>
 
                       {/* Stats Grid */}
-                      <div className="grid grid-cols-3 gap-3">
+                      <div className="grid grid-cols-2 gap-3">
                         <div className="text-center">
-                          <div className="text-xs text-gray-400 font-medium">Output</div>
+                          <div className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">Output</div>
                           <div className="text-sm font-bold text-green-400 mt-1">{output}</div>
                         </div>
-                        <div className="text-center border-l border-r border-gray-700/30">
-                          <div className="text-xs text-gray-400 font-medium">Target</div>
+                        <div className="text-center border-l border-gray-700/30">
+                          <div className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">Target</div>
                           <div className="text-sm font-bold text-blue-400 mt-1">{target}</div>
                         </div>
-                        <div className="text-center">
-                          <div className="text-xs text-gray-400 font-medium">Rate</div>
-                          <div className={`text-sm font-bold mt-1 ${percentage >= 100 ? 'text-green-400' : percentage >= 80 ? 'text-yellow-400' : 'text-red-400'}`}>
-                            {percentage}%
-                          </div>
+                        <div className="text-center mt-1 border-t border-gray-700/30 pt-1">
+                          <div className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">Repair</div>
+                          <div className="text-sm font-bold text-yellow-400 mt-1">{repair}</div>
                         </div>
+                        <div className="text-center mt-1 border-l border-t border-gray-700/30 pt-1">
+                          <div className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">Reject</div>
+                          <div className="text-sm font-bold text-red-400 mt-1">{reject}</div>
+                        </div>
+                      </div>
+
+                      <div className="h-px bg-gradient-to-r from-transparent via-gray-600 to-transparent"></div>
+
+                      <div className="flex justify-between items-center px-2">
+                        <span className="text-[10px] text-gray-400 uppercase tracking-wider">Efficiency Rate</span>
+                        <span className={`text-sm font-bold ${percentage >= 100 ? 'text-green-400' : percentage >= 80 ? 'text-yellow-400' : 'text-red-400'}`}>
+                          {percentage}%
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -161,36 +182,45 @@ export default function StackedBarChart({ data = [] }) {
 
 
 
-                      {remainingWidth > 0 ? (
+                      {repair > 0 && (
                         <div
-                          className="bg-blue-500 h-5 sm:h-6 md:h-7 transition-all duration-500 ease-out hover:bg-blue-600 flex items-center justify-end pr-1 sm:pr-2 relative rounded-r"
+                          className="bg-yellow-400 h-5 sm:h-6 md:h-7 transition-all duration-500 ease-out hover:bg-yellow-500 flex items-center justify-center relative border-l border-white/20"
                           style={{
-                            width: Math.max(remainingWidth, 12) + 'px',
+                            width: Math.max((repair / (target || 1)) * totalBarWidth, 8) + 'px'
+                          }}
+                        >
+                        </div>
+                      )}
+
+                      {reject > 0 && (
+                        <div
+                          className="bg-red-500 h-5 sm:h-6 md:h-7 transition-all duration-500 ease-out hover:bg-red-600 flex items-center justify-center relative border-l border-white/20"
+                          style={{
+                            width: Math.max((reject / (target || 1)) * totalBarWidth, 8) + 'px'
+                          }}
+                        >
+                        </div>
+                      )}
+
+                      {remainingWidth - ((repair + reject) / (target || 1)) * totalBarWidth > 0 ? (
+                        <div
+                          className="bg-blue-500 h-5 sm:h-6 md:h-7 transition-all duration-500 ease-out hover:bg-blue-600 flex items-center justify-end pr-1 sm:pr-2 relative rounded-r border-l border-white/20"
+                          style={{
+                            width: Math.max(remainingWidth - ((repair + reject) / (target || 1)) * totalBarWidth, 12) + 'px',
                             minWidth: '12px'
                           }}
                         >
-                          {remainingWidth >= 50 ? (
-                            <span className="text-white text-xs sm:text-sm font-bold truncate px-1">
-                              {target - output}
-                            </span>
-                          ) : remainingWidth >= 25 ? (
-                            <span className="text-white text-xs font-bold px-0.5">
-                              {target - output}
-                            </span>
-                          ) : (
-                            <span className="absolute left-full ml-1 sm:ml-2 text-xs font-bold text-blue-600 whitespace-nowrap">
-                              {target - output}
+                          {target - output - repair - reject > 0 && remainingWidth > 40 && (
+                            <span className="text-white text-[10px] font-bold truncate px-0.5">
+                              {target - output - repair - reject}
                             </span>
                           )}
                         </div>
                       ) : (
-
-
                         <div
                           className="bg-green-500 h-5 sm:h-6 md:h-7 transition-all duration-500 ease-out hover:bg-green-600 flex items-center justify-end pr-1 sm:pr-2 relative rounded-r"
                           style={{
-                            width: Math.max(outputFillWidth - (containerWidth / maxTarget * target), 12) + 'px',
-                            minWidth: outputFillWidth > (containerWidth / maxTarget * target) ? '12px' : '0px'
+                            width: Math.max(outputFillWidth - (containerWidth / maxTarget * target), 12) + 'px'
                           }}
                         >
                           {(outputFillWidth - (containerWidth / maxTarget * target)) >= 30 ? (

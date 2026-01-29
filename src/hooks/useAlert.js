@@ -5,6 +5,9 @@ export function useAlert() {
   const [alertType, setAlertType] = useState('success')
   const [alertMessage, setAlertMessage] = useState('')
   const [alertDetails, setAlertDetails] = useState([])
+  const [isConfirm, setIsConfirm] = useState(false)
+  const [onConfirm, setOnConfirm] = useState(null)
+  const [onCancel, setOnCancel] = useState(null)
 
 
   const timeoutRef = useRef(null)
@@ -29,6 +32,7 @@ export function useAlert() {
     setAlertType(type)
     setAlertMessage(message)
     setAlertDetails(details)
+    setIsConfirm(false)
     setShowAlert(true)
 
     timeoutRef.current = setTimeout(() => {
@@ -37,12 +41,43 @@ export function useAlert() {
     }, 4000)
   }, [])
 
+  const showConfirm = useCallback((message, details = []) => {
+    return new Promise((resolve) => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+
+      setAlertType('warning')
+      setAlertMessage(message)
+      setAlertDetails(details)
+      setIsConfirm(true)
+
+      setOnConfirm(() => () => {
+        setShowAlert(false)
+        setIsConfirm(false)
+        resolve(true)
+      })
+
+      setOnCancel(() => () => {
+        setShowAlert(false)
+        setIsConfirm(false)
+        resolve(false)
+      })
+
+      setShowAlert(true)
+    })
+  }, [])
+
   return {
     showAlert,
     setShowAlert,
     alertType,
     alertMessage,
     alertDetails,
-    showAlertMessage
+    isConfirm,
+    onConfirm,
+    onCancel,
+    showAlertMessage,
+    showConfirm
   }
 }

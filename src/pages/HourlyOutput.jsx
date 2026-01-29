@@ -29,7 +29,7 @@ export default function HourlyOutputPage() {
   const detailProcessHook = useDetailProcess(alert.showAlertMessage)
   const detailModalHook = useDetailModal(alert.showAlertMessage)
   const hourValidationHook = useHourValidation()
-  const outputHook = useHourlyOutput(user, alert.showAlertMessage, detailProcessHook)
+  const outputHook = useHourlyOutput(user, alert, detailProcessHook)
   const hourHook = useHour()
 
   // UI State
@@ -161,6 +161,11 @@ export default function HourlyOutputPage() {
           type={alert.alertType}
           message={alert.alertMessage}
           details={alert.alertDetails}
+          isConfirm={alert.isConfirm}
+          onConfirm={alert.onConfirm}
+          onCancel={alert.onCancel}
+          autoClose={!alert.isConfirm}
+          onClose={() => alert.setShowAlert(false)}
         />
       )}
 

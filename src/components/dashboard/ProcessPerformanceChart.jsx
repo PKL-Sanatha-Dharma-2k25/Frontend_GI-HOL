@@ -527,13 +527,10 @@ const ProcessPerformanceChart = ({
   processChartData,
   allHoursData,
   chartLoading,
-  user,
   showBottleneck,
   setShowBottleneck,
   showBalance,
-  setShowBalance,
-  orcData,
-  styleData
+  setShowBalance
 }) => {
   const { hours, loading: hourLoading, getHourName } = useHour()
 
